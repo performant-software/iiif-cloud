@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_05_11_145535) do
+ActiveRecord::Schema[7.0].define(version: 2022_06_24_150849) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -38,6 +38,13 @@ ActiveRecord::Schema[7.0].define(version: 2022_05_11_145535) do
     t.datetime "updated_at", null: false
     t.index ["reference_code_id"], name: "index_references_on_reference_code_id"
     t.index ["referrable_type", "referrable_id"], name: "index_references_on_referrable"
+  end
+
+  create_table "organizations", force: :cascade do |t|
+    t.string "name"
+    t.string "location"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "users", force: :cascade do |t|
