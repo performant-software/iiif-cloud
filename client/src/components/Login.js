@@ -2,9 +2,7 @@
 
 import { LoginModal } from '@performant-software/semantic-components';
 import React, { type ComponentType, useCallback, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Button } from 'semantic-ui-react';
 import AuthenticationService from '../services/Authentication';
 
 const Login: ComponentType<any> = () => {
@@ -12,10 +10,8 @@ const Login: ComponentType<any> = () => {
   const [email, setEmail] = useState();
   const [error, setError] = useState(false);
   const [password, setPassword] = useState();
-  const [visible, setVisible] = useState(false);
 
   const navigate = useNavigate();
-  const { t } = useTranslation();
 
   /**
    * Attempts to authenticate then navigates to the admin page.
@@ -36,19 +32,10 @@ const Login: ComponentType<any> = () => {
     <LoginModal
       disabled={disabled}
       loginFailed={error}
-      onClose={() => setVisible(false)}
       onLogin={onLogin}
       onPasswordChange={(e, { value }) => setPassword(value)}
       onUsernameChange={(e, { value }) => setEmail(value)}
-      open={visible}
-      trigger={(
-        <Button
-          content={t('Login.buttons.login')}
-          onClick={() => setVisible(true)}
-          primary
-          size='large'
-        />
-      )}
+      open
     />
   );
 };

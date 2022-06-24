@@ -6284,7 +6284,7 @@ mkdirp@~0.5.1:
   dependencies:
     minimist "^1.2.6"
 
-"moment-islamic-civil@github:ACGC/moment-islamic-civil":
+moment-islamic-civil@ACGC/moment-islamic-civil:
   version "1.0.0"
   resolved "https://codeload.github.com/ACGC/moment-islamic-civil/tar.gz/569fc450b9cdc526d3304d6cafdd6ef41c3273b4"
   dependencies:
