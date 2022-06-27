@@ -9,5 +9,5 @@ class User < ApplicationRecord
   accepts_nested_attributes_for :user_organizations, allow_destroy: true
 
   # Resourceable parameters
-  allow_params :name, :email, :password, :password_confirmation, user_organizations_attributes: [:id, :organization_id, :_destroy]
+  allow_params :name, :email, :admin, :password, :password_confirmation, user_organizations_attributes: [:id, :organization_id, :_destroy]
 end

@@ -33,6 +33,12 @@ const UserModal: ComponentType<any> = withTranslation()((props) => (
         required={props.isRequired('email')}
         value={props.item.email}
       />
+      <Form.Checkbox
+        checked={props.item.admin}
+        error={props.isError('admin')}
+        label={props.t('UserModal.labels.admin')}
+        onChange={props.onCheckboxInputChange.bind(this, 'admin')}
+      />
       <Message
         content={props.t('UserModal.password.content')}
         header={props.t('UserModal.password.header')}

@@ -25,6 +25,7 @@ class User extends BaseTransform {
    */
   getPayloadKeys(): Array<string> {
     return [
+      'admin',
       'name',
       'email',
       'password',

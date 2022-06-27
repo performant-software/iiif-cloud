@@ -3,7 +3,7 @@
 import React from 'react';
 import type { ComponentType } from 'react';
 import { withTranslation } from 'react-i18next';
-import { ListTable } from '@performant-software/semantic-components';
+import { BooleanIcon, ListTable } from '@performant-software/semantic-components';
 import UserModal from '../components/UserModal';
 import UsersService from '../services/Users';
 
@@ -26,6 +26,11 @@ const Users: ComponentType<any> = withTranslation()((props) => (
     }, {
       name: 'email',
       label: props.t('Users.columns.email'),
+      sortable: true
+    }, {
+      name: 'admin',
+      label: props.t('Users.columns.admin'),
+      render: (user) => <BooleanIcon value={user.admin} />,
       sortable: true
     }]}
     modal={{
