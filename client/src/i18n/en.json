@@ -15,5 +15,61 @@
     "buttons": {
       "login": "Login"
     }
+  },
+  "OrganizationModal": {
+    "labels": {
+      "location": "Location",
+      "name": "Name"
+    },
+    "title": {
+      "add": "Add Organization",
+      "edit": "Edit Organization"
+    }
+  },
+  "Organizations": {
+    "columns": {
+      "location": "Location",
+      "name": "Name"
+    }
+  },
+  "UserModal": {
+    "labels": {
+      "email": "Email",
+      "name": "Name",
+      "password": "Password",
+      "passwordConfirmation": "Password confirmation"
+    },
+    "password": {
+      "content": "Passwords must be at least eight (8) characters.",
+      "header": "Password Policy"
+    },
+    "tabs": {
+      "details": "Details",
+      "organizations": "Organizations"
+    },
+    "title": {
+      "add": "Add User",
+      "edit": "Edit User"
+    },
+    "userOrganizations": {
+      "columns": {
+        "location": "Location",
+        "name": "Name"
+      }
+    }
+  },
+  "UserOrganizationModal": {
+    "labels": {
+      "organization": "Organization"
+    },
+    "title": {
+      "add": "Add User Organization"
+    }
+  },
+  "Users": {
+    "columns": {
+      "email": "Email",
+      "name": "Name"
+    }
   }
 }

@@ -1,0 +1,39 @@
+// @flow
+
+import { AssociatedDropdown } from '@performant-software/semantic-components';
+import React, { type ComponentType } from 'react';
+import { withTranslation } from 'react-i18next';
+import { Form, Modal } from 'semantic-ui-react';
+import Organization from '../transforms/Organization';
+import OrganizationsService from '../services/Organizations';
+
+const UserOrganizationModal: ComponentType<any> = withTranslation()((props) => (
+  <Modal
+    as={Form}
+    centered={false}
+    open
+  >
+    <Modal.Header
+      content={props.t('UserOrganizationModal.title.add')}
+    />
+    <Modal.Content>
+      <Form.Input
+        error={props.isError('organization_id')}
+        label={props.t('UserOrganizationModal.labels.organization')}
+        required={props.isRequired('organization_id')}
+      >
+        <AssociatedDropdown
+          collectionName='organizations'
+          onSearch={(params) => OrganizationsService.fetchAll({ ...params, per_page: 0 })}
+          onSelection={props.onAssociationInputChange.bind(this, 'organization_id', 'organization')}
+          renderOption={(item) => Organization.toDropdown(item)}
+          searchQuery={props.item.organization && props.item.organization.name}
+          value={props.item.organization_id}
+        />
+      </Form.Input>
+    </Modal.Content>
+    { props.children }
+  </Modal>
+));
+
+export default UserOrganizationModal;

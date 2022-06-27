@@ -10,7 +10,7 @@ type Props = {
 
 const AuthenticatedRoute: ComponentType<any> = ({ children }: Props) => {
   if (!AuthenticationService.isAuthenticated()) {
-    return <Navigate to='/' />;
+    return <Navigate to='/login' />;
   }
 
   return children;
