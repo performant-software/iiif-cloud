@@ -7,10 +7,11 @@ import React, {
   type ComponentType
 } from 'react';
 import { Outlet } from 'react-router-dom';
-import AdminSidebar from '../components/AdminSidebar';
-import styles from './AdminLayout.module.css';
+import Sidebar from './Sidebar';
+import styles from './Layout.module.css';
+import Breadcrumbs from './Breadcrumbs';
 
-const AdminLayout: ComponentType<any> = () => {
+const Layout: ComponentType<any> = () => {
   const [menuWidth, setMenuWidth] = useState();
 
   const sidebarRef = useRef();
@@ -28,7 +29,7 @@ const AdminLayout: ComponentType<any> = () => {
     <div
       className={styles.adminLayout}
     >
-      <AdminSidebar
+      <Sidebar
         context={sidebarRef}
       />
       <div
@@ -37,10 +38,11 @@ const AdminLayout: ComponentType<any> = () => {
           marginLeft: menuWidth
         }}
       >
+        <Breadcrumbs />
         <Outlet />
       </div>
     </div>
   );
 };
 
-export default AdminLayout;
+export default Layout;

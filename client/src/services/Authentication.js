@@ -2,6 +2,7 @@
 
 import { BaseService, BaseTransform } from '@performant-software/shared-components';
 import AuthenticationTransform from '../transforms/Authentication';
+import _ from 'underscore';
 
 class Authentication extends BaseService {
   /**
@@ -51,7 +52,10 @@ class Authentication extends BaseService {
   login(params: any): Promise<any> {
     return this
       .create(params)
-      .then((response) => localStorage.setItem('user', JSON.stringify(response.data)));
+      .then((response) => {
+        localStorage.setItem('user', JSON.stringify(_.omit(response.data, 'user')));
+        return response;
+      });
   }
 
   /**

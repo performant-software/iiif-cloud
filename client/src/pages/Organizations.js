@@ -1,15 +1,26 @@
 // @flow
 
+import { ListTable } from '@performant-software/semantic-components';
 import React, { type ComponentType } from 'react';
 import { withTranslation } from 'react-i18next';
-import { ListTable } from '@performant-software/semantic-components';
+import { Link } from 'react-router-dom';
+import { Button } from 'semantic-ui-react';
 import OrganizationsService from '../services/Organizations';
 import OrganizationModal from '../components/OrganizationModal';
 
 const Organizations: ComponentType<any> = withTranslation()((props) => (
   <ListTable
     actions={[{
-      name: 'edit'
+      name: 'edit',
+      render: (item) => (
+        <Button
+          as={Link}
+          basic
+          compact
+          icon='edit'
+          to={item.id.toString()}
+        />
+      )
     }, {
       name: 'delete'
     }]}

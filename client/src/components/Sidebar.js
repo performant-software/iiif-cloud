@@ -5,10 +5,10 @@ import React, { type ComponentType, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon, Menu } from 'semantic-ui-react';
 import AuthenticationService from '../services/Authentication';
-import styles from './AdminSidebar.module.css';
 import MenuLink from './MenuLink';
+import styles from './Sidebar.module.css';
 
-const AdminSidebar: ComponentType<any> = (props) => {
+const Sidebar: ComponentType<any> = (props) => {
   const navigate = useNavigate();
 
   /**
@@ -83,4 +83,4 @@ const AdminSidebar: ComponentType<any> = (props) => {
   );
 };
 
-export default AdminSidebar;
+export default Sidebar;

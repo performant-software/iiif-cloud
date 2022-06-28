@@ -17,6 +17,21 @@ const Login: ComponentType<any> = () => {
   const navigate = useNavigate();
 
   /**
+   * After authentication is successful, navigates to the correct page.
+   *
+   * @type {(function({data: *}): void)|*}
+   */
+  const onAuthentication = useCallback(({ data }) => {
+    const { user } = data;
+
+    if (user && !user.admin) {
+      navigate('/organizations');
+    } else if (user && user.admin) {
+      navigate('/');
+    }
+  }, []);
+
+  /**
    * Attempts to authenticate then navigates to the admin page.
    *
    * @type {(function(): void)|*}
@@ -26,7 +41,7 @@ const Login: ComponentType<any> = () => {
 
     AuthenticationService
       .login({ email, password })
-      .then(() => navigate('/'))
+      .then(onAuthentication)
       .catch(() => setError(true))
       .finally(() => setDisabled(false));
   }, [email, password]);

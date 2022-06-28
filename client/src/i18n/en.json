@@ -32,6 +32,12 @@
       "name": "Name"
     }
   },
+  "Routes": {
+    "organizationDetails": "Organization Edit",
+    "organizations": "Organizations",
+    "userDetails": "User Edit",
+    "users": "Users"
+  },
   "UserModal": {
     "labels": {
       "admin": "Administrator",

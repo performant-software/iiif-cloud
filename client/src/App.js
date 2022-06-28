@@ -1,59 +1,27 @@
 // @flow
 
-import React, { type ComponentType } from 'react';
-import {
-  BrowserRouter as Router,
-  Navigate,
-  Route,
-  Routes
-} from 'react-router-dom';
 import { useDragDrop } from '@performant-software/shared-components';
-import AuthenticatedRoute from './components/AuthenticatedRoute';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import AdminLayout from './layouts/AdminLayout';
-import Organizations from './pages/Organizations';
-import Users from './pages/Users';
+import React, { useMemo, type ComponentType } from 'react';
+import { useRoutes } from 'react-router-dom';
+import useBreadcrumbs from 'use-react-router-breadcrumbs';
+import Routes from './config/Routes';
+import UserContext from './context/UserContext';
 
-const App: ComponentType<any> = useDragDrop(() => (
-  <Router>
-    <Routes>
-      <Route
-        element={(
-          <AuthenticatedRoute>
-            <AdminLayout />
-          </AuthenticatedRoute>
-        )}
-        path='/'
-      >
-        <Route
-          element={<Dashboard />}
-          index
-        />
-        <Route
-          element={<Organizations />}
-          path='/organizations'
-        />
-        <Route
-          element={<Users />}
-          path='/users'
-        />
-      </Route>
-      <Route
-        element={<Login />}
-        path='/login'
-      />
-      <Route
-        element={(
-          <Navigate
-            replace
-            to='/'
-          />
-        )}
-        path='*'
-      />
-    </Routes>
-  </Router>
-));
+const App: ComponentType<any> = useDragDrop(() => {
+  const breadcrumbs = useBreadcrumbs(Routes, { excludePaths: ['/'] });
+  const routes = useRoutes(Routes);
+
+  const userContext = useMemo(() => ({
+    breadcrumbs
+  }), [breadcrumbs]);
+
+  return (
+    <UserContext.Provider
+      value={userContext}
+    >
+      { routes }
+    </UserContext.Provider>
+  );
+});
 
 export default App;
