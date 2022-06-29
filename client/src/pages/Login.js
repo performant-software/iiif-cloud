@@ -1,14 +1,13 @@
 // @flow
 
-import React, { useCallback, useState } from 'react';
-import styles from './Login.module.css';
-import { Image } from 'semantic-ui-react';
-import type { ComponentType } from 'react';
+import React, { useCallback, useState, type Node } from 'react';
 import { LoginModal } from '@performant-software/semantic-components';
 import { useNavigate } from 'react-router-dom';
+import { Image } from 'semantic-ui-react';
 import AuthenticationService from '../services/Authentication';
+import styles from './Login.module.css';
 
-const Login: ComponentType<any> = () => {
+const Login = (): Node => {
   const [disabled, setDisabled] = useState(false);
   const [email, setEmail] = useState();
   const [error, setError] = useState(false);

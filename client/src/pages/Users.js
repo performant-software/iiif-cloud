@@ -1,23 +1,14 @@
 // @flow
 
-import React from 'react';
-import type { ComponentType } from 'react';
+import { BooleanIcon } from '@performant-software/semantic-components';
+import React, { type ComponentType } from 'react';
 import { withTranslation } from 'react-i18next';
-import { BooleanIcon, ListTable } from '@performant-software/semantic-components';
-import UserModal from '../components/UserModal';
+import ItemList from '../components/ItemList';
 import UsersService from '../services/Users';
+import withParams from '../hooks/Params';
 
-const Users: ComponentType<any> = withTranslation()((props) => (
-  <ListTable
-    actions={[{
-      name: 'edit'
-    }, {
-      name: 'delete'
-    }]}
-    addButton={{
-      color: undefined,
-      location: 'top'
-    }}
+const Users: ComponentType<any> = withTranslation()(withParams((props) => (
+  <ItemList
     collectionName='users'
     columns={[{
       name: 'name',
@@ -33,18 +24,9 @@ const Users: ComponentType<any> = withTranslation()((props) => (
       render: (user) => <BooleanIcon value={user.admin} />,
       sortable: true
     }]}
-    modal={{
-      component: UserModal,
-      props: {
-        onInitialize: (id) => UsersService.fetchOne(id).then(({ data }) => data.user),
-        required: ['name', 'email']
-      }
-    }}
     onDelete={(user) => UsersService.delete(user)}
-    onLoad={(params) => UsersService.fetchAll(params)}
-    onSave={(user) => UsersService.save(user)}
-    perPageOptions={[10, 25, 50, 100]}
+    onLoad={(params) => UsersService.fetchAll({ ...params, organization_id: props.organizationId })}
   />
-));
+)));
 
 export default Users;

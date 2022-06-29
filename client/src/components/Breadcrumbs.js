@@ -1,14 +1,14 @@
 // @flow
 
 import cx from 'classnames';
-import React, { useCallback, useContext, type ComponentType } from 'react';
+import React, { useCallback, useContext, type Node } from 'react';
 import { Link } from 'react-router-dom';
 import _ from 'underscore';
 import { Breadcrumb } from 'semantic-ui-react';
 import styles from './Breadcrumbs.module.css';
 import UserContext from '../context/UserContext';
 
-const Breadcrumbs: ComponentType<any> = () => {
+const Breadcrumbs = (): Node => {
   const { breadcrumbs } = useContext(UserContext);
 
   /**

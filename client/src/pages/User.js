@@ -1,24 +1,33 @@
 // @flow
 
-import { EmbeddedList, TabbedModal } from '@performant-software/semantic-components';
-import React, { type ComponentType } from 'react';
-import { withTranslation } from 'react-i18next';
+import type { EditContainerProps } from '@performant-software/shared-components/types';
+import React, { type ComponentType, useEffect } from 'react';
+import withEditPage from '../hooks/EditPage';
 import { Form, Message } from 'semantic-ui-react';
-import UserOrganizationModal from './UserOrganizationModal';
+import UsersService from '../services/Users';
+import type { Translateable } from '../types/Translateable';
+import { withTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 
-const UserModal: ComponentType<any> = withTranslation()((props) => (
-  <TabbedModal
-    as={Form}
-    centered={false}
-    header={props.item.id
-      ? props.t('UserModal.title.edit')
-      : props.t('UserModal.title.add')}
-    inlineTabs={false}
-    open
-  >
-    <TabbedModal.Tab
-      name={props.t('UserModal.tabs.details')}
-    >
+const UserForm = withTranslation()((props: EditContainerProps & Translateable) => {
+  const { organizationId } = useParams();
+
+  /**
+   * If we're adding a new user from the organization context, automatically
+   * add a user_organizations records.
+   */
+  useEffect(() => {
+    if (!props.item.id) {
+      props.onSetState({
+        user_organizations: [{
+          organization_id: organizationId
+        }]
+      });
+    }
+  }, [organizationId]);
+
+  return (
+    <Form>
       <Form.Input
         error={props.isError('name')}
         label={props.t('UserModal.labels.name')}
@@ -61,35 +70,15 @@ const UserModal: ComponentType<any> = withTranslation()((props) => (
         type='password'
         value={props.item.password_confirmation || ''}
       />
-    </TabbedModal.Tab>
-    <TabbedModal.Tab
-      name={props.t('UserModal.tabs.organizations')}
-    >
-      <EmbeddedList
-        actions={[{
-          name: 'delete'
-        }]}
-        columns={[{
-          name: 'name',
-          label: props.t('UserModal.userOrganizations.columns.name'),
-          resolve: (u) => u.organization.name,
-          sortable: true
-        }, {
-          name: 'location',
-          label: props.t('UserModal.userOrganizations.columns.location'),
-          resolve: (u) => u.organization.location,
-          sortable: true
-        }]}
-        items={props.item.user_organizations}
-        modal={{
-          component: UserOrganizationModal
-        }}
-        onDelete={props.onDeleteChildAssociation.bind(this, 'user_organizations')}
-        onSave={props.onSaveChildAssociation.bind(this, 'user_organizations')}
-      />
-    </TabbedModal.Tab>
-    { props.children }
-  </TabbedModal>
-));
+    </Form>
+  );
+});
 
-export default UserModal;
+const User: ComponentType<any> = withEditPage(UserForm, {
+  id: 'userId',
+  onInitialize: (id) => UsersService.fetchOne(id).then(({ data }) => data.user),
+  onSave: (user) => UsersService.save(user).then(({ data }) => data.user),
+  required: ['name', 'email']
+});
+
+export default User;

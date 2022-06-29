@@ -4,14 +4,14 @@ import React, {
   useEffect,
   useRef,
   useState,
-  type ComponentType
+  type Node
 } from 'react';
 import { Outlet } from 'react-router-dom';
+import { Container } from 'semantic-ui-react';
 import Sidebar from './Sidebar';
 import styles from './Layout.module.css';
-import Breadcrumbs from './Breadcrumbs';
 
-const Layout: ComponentType<any> = () => {
+const Layout = (): Node => {
   const [menuWidth, setMenuWidth] = useState();
 
   const sidebarRef = useRef();
@@ -38,8 +38,9 @@ const Layout: ComponentType<any> = () => {
           marginLeft: menuWidth
         }}
       >
-        <Breadcrumbs />
-        <Outlet />
+        <Container>
+          <Outlet />
+        </Container>
       </div>
     </div>
   );

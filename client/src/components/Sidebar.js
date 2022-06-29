@@ -1,14 +1,21 @@
 // @flow
 
 import cx from 'classnames';
-import React, { type ComponentType, useCallback } from 'react';
+import React, { useCallback, type Node } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon, Menu } from 'semantic-ui-react';
 import AuthenticationService from '../services/Authentication';
 import MenuLink from './MenuLink';
 import styles from './Sidebar.module.css';
+import SubMenu from './SubMenu';
 
-const Sidebar: ComponentType<any> = (props) => {
+type Props = {
+  context: {
+    current: ?HTMLDivElement
+  }
+};
+
+const Sidebar = (props: Props): Node => {
   const navigate = useNavigate();
 
   /**
@@ -26,9 +33,8 @@ const Sidebar: ComponentType<any> = (props) => {
       <Menu
         className={cx(styles.ui, styles.vertical, styles.icon, styles.menu)}
         inverted
-        icon
+        icon='labeled'
         vertical
-        secondary
       >
         <Menu.Item
           className={styles.item}
@@ -43,6 +49,7 @@ const Sidebar: ComponentType<any> = (props) => {
         </Menu.Item>
         <MenuLink
           className={styles.item}
+          index
           to='/'
         >
           <Icon
@@ -52,20 +59,45 @@ const Sidebar: ComponentType<any> = (props) => {
         </MenuLink>
         <MenuLink
           className={styles.item}
+          index
           to='/organizations'
         >
           <Icon
+            className={styles.icon}
             name='building outline'
             size='big'
+          />
+          <SubMenu
+            basePath='/organizations'
+            id='organizationId'
+            items={[{
+              content: 'Details',
+              path: ''
+            }, {
+              content: 'Users',
+              path: 'users'
+            }]}
           />
         </MenuLink>
         <MenuLink
           className={styles.item}
+          index
           to='users'
         >
           <Icon
             name='users'
             size='big'
+          />
+          <SubMenu
+            basePath='/users'
+            id='userId'
+            items={[{
+              content: 'Details',
+              path: ''
+            }, {
+              content: 'Organizations',
+              path: 'organizations'
+            }]}
           />
         </MenuLink>
         <Menu.Item

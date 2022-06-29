@@ -11,9 +11,10 @@
   background: none;
   color: #f0f4ef;
   min-width: 100px;
+  text-align: left;
 }
 
-.adminSidebar > .ui.vertical.menu > .item {
+.adminSidebar > .ui.vertical.icon.menu > .item {
   padding-top: 25px;
   padding-bottom: 25px;
 }

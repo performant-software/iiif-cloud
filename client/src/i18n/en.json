@@ -8,6 +8,18 @@
       "success": "You've successfully authenticated"
     }
   },
+  "Common": {
+    "buttons": {
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "messages": {
+      "save": {
+        "content": "Your changes have been saved.",
+        "header": "Success!"
+      }
+    }
+  },
   "Home": {
     "header": "Welcome to Rails-React Template <1>Edit <1>src/App.js</1> and save to reload.</1>"
   },

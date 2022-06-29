@@ -3,10 +3,8 @@
 import { createContext } from 'react';
 
 const UserContext: any = createContext({
-  organization: null,
-  setOrganization: () => {},
-  setUser: () => {},
-  user: null
+  breadcrumbs: null,
+  setBreadcrumbs: () => {}
 });
 
 export default UserContext;
