@@ -1,6 +1,5 @@
 // @flow
 
-import { matchPath, resolvePath, useMatch } from 'react-router-dom';
 import _ from 'underscore';
 
 type Location = {
@@ -54,23 +53,6 @@ const join = (...args: Array<string>): string => {
 
   return path.join('/');
 };
-
-// const currentPathStartsWith = (location, params, pathname) => {
-//   let value;
-//
-//   const currentPath = getCurrentPath(location, params);
-//
-//   if (pathname === '/') {
-//     value = currentPath === pathname;
-//   } else {
-//     value = currentPath.startsWith(pathname);
-//   }
-//   return value;
-// };
-//
-// const currentPathEndsWith = (pathname) => {
-//   return matchPath({ path: pathname, end: true });
-// };
 
 export default {
   getCurrentPath,
