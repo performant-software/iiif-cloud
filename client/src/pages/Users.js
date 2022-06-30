@@ -5,9 +5,8 @@ import React, { type ComponentType } from 'react';
 import { withTranslation } from 'react-i18next';
 import ItemList from '../components/ItemList';
 import UsersService from '../services/Users';
-import withParams from '../hooks/Params';
 
-const Users: ComponentType<any> = withTranslation()(withParams((props) => (
+const Users: ComponentType<any> = withTranslation()((props) => (
   <ItemList
     collectionName='users'
     columns={[{
@@ -27,6 +26,6 @@ const Users: ComponentType<any> = withTranslation()(withParams((props) => (
     onDelete={(user) => UsersService.delete(user)}
     onLoad={(params) => UsersService.fetchAll({ ...params, organization_id: props.organizationId })}
   />
-)));
+));
 
 export default Users;

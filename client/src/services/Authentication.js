@@ -24,6 +24,20 @@ class Authentication extends BaseService {
   }
 
   /**
+   * Returns true if the logged in user is an administrator.
+   *
+   * @returns {boolean|*}
+   */
+  isAdmin(): boolean {
+    if (!localStorage.getItem('user')) {
+      return false;
+    }
+
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    return user && user.admin;
+  }
+
+  /**
    * Returns true if the current user is authenticated.
    *
    * @returns {*|boolean}

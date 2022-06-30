@@ -5,6 +5,7 @@ import { NestedAttributesTransform } from '@performant-software/shared-component
 class UserOrganizations extends NestedAttributesTransform {
   /**
    * Returns the collection of allowed payload keys.
+   *
    * @returns {string[]}
    */
   getPayloadKeys(): Array<string> {

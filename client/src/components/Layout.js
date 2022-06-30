@@ -4,14 +4,14 @@ import React, {
   useEffect,
   useRef,
   useState,
-  type Node
+  type ComponentType
 } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Container } from 'semantic-ui-react';
 import Sidebar from './Sidebar';
 import styles from './Layout.module.css';
 
-const Layout = (): Node => {
+const Layout: ComponentType<any> = () => {
   const [menuWidth, setMenuWidth] = useState();
 
   const sidebarRef = useRef();

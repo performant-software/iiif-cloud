@@ -13,11 +13,19 @@
       "cancel": "Cancel",
       "save": "Save"
     },
+    "errors": {
+      "save": "There was an problem saving the record."
+    },
     "messages": {
       "save": {
         "content": "Your changes have been saved.",
         "header": "Success!"
       }
+    },
+    "tabs": {
+      "details": "Details",
+      "organizations": "Organizations",
+      "users": "Users"
     }
   },
   "Home": {
@@ -28,10 +36,21 @@
       "login": "Login"
     }
   },
-  "OrganizationModal": {
+  "Organization": {
     "labels": {
       "location": "Location",
       "name": "Name"
+    },
+    "users": {
+      "columns": {
+        "email": "Email",
+        "name": "Name"
+      }
+    }
+  },
+  "OrganizationModal": {
+    "labels": {
+      "organization": "Organization"
     },
     "title": {
       "add": "Add Organization",
@@ -50,7 +69,7 @@
     "userDetails": "User Edit",
     "users": "Users"
   },
-  "UserModal": {
+  "User": {
     "labels": {
       "admin": "Administrator",
       "email": "Email",
@@ -58,23 +77,24 @@
       "password": "Password",
       "passwordConfirmation": "Password confirmation"
     },
-    "password": {
-      "content": "Passwords must be at least eight (8) characters.",
-      "header": "Password Policy"
-    },
-    "tabs": {
-      "details": "Details",
-      "organizations": "Organizations"
-    },
-    "title": {
-      "add": "Add User",
-      "edit": "Edit User"
-    },
-    "userOrganizations": {
+    "organizations": {
       "columns": {
         "location": "Location",
         "name": "Name"
       }
+    },
+    "password": {
+      "content": "Passwords must be at least eight (8) characters.",
+      "header": "Password Policy"
+    }
+  },
+  "UserModal": {
+    "labels": {
+      "user": "User"
+    },
+    "title": {
+      "add": "Add User",
+      "edit": "Edit User"
     }
   },
   "UserOrganizationModal": {

@@ -1,34 +1,17 @@
 // @flow
 
-import React, { useCallback, useState, type Node } from 'react';
+import React, { useCallback, useState, type ComponentType } from 'react';
 import { LoginModal } from '@performant-software/semantic-components';
-import { useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { Image } from 'semantic-ui-react';
 import AuthenticationService from '../services/Authentication';
 import styles from './Login.module.css';
 
-const Login = (): Node => {
+const Login: ComponentType<any> = () => {
   const [disabled, setDisabled] = useState(false);
   const [email, setEmail] = useState();
   const [error, setError] = useState(false);
   const [password, setPassword] = useState();
-
-  const navigate = useNavigate();
-
-  /**
-   * After authentication is successful, navigates to the correct page.
-   *
-   * @type {(function({data: *}): void)|*}
-   */
-  const onAuthentication = useCallback(({ data }) => {
-    const { user } = data;
-
-    if (user && !user.admin) {
-      navigate('/organizations');
-    } else if (user && user.admin) {
-      navigate('/');
-    }
-  }, []);
 
   /**
    * Attempts to authenticate then navigates to the admin page.
@@ -40,10 +23,17 @@ const Login = (): Node => {
 
     AuthenticationService
       .login({ email, password })
-      .then(onAuthentication)
       .catch(() => setError(true))
       .finally(() => setDisabled(false));
   }, [email, password]);
+
+  if (AuthenticationService.isAuthenticated()) {
+    if (AuthenticationService.isAdmin()) {
+      return <Navigate to='/dashboard' />;
+    }
+
+    return <Navigate to='/organizations' />;
+  }
 
   return (
     <div

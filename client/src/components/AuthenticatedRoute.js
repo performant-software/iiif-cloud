@@ -1,14 +1,14 @@
 // @flow
 
-import React, { type Node } from 'react';
+import React, { type ComponentType } from 'react';
 import { Navigate } from 'react-router-dom';
 import AuthenticationService from '../services/Authentication';
 
 type Props = {
-  children: Array<Node>
+  children: any
 };
 
-const AuthenticatedRoute = ({ children }: Props): Node => {
+const AuthenticatedRoute: ComponentType<any> = ({ children }: Props) => {
   if (!AuthenticationService.isAuthenticated()) {
     return <Navigate to='/login' />;
   }

@@ -1,8 +1,8 @@
 // @flow
 
-import React, { type Node } from 'react';
+import React, { type ComponentType } from 'react';
 
-const Dashboard = (): Node => (
+const Dashboard: ComponentType<any> = () => (
   <div>
     Dashboard
   </div>

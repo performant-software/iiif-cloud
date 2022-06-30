@@ -1,13 +1,12 @@
 // @flow
 
 import cx from 'classnames';
-import React, { useCallback, type Node } from 'react';
+import React, { useCallback, type ComponentType } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon, Menu } from 'semantic-ui-react';
 import AuthenticationService from '../services/Authentication';
 import MenuLink from './MenuLink';
 import styles from './Sidebar.module.css';
-import SubMenu from './SubMenu';
 
 type Props = {
   context: {
@@ -15,7 +14,7 @@ type Props = {
   }
 };
 
-const Sidebar = (props: Props): Node => {
+const Sidebar: ComponentType<any> = (props: Props) => {
   const navigate = useNavigate();
 
   /**
@@ -49,8 +48,7 @@ const Sidebar = (props: Props): Node => {
         </Menu.Item>
         <MenuLink
           className={styles.item}
-          index
-          to='/'
+          to='/dashboard'
         >
           <Icon
             name='chart bar'
@@ -67,17 +65,6 @@ const Sidebar = (props: Props): Node => {
             name='building outline'
             size='big'
           />
-          <SubMenu
-            basePath='/organizations'
-            id='organizationId'
-            items={[{
-              content: 'Details',
-              path: ''
-            }, {
-              content: 'Users',
-              path: 'users'
-            }]}
-          />
         </MenuLink>
         <MenuLink
           className={styles.item}
@@ -87,17 +74,6 @@ const Sidebar = (props: Props): Node => {
           <Icon
             name='users'
             size='big'
-          />
-          <SubMenu
-            basePath='/users'
-            id='userId'
-            items={[{
-              content: 'Details',
-              path: ''
-            }, {
-              content: 'Organizations',
-              path: 'organizations'
-            }]}
           />
         </MenuLink>
         <Menu.Item

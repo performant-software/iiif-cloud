@@ -1,7 +1,7 @@
 // @flow
 
 import { BaseTransform } from '@performant-software/shared-components';
-
+import UserOrganizations from './UserOrganizations';
 import type { Organization as OrganizationType } from '../types/Organization';
 
 /**
@@ -41,6 +41,24 @@ class Organization extends BaseTransform {
       key: organization.id,
       value: organization.id,
       text: organization.name
+    };
+  }
+
+  /**
+   * Returns the passed organization for PUT/POST requests.
+   *
+   * @param organization
+   *
+   * @returns {{[p: string]: {[p: string]: *}}}
+   */
+  toPayload(organization: OrganizationType): any {
+    const payload = super.toPayload(organization)[this.getParameterName()];
+
+    return {
+      [this.getParameterName()]: {
+        ...payload,
+        ...UserOrganizations.toPayload(organization)
+      }
     };
   }
 }

@@ -1,12 +1,11 @@
 // @flow
 
-import React, { type Node } from 'react';
+import React, { type ComponentType } from 'react';
 import { withTranslation } from 'react-i18next';
 import ItemList from '../components/ItemList';
 import OrganizationsService from '../services/Organizations';
-import withParams from '../hooks/Params';
 
-const Organizations = (withTranslation()(withParams((props) => (
+const Organizations: ComponentType<any> = withTranslation()((props) => (
   <ItemList
     collectionName='organizations'
     columns={[{
@@ -19,9 +18,9 @@ const Organizations = (withTranslation()(withParams((props) => (
       sortable: true
     }]}
     onDelete={(organization) => OrganizationsService.delete(organization)}
-    onLoad={(params) => OrganizationsService.fetchAll({ ...params, user_id: props.userId })}
+    onLoad={(params) => OrganizationsService.fetchAll(params)}
     onSave={(organization) => OrganizationsService.save(organization)}
   />
-))): Node);
+));
 
 export default Organizations;

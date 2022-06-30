@@ -27,6 +27,7 @@ class Api::AuthenticationController < Api::BaseController
       exp: time.strftime("%m-%d-%Y %H:%M"),
       username: user.email,
       user: serializer.render_show(user),
+      admin: user.admin?,
       id: user.id
     }
   end
