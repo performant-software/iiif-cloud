@@ -1,5 +1,5 @@
 {
-  "name": "IIIF Cloud",
+  "name": "IIIFCloud",
   "license": "MIT",
   "engines": {
     "node": "16.x",
@@ -7,7 +7,6 @@
   },
   "scripts": {
     "build": "yarn --cwd client install && yarn --cwd client run build && cd ..",
-    "deploy": "cp -a client/build/. public/",
-    "heroku-postbuild": "yarn build && yarn deploy"
+    "deploy": "cp -a client/build/. public/"
   }
 }
