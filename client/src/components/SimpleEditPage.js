@@ -1,6 +1,9 @@
 // @flow
 
+import { Toaster } from '@performant-software/semantic-components';
 import { Element } from '@performant-software/shared-components';
+import type { EditContainerProps } from '@performant-software/shared-components/types';
+import cx from 'classnames';
 import React, {
   useCallback,
   useEffect,
@@ -19,9 +22,8 @@ import {
   Ref,
   Sticky
 } from 'semantic-ui-react';
-import { Toaster } from '@performant-software/semantic-components';
+import styles from './SimpleEditPage.module.css';
 import { useLocation, useNavigate } from 'react-router-dom';
-import type { EditContainerProps } from '@performant-software/shared-components/types';
 import type { Translateable } from '../types/Translateable';
 
 type Props = EditContainerProps & Translateable & {
@@ -63,6 +65,7 @@ const SimpleEditPage: ComponentType<any> = (props: Props) => {
   const renderTabs = useCallback(() => {
     const menu = (
       <Menu
+        className={styles.menu}
         pointing
         secondary
       >
@@ -77,16 +80,18 @@ const SimpleEditPage: ComponentType<any> = (props: Props) => {
         <Menu.Menu
           position='right'
         >
-          <Menu.Item>
+          <Menu.Item
+            className={cx(styles.item, styles.buttonContainer)}
+          >
             <Button
+              className={styles.button}
               content={props.t('Common.buttons.save')}
               onClick={props.onSave}
               primary
             />
-          </Menu.Item>
-          <Menu.Item>
             <Button
               basic
+              className={styles.button}
               content={props.t('Common.buttons.cancel')}
               onClick={() => navigate(-1)}
             />
@@ -129,7 +134,9 @@ const SimpleEditPage: ComponentType<any> = (props: Props) => {
   }, []);
 
   return (
-    <Grid>
+    <Grid
+      className={styles.simpleEditPage}
+    >
       <Grid.Row>
         <Grid.Column>
           { renderTabs() }
