@@ -5,6 +5,8 @@ import type { EditContainerProps } from '@performant-software/shared-components/
 import React, { type ComponentType } from 'react';
 import { withTranslation } from 'react-i18next';
 import { Form, Message } from 'semantic-ui-react';
+import _ from 'underscore';
+import i18n from '../i18n/i18n';
 import OrganizationModal from '../components/OrganizationModal';
 import SimpleEditPage from '../components/SimpleEditPage';
 import UsersService from '../services/Users';
@@ -97,6 +99,16 @@ const UserForm = withTranslation()((props: EditContainerProps & Translateable) =
   </SimpleEditPage>
 ));
 
+const ValidateUser = (user) => {
+  const errors = {};
+
+  if (user && !user.admin && _.isEmpty(user.user_organizations)) {
+    _.extend(errors, { user_organizations: i18n.t('User.errors.noOrganization') });
+  }
+
+  return errors;
+};
+
 const User: ComponentType<any> = withEditPage(UserForm, {
   onInitialize: (id) => (
     UsersService
@@ -108,7 +120,8 @@ const User: ComponentType<any> = withEditPage(UserForm, {
       .save(user)
       .then(({ data }) => data.user)
   ),
-  required: ['name', 'email']
+  required: ['name', 'email'],
+  validate: ValidateUser
 });
 
 export default User;

@@ -10,4 +10,7 @@ class User < ApplicationRecord
 
   # Resourceable parameters
   allow_params :name, :email, :admin, :password, :password_confirmation, user_organizations_attributes: [:id, :organization_id, :_destroy]
+
+  # Validations
+  validates :user_organizations, presence: true, unless: :admin?
 end

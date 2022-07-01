@@ -7,7 +7,8 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 type Config = {
   onInitialize: (item: any) => Promise<any>,
   onSave: (item: any) => Promise<any>,
-  required?: Array<string>
+  required?: Array<string>,
+  validate: () => {}
 };
 
 const withEditPage = (WrappedComponent: ComponentType<any>, config: Config): any => (props: any) => {
@@ -45,6 +46,7 @@ const withEditPage = (WrappedComponent: ComponentType<any>, config: Config): any
       onInitialize={config.onInitialize}
       onSave={onSave}
       required={config.required}
+      validate={config.validate}
     />
   );
 };

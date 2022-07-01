@@ -70,6 +70,9 @@
     "users": "Users"
   },
   "User": {
+    "errors": {
+      "noOrganization": "This user is not part of an organization"
+    },
     "labels": {
       "admin": "Administrator",
       "email": "Email",
