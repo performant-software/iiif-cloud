@@ -42,21 +42,6 @@ const SimpleEditPage: ComponentType<any> = (props: Props) => {
   const tab = useMemo(() => _.find(tabs, (t) => t.key === currentTab), [currentTab, tabs]);
 
   /**
-   * Calls the onSave prop and sets the "saved" variable if no errors occur.
-   *
-   * @type {function(): Promise<unknown>|*}
-   */
-  const onSave = useCallback(() => (
-    Promise
-      .resolve(props.onSave())
-      .then(() => {
-        if (_.isEmpty(props.errors)) {
-          setSaved(true);
-        }
-      })
-  ), [props.errors, props.onSave]);
-
-  /**
    * Sets the current tab.
    *
    * @type {(function(*): void)|*}
@@ -95,7 +80,7 @@ const SimpleEditPage: ComponentType<any> = (props: Props) => {
           <Menu.Item>
             <Button
               content={props.t('Common.buttons.save')}
-              onClick={onSave}
+              onClick={props.onSave}
               primary
             />
           </Menu.Item>
