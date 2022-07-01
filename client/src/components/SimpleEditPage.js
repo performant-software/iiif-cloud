@@ -22,7 +22,6 @@ import {
 import { Toaster } from '@performant-software/semantic-components';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { EditContainerProps } from '@performant-software/shared-components/types';
-import hoistNonReactStatic from 'hoist-non-react-statics';
 import type { Translateable } from '../types/Translateable';
 
 type Props = EditContainerProps & Translateable & {
