@@ -77,6 +77,14 @@
     "userDetails": "User Edit",
     "users": "Users"
   },
+  "Sidebar": {
+    "labels": {
+      "dashboard": "Dashboard",
+      "organizations": "Organizations",
+      "projects": "Projects",
+      "users": "Users"
+    }
+  },
   "User": {
     "errors": {
       "noOrganization": "This user is not part of an organization"

@@ -3,18 +3,20 @@
 import cx from 'classnames';
 import React, { useCallback, type ComponentType } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Icon, Menu } from 'semantic-ui-react';
+import { Icon, Menu, Popup } from 'semantic-ui-react';
 import AuthenticationService from '../services/Authentication';
 import MenuLink from './MenuLink';
 import styles from './Sidebar.module.css';
+import { withTranslation } from 'react-i18next';
+import type { Translateable } from '../types/Translateable';
 
-type Props = {
+type Props = Translateable & {
   context: {
     current: ?HTMLDivElement
   }
 };
 
-const Sidebar: ComponentType<any> = (props: Props) => {
+const Sidebar: ComponentType<any> = withTranslation()((props: Props) => {
   const navigate = useNavigate();
 
   /**
@@ -46,47 +48,75 @@ const Sidebar: ComponentType<any> = (props: Props) => {
             }}
           />
         </Menu.Item>
-        <MenuLink
-          className={styles.item}
-          to='/dashboard'
-        >
-          <Icon
-            name='chart bar'
-            size='big'
-          />
-        </MenuLink>
-        <MenuLink
-          className={styles.item}
-          index
-          to='/organizations'
-        >
-          <Icon
-            className={styles.icon}
-            name='building outline'
-            size='big'
-          />
-        </MenuLink>
-        <MenuLink
-          className={styles.item}
-          index
-          to='/projects'
-        >
-          <Icon
-            className={styles.icon}
-            name='folder outline'
-            size='big'
-          />
-        </MenuLink>
-        <MenuLink
-          className={styles.item}
-          index
-          to='users'
-        >
-          <Icon
-            name='users'
-            size='big'
-          />
-        </MenuLink>
+        <Popup
+          content={props.t('Sidebar.labels.dashboard')}
+          mouseEnterDelay={1000}
+          position='right center'
+          trigger={(
+            <MenuLink
+              className={styles.item}
+              to='/dashboard'
+            >
+              <Icon
+                name='chart bar'
+                size='big'
+              />
+            </MenuLink>
+          )}
+        />
+        <Popup
+          content={props.t('Sidebar.labels.organizations')}
+          mouseEnterDelay={1000}
+          position='right center'
+          trigger={(
+            <MenuLink
+              className={styles.item}
+              index
+              to='/organizations'
+            >
+              <Icon
+                className={styles.icon}
+                name='building outline'
+                size='big'
+              />
+            </MenuLink>
+          )}
+        />
+        <Popup
+          content={props.t('Sidebar.labels.projects')}
+          mouseEnterDelay={1000}
+          position='right center'
+          trigger={(
+            <MenuLink
+              className={styles.item}
+              index
+              to='/projects'
+            >
+              <Icon
+                className={styles.icon}
+                name='folder outline'
+                size='big'
+              />
+            </MenuLink>
+          )}
+        />
+        <Popup
+          content={props.t('Sidebar.labels.users')}
+          mouseEnterDelay={1000}
+          position='right center'
+          trigger={(
+            <MenuLink
+              className={styles.item}
+              index
+              to='users'
+            >
+              <Icon
+                name='users'
+                size='big'
+              />
+            </MenuLink>
+          )}
+        />
         <Menu.Item
           className={styles.item}
           onClick={onLogout}
@@ -100,6 +130,6 @@ const Sidebar: ComponentType<any> = (props: Props) => {
       </Menu>
     </div>
   );
-};
+});
 
 export default Sidebar;
