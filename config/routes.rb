@@ -2,10 +2,8 @@ Rails.application.routes.draw do
   mount ControlledVocabulary::Engine, at: "/controlled_vocabulary"
 
   namespace :api do
-    resources :organizations do
-      resources :users
-    end
-
+    resources :organizations
+    resources :projects
     resources :users
 
     # Authentication
