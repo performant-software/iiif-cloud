@@ -2,6 +2,7 @@
 
 import { BaseService, BaseTransform } from '@performant-software/shared-components';
 import AuthenticationTransform from '../transforms/Authentication';
+import type { User } from '../types/User';
 
 const STORAGE_KEY = 'current_user';
 
@@ -13,6 +14,16 @@ class Authentication extends BaseService {
    */
   getBaseUrl(): string {
     return '/api/auth/login';
+  }
+
+  /**
+   * Returns the current user.
+   *
+   * @returns {*}
+   */
+  getCurrentUser(): User {
+    const user = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    return user.user;
   }
 
   /**
