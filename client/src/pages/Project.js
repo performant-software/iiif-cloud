@@ -4,7 +4,7 @@ import { AssociatedDropdown } from '@performant-software/semantic-components';
 import React, { type ComponentType, useEffect } from 'react';
 import { withTranslation } from 'react-i18next';
 import uuid from 'react-uuid';
-import { Form } from 'semantic-ui-react';
+import { Form, Message } from 'semantic-ui-react';
 import Organization from '../transforms/Organization';
 import OrganizationsService from '../services/Organizations';
 import ProjectsService from '../services/Projects';
@@ -77,6 +77,12 @@ const ProjectForm = withTranslation()((props) => {
           onChange={props.onTextInputChange.bind(this, 'api_key')}
           required={props.isRequired('api_key')}
           value={props.item.api_key}
+        />
+        <Message
+          content={props.item.id ? props.item.bucket_name : props.t('Project.messages.bucket.content')}
+          icon='database'
+          info
+          header={props.t('Project.messages.bucket.header')}
         />
       </SimpleEditPage.Tab>
     </SimpleEditPage>

@@ -67,9 +67,16 @@
   "Project": {
     "labels": {
       "apiKey": "API key",
+      "bucketName": "AWS S3 bucket",
       "description": "Description",
       "name": "Name",
       "organization": "Organization"
+    },
+    "messages": {
+      "bucket": {
+        "content": "A bucket on AWS S3 will be created after you save the record.",
+        "header": "AWS S3"
+      }
     }
   },
   "Routes": {
