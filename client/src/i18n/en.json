@@ -14,7 +14,8 @@
       "save": "Save"
     },
     "errors": {
-      "save": "There was an problem saving the record."
+      "save": "There was an problem saving the record.",
+      "unauthorized": "You do not have access to this record."
     },
     "messages": {
       "save": {

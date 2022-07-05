@@ -6,6 +6,7 @@ import React, { type ComponentType } from 'react';
 import { withTranslation } from 'react-i18next';
 import { Form, Message } from 'semantic-ui-react';
 import _ from 'underscore';
+import AuthenticationService from '../services/Authentication';
 import i18n from '../i18n/i18n';
 import OrganizationModal from '../components/OrganizationModal';
 import SimpleEditPage from '../components/SimpleEditPage';
@@ -35,12 +36,14 @@ const UserForm = withTranslation()((props: EditContainerProps & Translateable) =
         required={props.isRequired('email')}
         value={props.item.email}
       />
-      <Form.Checkbox
-        checked={props.item.admin}
-        error={props.isError('admin')}
-        label={props.t('User.labels.admin')}
-        onChange={props.onCheckboxInputChange.bind(this, 'admin')}
-      />
+      { AuthenticationService.isAdmin() && (
+        <Form.Checkbox
+          checked={props.item.admin}
+          error={props.isError('admin')}
+          label={props.t('User.labels.admin')}
+          onChange={props.onCheckboxInputChange.bind(this, 'admin')}
+        />
+      )}
       <Message
         content={props.t('User.password.content')}
         header={props.t('User.password.header')}

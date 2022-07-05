@@ -13,7 +13,7 @@ type Props = {
   buttons?: Array<any>
 };
 
-const ItemList: ComponentType<any> = (props: Props) => (
+const SimpleList: ComponentType<any> = (props: Props) => (
   <ListTable
     actions={[{
       accept: () => props.allowEdit,
@@ -46,9 +46,9 @@ const ItemList: ComponentType<any> = (props: Props) => (
 );
 
 // $FlowIssue - Ignoring default props error
-ItemList.defaultProps = {
+SimpleList.defaultProps = {
   allowAdd: true,
   allowEdit: true
 };
 
-export default ItemList;
+export default SimpleList;

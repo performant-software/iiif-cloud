@@ -48,40 +48,44 @@ const Sidebar: ComponentType<any> = withTranslation()((props: Props) => {
             }}
           />
         </Menu.Item>
-        <Popup
-          content={props.t('Sidebar.labels.dashboard')}
-          mouseEnterDelay={1000}
-          position='right center'
-          trigger={(
-            <MenuLink
-              className={styles.item}
-              to='/dashboard'
-            >
-              <Icon
-                name='chart bar'
-                size='big'
-              />
-            </MenuLink>
-          )}
-        />
-        <Popup
-          content={props.t('Sidebar.labels.organizations')}
-          mouseEnterDelay={1000}
-          position='right center'
-          trigger={(
-            <MenuLink
-              className={styles.item}
-              index
-              to='/organizations'
-            >
-              <Icon
-                className={styles.icon}
-                name='building outline'
-                size='big'
-              />
-            </MenuLink>
-          )}
-        />
+        { AuthenticationService.isAdmin() && (
+          <Popup
+            content={props.t('Sidebar.labels.dashboard')}
+            mouseEnterDelay={1000}
+            position='right center'
+            trigger={(
+              <MenuLink
+                className={styles.item}
+                to='/dashboard'
+              >
+                <Icon
+                  name='chart bar'
+                  size='big'
+                />
+              </MenuLink>
+            )}
+          />
+        )}
+        { AuthenticationService.isAdmin() && (
+          <Popup
+            content={props.t('Sidebar.labels.organizations')}
+            mouseEnterDelay={1000}
+            position='right center'
+            trigger={(
+              <MenuLink
+                className={styles.item}
+                index
+                to='/organizations'
+              >
+                <Icon
+                  className={styles.icon}
+                  name='building outline'
+                  size='big'
+                />
+              </MenuLink>
+            )}
+          />
+        )}
         <Popup
           content={props.t('Sidebar.labels.projects')}
           mouseEnterDelay={1000}

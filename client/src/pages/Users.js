@@ -3,11 +3,11 @@
 import { BooleanIcon } from '@performant-software/semantic-components';
 import React, { type ComponentType } from 'react';
 import { withTranslation } from 'react-i18next';
-import ItemList from '../components/ItemList';
+import SimpleList from '../components/SimpleList';
 import UsersService from '../services/Users';
 
 const Users: ComponentType<any> = withTranslation()((props) => (
-  <ItemList
+  <SimpleList
     collectionName='users'
     columns={[{
       name: 'name',
