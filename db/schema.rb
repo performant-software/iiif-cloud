@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_07_01_155419) do
+ActiveRecord::Schema[7.0].define(version: 2022_07_05_163425) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -55,6 +55,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_07_01_155419) do
     t.string "api_key"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "bucket_name"
     t.index ["organization_id"], name: "index_projects_on_organization_id"
   end
 
