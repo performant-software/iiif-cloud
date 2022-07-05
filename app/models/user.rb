@@ -15,7 +15,7 @@ class User < ApplicationRecord
   validates :user_organizations, presence: true, unless: :admin?
 
   def has_access?(organization_ids)
-    if organization_ids.is_a?(String)
+    if organization_ids.is_a?(Integer)
       organization_ids = [organization_ids]
     end
 
