@@ -4,8 +4,16 @@ class Api::BaseController < Api::ResourceController
 
   protected
 
+  def check_authorization(organization_id)
+    deny_access unless current_user.has_access?(organization_id)
+  end
+
   def current_user
     @current_user
+  end
+
+  def deny_access
+    render json: { errors: [I18n.t('errors.unauthorized')] }, status: :forbidden
   end
 
   private

@@ -2,7 +2,8 @@
 
 import { BaseService, BaseTransform } from '@performant-software/shared-components';
 import AuthenticationTransform from '../transforms/Authentication';
-import _ from 'underscore';
+
+const STORAGE_KEY = 'current_user';
 
 class Authentication extends BaseService {
   /**
@@ -12,6 +13,16 @@ class Authentication extends BaseService {
    */
   getBaseUrl(): string {
     return '/api/auth/login';
+  }
+
+  /**
+   * Returns the user authentication token.
+   *
+   * @returns {*}
+   */
+  getToken(): string {
+    const user = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    return user && user.token;
   }
 
   /**
@@ -29,12 +40,12 @@ class Authentication extends BaseService {
    * @returns {boolean|*}
    */
   isAdmin(): boolean {
-    if (!localStorage.getItem('user')) {
+    if (!localStorage.getItem(STORAGE_KEY)) {
       return false;
     }
 
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    return user && user.admin;
+    const user = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    return user && user.user && user.user.admin;
   }
 
   /**
@@ -43,11 +54,11 @@ class Authentication extends BaseService {
    * @returns {*|boolean}
    */
   isAuthenticated(): boolean {
-    if (!localStorage.getItem('user')) {
+    if (!localStorage.getItem(STORAGE_KEY)) {
       return false;
     }
 
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const user = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
     const { token, exp } = user;
 
     const expirationDate = new Date(Date.parse(exp));
@@ -67,7 +78,7 @@ class Authentication extends BaseService {
     return this
       .create(params)
       .then((response) => {
-        localStorage.setItem('user', JSON.stringify(_.omit(response.data, 'user')));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(response.data));
         return response;
       });
   }
@@ -78,10 +89,10 @@ class Authentication extends BaseService {
    * @returns {Promise<*>}
    */
   logout(): Promise<any> {
-    localStorage.removeItem('user');
+    localStorage.removeItem(STORAGE_KEY);
     return Promise.resolve();
   }
 }
 
-const Auth: Authentication = new Authentication();
-export default Auth;
+const AuthenticationService: Authentication = new Authentication();
+export default AuthenticationService;
