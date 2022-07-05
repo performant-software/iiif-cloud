@@ -22,6 +22,7 @@ const Projects: ComponentType<any> = () => {
       }}
       collectionName='projects'
       onLoad={(params) => ProjectsService.fetchAll(params)}
+      onDelete={(project) => ProjectsService.delete(project)}
       renderDescription={(project) => project.description}
       renderHeader={(project) => project.name}
       renderMeta={(project) => project.organization && project.organization.name}
