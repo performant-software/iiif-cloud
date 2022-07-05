@@ -15,7 +15,9 @@ import Organizations from './pages/Organizations';
 import Users from './pages/Users';
 import Login from './pages/Login';
 import Organization from './pages/Organization';
+import Projects from './pages/Projects';
 import User from './pages/User';
+import Project from './pages/Project';
 
 const App: ComponentType<any> = useDragDrop(() => (
   <Router>
@@ -48,6 +50,18 @@ const App: ComponentType<any> = useDragDrop(() => (
         <Route
           element={<Organization />}
           path='/organizations/:id'
+        />
+        <Route
+          element={<Projects />}
+          path='/projects'
+        />
+        <Route
+          element={<Project />}
+          path='/projects/new'
+        />
+        <Route
+          element={<Project />}
+          path='/projects/:id'
         />
         <Route
           element={<Users />}

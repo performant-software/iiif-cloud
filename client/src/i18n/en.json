@@ -63,6 +63,14 @@
       "name": "Name"
     }
   },
+  "Project": {
+    "labels": {
+      "apiKey": "API key",
+      "description": "Description",
+      "name": "Name",
+      "organization": "Organization"
+    }
+  },
   "Routes": {
     "organizationDetails": "Organization Edit",
     "organizations": "Organizations",

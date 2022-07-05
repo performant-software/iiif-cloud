@@ -8,7 +8,7 @@ type Config = {
   onInitialize: (item: any) => Promise<any>,
   onSave: (item: any) => Promise<any>,
   required?: Array<string>,
-  validate: () => {}
+  validate?: () => {}
 };
 
 const withEditPage = (WrappedComponent: ComponentType<any>, config: Config): any => (props: any) => {

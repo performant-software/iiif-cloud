@@ -69,6 +69,17 @@ const Sidebar: ComponentType<any> = (props: Props) => {
         <MenuLink
           className={styles.item}
           index
+          to='/projects'
+        >
+          <Icon
+            className={styles.icon}
+            name='folder outline'
+            size='big'
+          />
+        </MenuLink>
+        <MenuLink
+          className={styles.item}
+          index
           to='users'
         >
           <Icon
