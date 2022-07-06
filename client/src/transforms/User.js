@@ -1,14 +1,13 @@
 // @flow
 
-import { BaseTransform } from '@performant-software/shared-components';
-import UserOrganizations from './UserOrganizations';
-
+import { Attachments, FormDataTransform } from '@performant-software/shared-components';
 import type { User as UserType } from '../types/User';
+import UserOrganizations from './UserOrganizations';
 
 /**
  * Class responsible for transforming user objects.
  */
-class User extends BaseTransform {
+class User extends FormDataTransform {
   /**
    * Returns the user parameter name.
    *
@@ -27,9 +26,7 @@ class User extends BaseTransform {
     return [
       'admin',
       'name',
-      'email',
-      'password',
-      'password_confirmation',
+      'email'
     ];
   }
 
@@ -56,14 +53,17 @@ class User extends BaseTransform {
    * @returns {{[p: string]: *}}
    */
   toPayload(user: UserType): any {
-    const payload = super.toPayload(user)[this.getParameterName()];
+    const formData = super.toPayload(user);
+    Attachments.toPayload(formData, this.getParameterName(), user, 'avatar');
+    UserOrganizations.toFormData(formData, this.getParameterName(), user);
 
-    return {
-      [this.getParameterName()]: {
-        ...payload,
-        ...UserOrganizations.toPayload(user)
-      }
-    };
+    // Only include the password/confirmation in the payload if we're changing it
+    if (user.password && user.password_confirmation) {
+      formData.append(`${this.getParameterName()}[password]`, user.password);
+      formData.append(`${this.getParameterName()}[password_confirmation]`, user.password_confirmation);
+    }
+
+    return formData;
   }
 }
 

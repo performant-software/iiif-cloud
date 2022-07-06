@@ -11,11 +11,16 @@
   "Common": {
     "buttons": {
       "cancel": "Cancel",
-      "save": "Save"
+      "remove": "Remove",
+      "save": "Save",
+      "upload": "Upload"
     },
     "errors": {
       "save": "There was an problem saving the record.",
       "unauthorized": "You do not have access to this record."
+    },
+    "labels": {
+      "avatar": "Avatar"
     },
     "messages": {
       "save": {

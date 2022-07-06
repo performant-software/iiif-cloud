@@ -1,11 +1,12 @@
 // @flow
 
-import { BaseTransform } from '@performant-software/shared-components';
+import { Attachments, FormDataTransform } from '@performant-software/shared-components';
+import type { Project as ProjectType } from '../types/Project';
 
 /**
  * Class for handling transforming projects for PUT/POST requests.
  */
-class Project extends BaseTransform {
+class Project extends FormDataTransform {
   /**
    * Returns the project parameter name.
    *
@@ -28,6 +29,20 @@ class Project extends BaseTransform {
       'api_key',
       'organization_id'
     ];
+  }
+
+  /**
+   * Returns the passed project record as JSON for PUT/POST requests.
+   *
+   * @param project
+   *
+   * @returns {*}
+   */
+  toPayload(project: ProjectType): FormData {
+    const formData = super.toPayload(project);
+    Attachments.toPayload(formData, this.getParameterName(), project, 'avatar');
+
+    return formData;
   }
 }
 

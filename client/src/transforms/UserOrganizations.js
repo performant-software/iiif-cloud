@@ -18,6 +18,20 @@ class UserOrganizations extends NestedAttributesTransform {
   }
 
   /**
+   * Appends the user_organizations records to the passed form data object.
+   *
+   * @param formData
+   * @param prefix
+   * @param record
+   * @param collection
+   *
+   * @returns {void|*}
+   */
+  toFormData(formData: FormData, prefix: string, record: any, collection: string = 'user_organizations'): void {
+    return super.toFormData(formData, prefix, record, collection);
+  }
+
+  /**
    * Returns the collection of user_organizations for PUT/POST requests.
    *
    * @param record
