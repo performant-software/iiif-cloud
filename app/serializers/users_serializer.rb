@@ -1,4 +1,4 @@
 class UsersSerializer < BaseSerializer
-  index_attributes :id, :name, :email, :admin
-  show_attributes :id, :name, :email, :admin, user_organizations: [:id, :organization_id, organization: OrganizationsSerializer]
+  index_attributes :id, :name, :email, :admin, :avatar_url
+  show_attributes :id, :name, :email, :admin, :avatar_url, user_organizations: [:id, :organization_id, organization: OrganizationsSerializer]
 end

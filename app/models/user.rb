@@ -1,4 +1,7 @@
 class User < ApplicationRecord
+  # Includes
+  include Attachable
+
   # JWT
   has_secure_password
 
@@ -9,7 +12,10 @@ class User < ApplicationRecord
   accepts_nested_attributes_for :user_organizations, allow_destroy: true
 
   # Resourceable parameters
-  allow_params :name, :email, :admin, :password, :password_confirmation, user_organizations_attributes: [:id, :organization_id, :_destroy]
+  allow_params :name, :email, :admin, :avatar, :password, :password_confirmation, user_organizations_attributes: [:id, :organization_id, :_destroy]
+
+  # ActiveStorage
+  has_one_attached :avatar
 
   # Validations
   validates :user_organizations, presence: true, unless: :admin?

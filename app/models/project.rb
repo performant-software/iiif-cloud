@@ -1,16 +1,13 @@
 class Project < ApplicationRecord
+  # Includes
+  include Attachable
+
   # Relationships
   belongs_to :organization
 
   # Resourceable attributes
-  allow_params :organization_id, :name, :description, :api_key
+  allow_params :organization_id, :name, :description, :api_key, :avatar
 
-  # Callbacks
-  before_create :set_bucket_name
-
-  private
-
-  def set_bucket_name
-    self.bucket_name = Storage.new.generate_name(self.name)
-  end
+  # ActiveStorage
+  has_one_attached :avatar
 end

@@ -1,10 +1,10 @@
 // @flow
 
-import { EmbeddedList } from '@performant-software/semantic-components';
+import { EmbeddedList, FileInputButton, LazyImage } from '@performant-software/semantic-components';
 import type { EditContainerProps } from '@performant-software/shared-components/types';
 import React, { type ComponentType, useEffect } from 'react';
 import { withTranslation } from 'react-i18next';
-import { Form, Message } from 'semantic-ui-react';
+import { Button, Form, Message } from 'semantic-ui-react';
 import _ from 'underscore';
 import AuthenticationService from '../services/Authentication';
 import i18n from '../i18n/i18n';
@@ -36,6 +36,35 @@ const UserForm = withTranslation()((props: EditContainerProps & Translateable) =
         key='details'
         name={props.t('Common.tabs.details')}
       >
+        <Form.Input
+          label={props.t('Common.labels.avatar')}
+        >
+          <LazyImage
+            preview={props.item.avatar_url}
+            src={props.item.avatar_url}
+            size='medium'
+          >
+            { !props.item.avatar_url && (
+              <FileInputButton
+                color='green'
+                content={props.t('Common.buttons.upload')}
+                icon='cloud upload'
+                onSelection={(files) => {
+                  const file = _.first(files);
+                  props.onSetState({ avatar: file, avatar_url: URL.createObjectURL(file) });
+                }}
+              />
+            )}
+            { props.item.avatar_url && (
+              <Button
+                color='red'
+                content={props.t('Common.buttons.remove')}
+                icon='times'
+                onClick={() => props.onSetState({ avatar: null, avatar_url: null, avatar_remove: true })}
+              />
+            )}
+          </LazyImage>
+        </Form.Input>
         <Form.Input
           error={props.isError('name')}
           label={props.t('User.labels.name')}

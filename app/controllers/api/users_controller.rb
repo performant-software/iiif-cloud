@@ -3,6 +3,7 @@ class Api::UsersController < Api::BaseController
   search_attributes :name, :email
 
   # Preloads
+  preloads User.attachment_preloads
   preloads user_organizations: :organization, only: :show
 
   # Actions
