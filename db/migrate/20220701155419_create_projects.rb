@@ -1,7 +1,7 @@
 class CreateProjects < ActiveRecord::Migration[7.0]
-  def change
+  def up
     create_table :projects do |t|
-      t.references :organization, null: false, foreign_key: true
+      t.references :organization, null: false, foreign_key: true, index: true
       t.string :uid
       t.string :name
       t.text :description
@@ -9,5 +9,9 @@ class CreateProjects < ActiveRecord::Migration[7.0]
 
       t.timestamps
     end
+  end
+
+  def down
+    drop_table :projects
   end
 end

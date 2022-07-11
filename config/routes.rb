@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   namespace :api do
     resources :organizations
     resources :projects
+    resources :resources
     resources :users
 
     # Authentication

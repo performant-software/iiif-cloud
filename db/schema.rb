@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_07_05_195008) do
+ActiveRecord::Schema[7.0].define(version: 2022_07_06_163617) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -86,6 +86,16 @@ ActiveRecord::Schema[7.0].define(version: 2022_07_05_195008) do
     t.index ["organization_id"], name: "index_projects_on_organization_id"
   end
 
+  create_table "resources", force: :cascade do |t|
+    t.bigint "project_id", null: false
+    t.string "name"
+    t.jsonb "exif"
+    t.jsonb "metadata"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id"], name: "index_resources_on_project_id"
+  end
+
   create_table "user_organizations", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "organization_id", null: false
@@ -107,6 +117,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_07_05_195008) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "projects", "organizations"
+  add_foreign_key "resources", "projects"
   add_foreign_key "user_organizations", "organizations"
   add_foreign_key "user_organizations", "users"
 end
