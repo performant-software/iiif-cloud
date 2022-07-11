@@ -2,7 +2,7 @@
 
 import cx from 'classnames';
 import React, { useCallback, type ComponentType } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Icon, Menu, Popup } from 'semantic-ui-react';
 import AuthenticationService from '../services/Authentication';
 import MenuLink from './MenuLink';
@@ -18,6 +18,7 @@ type Props = Translateable & {
 
 const Sidebar: ComponentType<any> = withTranslation()((props: Props) => {
   const navigate = useNavigate();
+  const params = useParams();
 
   /**
    * Logs the user out and navigates to the index page.
@@ -74,7 +75,7 @@ const Sidebar: ComponentType<any> = withTranslation()((props: Props) => {
             trigger={(
               <MenuLink
                 className={styles.item}
-                index
+                parent
                 to='/organizations'
               >
                 <Icon
@@ -93,7 +94,7 @@ const Sidebar: ComponentType<any> = withTranslation()((props: Props) => {
           trigger={(
             <MenuLink
               className={styles.item}
-              index
+              parent
               to='/projects'
             >
               <Icon
@@ -101,6 +102,19 @@ const Sidebar: ComponentType<any> = withTranslation()((props: Props) => {
                 name='folder outline'
                 size='big'
               />
+              { params.projectId && (
+                <Menu.Menu>
+                  <MenuLink
+                    content={props.t('Sidebar.labels.details')}
+                    to={`/projects/${params.projectId}`}
+                  />
+                  <MenuLink
+                    content={props.t('Sidebar.labels.resources')}
+                    parent
+                    to={`/projects/${params.projectId}/resources`}
+                  />
+                </Menu.Menu>
+              )}
             </MenuLink>
           )}
         />
@@ -111,7 +125,7 @@ const Sidebar: ComponentType<any> = withTranslation()((props: Props) => {
           trigger={(
             <MenuLink
               className={styles.item}
-              index
+              parent
               to='users'
             >
               <Icon

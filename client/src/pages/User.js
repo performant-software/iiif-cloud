@@ -10,8 +10,8 @@ import AuthenticationService from '../services/Authentication';
 import i18n from '../i18n/i18n';
 import OrganizationModal from '../components/OrganizationModal';
 import SimpleEditPage from '../components/SimpleEditPage';
-import UsersService from '../services/Users';
 import type { Translateable } from '../types/Translateable';
+import UsersService from '../services/Users';
 import withEditPage from '../hooks/EditPage';
 
 const UserForm = withTranslation()((props: EditContainerProps & Translateable) => {
@@ -157,6 +157,7 @@ const ValidateUser = (user) => {
 };
 
 const User: ComponentType<any> = withEditPage(UserForm, {
+  id: 'userId',
   onInitialize: (id) => (
     UsersService
       .fetchOne(id)

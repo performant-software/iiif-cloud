@@ -4,14 +4,14 @@ import { AssociatedDropdown, FileInputButton, LazyImage } from '@performant-soft
 import React, { type ComponentType, useEffect } from 'react';
 import { withTranslation } from 'react-i18next';
 import uuid from 'react-uuid';
-import { Button, Form, Message } from 'semantic-ui-react';
+import { Button, Form } from 'semantic-ui-react';
+import _ from 'underscore';
 import Organization from '../transforms/Organization';
 import OrganizationsService from '../services/Organizations';
 import ProjectsService from '../services/Projects';
 import SimpleEditPage from '../components/SimpleEditPage';
 import withEditPage from '../hooks/EditPage';
 import AuthenticationService from '../services/Authentication';
-import _ from 'underscore';
 
 const ProjectForm = withTranslation()((props) => {
   /**
@@ -113,6 +113,7 @@ const ProjectForm = withTranslation()((props) => {
 });
 
 const Project: ComponentType<any> = withEditPage(ProjectForm, {
+  id: 'projectId',
   onInitialize: (
     (id) => ProjectsService
       .fetchOne(id)

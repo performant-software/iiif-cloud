@@ -82,6 +82,9 @@
         "content": "A bucket on AWS S3 will be created after you save the record.",
         "header": "AWS S3"
       }
+    },
+    "tabs": {
+      "resources": "Resources"
     }
   },
   "Routes": {
@@ -93,8 +96,10 @@
   "Sidebar": {
     "labels": {
       "dashboard": "Dashboard",
+      "details": "Details",
       "organizations": "Organizations",
       "projects": "Projects",
+      "resources": "Resources",
       "users": "Users"
     }
   },

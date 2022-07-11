@@ -150,6 +150,7 @@ const SimpleEditPage: ComponentType<any> = (props: Props) => {
             <div>
               <Form
                 error={!_.isEmpty(props.errors)}
+                noValidate
               >
                 <Message
                   error
