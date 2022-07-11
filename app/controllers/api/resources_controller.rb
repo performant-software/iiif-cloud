@@ -1,4 +1,7 @@
 class Api::ResourcesController < Api::BaseController
+  # Includes
+  include Api::Uploadable
+
   # Search attributes
   search_attributes :name
 

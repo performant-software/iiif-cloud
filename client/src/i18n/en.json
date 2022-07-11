@@ -28,6 +28,11 @@
         "header": "Success!"
       }
     },
+    "sort": {
+      "created": "Date created",
+      "name": "Name",
+      "updated": "Date updated"
+    },
     "tabs": {
       "details": "Details",
       "organizations": "Organizations",
