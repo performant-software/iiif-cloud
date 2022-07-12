@@ -64,7 +64,7 @@ module Attachable
         attachment = self.send(name)
         return nil unless attachment.attached?
 
-        url_for(attachment)
+        "#{ENV['IIIF_HOST']}/iiif/3/#{attachment.key}/full/500,/0/default.jpg"
       end
 
       define_method("#{name}_download_url") do
@@ -72,6 +72,13 @@ module Attachable
         return nil unless attachment.attached?
 
         attachment.service_url({ disposition: 'attachment' })
+      end
+
+      define_method("#{name}_thumbnail_url") do
+        attachment = self.send(name)
+        return nil unless attachment.attached?
+
+        "#{ENV['IIIF_HOST']}/iiif/3/#{attachment.key}/square/250,250/0/default.jpg"
       end
     end
 

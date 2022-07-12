@@ -25,7 +25,7 @@ const Projects: ComponentType<any> = () => {
       onDelete={(project) => ProjectsService.delete(project)}
       renderDescription={(project) => project.description}
       renderHeader={(project) => project.name}
-      renderImage={(project) => <LazyImage src={project.avatar_url} />}
+      renderImage={(project) => <LazyImage dimmable={false} src={project.avatar_thumbnail_url} />}
       renderMeta={(project) => project.organization && project.organization.name}
     />
   );

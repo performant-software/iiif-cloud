@@ -61,7 +61,7 @@ const Resources: ComponentType<any> = () => {
       onDelete={(resource) => ResourcesService.delete(resource)}
       perPageOptions={[10, 25, 50, 100]}
       renderHeader={(resource) => resource.name}
-      renderImage={(resource) => <LazyImage src={resource.content_url} />}
+      renderImage={(resource) => <LazyImage dimmable={false} src={resource.content_thumbnail_url} />}
       renderMeta={() => ''}
       renderDescription={() => <div>Test</div>}
       saved={location.state && location.state.saved}
