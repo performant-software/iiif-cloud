@@ -7,6 +7,7 @@ export type Resource = {
   name: string,
   content_url: string,
   content_download_url: string,
+  content_preview_url: string,
   content_thumbnail_url: string,
   exif: any,
   metadata: any,

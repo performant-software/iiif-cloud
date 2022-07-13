@@ -1,10 +1,10 @@
 // @flow
 
-import { FileInputButton, LazyImage } from '@performant-software/semantic-components';
+import { DownloadButton, FileInputButton, LazyImage } from '@performant-software/semantic-components';
 import React, { type ComponentType, useEffect } from 'react';
 import { withTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
-import { Button, Form } from 'semantic-ui-react';
+import { Link, useParams } from 'react-router-dom';
+import { Button, Form, Icon } from 'semantic-ui-react';
 import _ from 'underscore';
 import ResourcesService from '../services/Resources';
 import withEditPage from '../hooks/EditPage';
@@ -29,20 +29,37 @@ const ProjectForm = withTranslation()((props) => {
           label={props.t('Resource.labels.content')}
         >
           <LazyImage
-            preview={props.item.content_url}
+            preview={props.item.content_preview_url}
             src={props.item.content_url}
             size='medium'
           >
             { !props.item.content_url && (
               <FileInputButton
-                color='green'
+                color='orange'
                 content={props.t('Common.buttons.upload')}
                 icon='cloud upload'
                 onSelection={(files) => {
                   const file = _.first(files);
-                  props.onSetState({ content: file, content_url: URL.createObjectURL(file) });
+                  const url = URL.createObjectURL(file);
+                  props.onSetState({
+                    content: file,
+                    content_url: url,
+                    content_preview_url: url
+                  });
                 }}
               />
+            )}
+            { props.item.content_download_url && (
+              <a
+                className='ui button green'
+                download={props.item.name}
+                href={props.item.content_download_url}
+              >
+                <Icon
+                  name='cloud download'
+                />
+                { props.t('Common.buttons.download') }
+              </a>
             )}
             { props.item.content_url && (
               <Button

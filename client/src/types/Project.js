@@ -12,5 +12,6 @@ export type Project = {
   organization: Organization,
   avatar_url: string,
   avatar_download_url: string,
+  avatar_preview_url: string,
   avatar_thumbnail_url: string
 };

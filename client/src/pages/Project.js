@@ -39,7 +39,7 @@ const ProjectForm = withTranslation()((props) => {
           label={props.t('Common.labels.avatar')}
         >
           <LazyImage
-            preview={props.item.avatar_url}
+            preview={props.item.avatar_preview_url}
             src={props.item.avatar_url}
             size='medium'
           >
@@ -50,7 +50,12 @@ const ProjectForm = withTranslation()((props) => {
                 icon='cloud upload'
                 onSelection={(files) => {
                   const file = _.first(files);
-                  props.onSetState({ avatar: file, avatar_url: URL.createObjectURL(file) });
+                  const url = URL.createObjectURL(file);
+                  props.onSetState({
+                    avatar: file,
+                    avatar_url: url,
+                    avatar_preview_url: url
+                  });
                 }}
               />
             )}

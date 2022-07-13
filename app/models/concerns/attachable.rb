@@ -64,14 +64,21 @@ module Attachable
         attachment = self.send(name)
         return nil unless attachment.attached?
 
-        "#{ENV['IIIF_HOST']}/iiif/3/#{attachment.key}/full/500,/0/default.jpg"
+        "#{ENV['IIIF_HOST']}/iiif/3/#{attachment.key}/full/max/0/default.jpg"
       end
 
       define_method("#{name}_download_url") do
         attachment = self.send(name)
         return nil unless attachment.attached?
 
-        attachment.service_url({ disposition: 'attachment' })
+        attachment.url(disposition: 'attachment')
+      end
+
+      define_method("#{name}_preview_url") do
+        attachment = self.send(name)
+        return nil unless attachment.attached?
+
+        "#{ENV['IIIF_HOST']}/iiif/3/#{attachment.key}/full/500,/0/default.jpg"
       end
 
       define_method("#{name}_thumbnail_url") do

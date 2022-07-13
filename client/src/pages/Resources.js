@@ -32,9 +32,11 @@ const Resources: ComponentType<any> = () => {
     <ItemList
       actions={[{
         name: 'edit',
+        label: null,
         onClick: (item) => navigate(item.id.toString())
       }, {
-        name: 'delete'
+        name: 'delete',
+        label: null
       }]}
       addButton={{
         location: 'top',
@@ -61,9 +63,13 @@ const Resources: ComponentType<any> = () => {
       onDelete={(resource) => ResourcesService.delete(resource)}
       perPageOptions={[10, 25, 50, 100]}
       renderHeader={(resource) => resource.name}
-      renderImage={(resource) => <LazyImage dimmable={false} src={resource.content_thumbnail_url} />}
+      renderImage={(resource) => (
+        <LazyImage
+          dimmable={false}
+          src={resource.content_thumbnail_url}
+        />
+      )}
       renderMeta={() => ''}
-      renderDescription={() => <div>Test</div>}
       saved={location.state && location.state.saved}
       sort={[{
         key: 'name',

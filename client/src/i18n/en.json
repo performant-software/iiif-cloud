@@ -11,6 +11,7 @@
   "Common": {
     "buttons": {
       "cancel": "Cancel",
+      "download": "Download",
       "remove": "Remove",
       "save": "Save",
       "upload": "Upload"
@@ -90,6 +91,11 @@
     },
     "tabs": {
       "resources": "Resources"
+    }
+  },
+  "Resource": {
+    "labels": {
+      "content": "Content"
     }
   },
   "Routes": {

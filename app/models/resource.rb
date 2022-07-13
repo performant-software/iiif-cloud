@@ -9,34 +9,42 @@ class Resource < ApplicationRecord
   allow_params :project_id, :name, :metadata, :content
 
   # Callbacks
-  after_create_commit :convert_to_tif
+  after_create_commit :convert
 
   # ActiveStorage
   has_one_attached :content
+  has_one_attached :content_converted
+
+  def content_url
+    return super unless content.image? && content_converted.attached?
+
+    "#{ENV['IIIF_HOST']}/iiif/3/#{content_converted.key}/full/max/0/default.jpg"
+  end
+
+  def content_preview_url
+    return super unless content.image? && content_converted.attached?
+
+    "#{ENV['IIIF_HOST']}/iiif/3/#{content_converted.key}/full/500,/0/default.jpg"
+  end
+
+  def content_thumbnail_url
+    return super unless content.image? && content_converted.attached?
+
+    "#{ENV['IIIF_HOST']}/iiif/3/#{content_converted.key}/square/250,250/0/default.jpg"
+  end
 
   private
 
-  def convert_to_tif
+  def convert
     return unless content.attached? && content.image?
 
     content.open do |file|
-      output_file = "#{File.basename(file.path, '.*')}.tif"
-      output_path = File.join(File.dirname(file.path), output_file)
+      filepath = Images::Convert.to_tiff(file)
+      filename = Images::Convert.filename(content.filename.to_s, 'tif')
 
-      convert = MiniMagick::Tool::Convert.new
-      convert << file.path
-      convert << '-define'
-      convert << 'tiff:tile-geometry=1024x1024'
-      convert << '-depth'
-      convert << '8'
-      convert << '-compress'
-      convert << 'jpeg'
-      convert << "ptif:#{output_path}"
-      convert.call
-
-      content.attach(
-        io: File.open(output_path),
-        filename:  output_file,
+      content_converted.attach(
+        io: File.open(filepath),
+        filename:  filename,
         content_type: 'image/tiff'
       )
     end

@@ -25,7 +25,12 @@ const Users: ComponentType<any> = withTranslation()(() => {
       onLoad={(params) => UsersService.fetchAll(params)}
       onDelete={(user) => UsersService.delete(user)}
       renderHeader={(user) => user.name}
-      renderImage={(user) => <LazyImage dimmable={false} src={user.avatar_thumbnail_url} />}
+      renderImage={(user) => (
+        <LazyImage
+          dimmable={false}
+          src={user.avatar_thumbnail_url}
+        />
+      )}
       renderMeta={(user) => user.email}
     />
   );
