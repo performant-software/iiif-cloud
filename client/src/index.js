@@ -1,7 +1,7 @@
 // @flow
 
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import ReactDOM from 'react-dom';
 import App from './App';
 
 // Configuration
@@ -14,6 +14,7 @@ import '@performant-software/semantic-components/build/main.css';
 import '@performant-software/semantic-components/build/semantic-ui.css';
 import './index.css';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-
-root.render(<App />);
+ReactDOM.render(
+  <App />,
+  document.getElementById('root')
+);

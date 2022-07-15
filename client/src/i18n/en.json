@@ -12,6 +12,7 @@
     "buttons": {
       "cancel": "Cancel",
       "download": "Download",
+      "iiif": "View IIIF",
       "remove": "Remove",
       "save": "Save",
       "upload": "Upload"

@@ -16,7 +16,7 @@ class Resource < ApplicationRecord
   has_one_attached :content
   has_one_attached :content_converted
 
-  #
+  # Overload attachable methods
   alias_method :attachable_content_url, :content_url
   alias_method :attachable_content_base_url, :content_base_url
   alias_method :attachable_content_preview_url, :content_preview_url
@@ -25,7 +25,7 @@ class Resource < ApplicationRecord
   def content_url
     return attachable_content_url unless content.image? && content_converted.attached?
 
-    "#{content_base_url}/full/max/0/default.jpg"
+    "#{content_base_url}/full/full/0/default.jpg"
   end
 
   def content_base_url

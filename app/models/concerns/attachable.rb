@@ -64,7 +64,7 @@ module Attachable
         attachment = self.send(name)
         return nil unless attachment.attached?
 
-        "#{self.send("#{name}_base_url")}/full/max/0/default.jpg"
+        "#{self.send("#{name}_base_url")}/full/full/0/default.jpg"
       end
 
       define_method("#{name}_base_url") do
