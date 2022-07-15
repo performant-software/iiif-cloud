@@ -6,7 +6,7 @@ class Project < ApplicationRecord
   belongs_to :organization
 
   # Resourceable attributes
-  allow_params :organization_id, :name, :description, :api_key, :avatar
+  allow_params :organization_id, :name, :description, :api_key, :avatar, :metadata
 
   # ActiveStorage
   has_one_attached :avatar

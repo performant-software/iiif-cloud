@@ -1,6 +1,7 @@
 // @flow
 
 import { FileInputButton, LazyImage } from '@performant-software/semantic-components';
+import CloverIIIF from '@samvera/clover-iiif';
 import React, {
   useEffect,
   useMemo,
@@ -16,12 +17,14 @@ import {
   Modal
 } from 'semantic-ui-react';
 import _ from 'underscore';
+import ProjectsService from '../services/Projects';
+import ResourceMetadata from '../components/ResourceMetadata';
 import ResourcesService from '../services/Resources';
-import withEditPage from '../hooks/EditPage';
 import SimpleEditPage from '../components/SimpleEditPage';
-import CloverIIIF from '@samvera/clover-iiif';
+import withEditPage from '../hooks/EditPage';
 
-const ProjectForm = withTranslation()((props) => {
+const ResourceForm = withTranslation()((props) => {
+  const [project, setProject] = useState();
   const [viewer, setViewer] = useState(false);
 
   const { projectId } = useParams();
@@ -42,6 +45,10 @@ const ProjectForm = withTranslation()((props) => {
    */
   useEffect(() => {
     props.onSetState({ project_id: projectId });
+
+    ProjectsService
+      .fetchOne(projectId)
+      .then(({ data }) => setProject(data.project));
   }, [projectId]);
 
   return (
@@ -114,6 +121,13 @@ const ProjectForm = withTranslation()((props) => {
           required={props.isRequired('name')}
           value={props.item.name}
         />
+        { project && (
+          <ResourceMetadata
+            items={JSON.parse(project.metadata)}
+            onChange={(obj) => props.onTextInputChange('metadata', null, { value: JSON.stringify(obj) })}
+            value={props.item.metadata && JSON.parse(props.item.metadata)}
+          />
+        )}
         { viewer && props.item.manifest && (
           <Modal
             centered={false}
@@ -136,7 +150,7 @@ const ProjectForm = withTranslation()((props) => {
   );
 });
 
-const Resource: ComponentType<any> = withEditPage(ProjectForm, {
+const Resource: ComponentType<any> = withEditPage(ResourceForm, {
   id: 'resourceId',
   onInitialize: (
     (id) => ResourcesService

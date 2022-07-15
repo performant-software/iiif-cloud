@@ -6,12 +6,13 @@ import { withTranslation } from 'react-i18next';
 import uuid from 'react-uuid';
 import { Button, Form } from 'semantic-ui-react';
 import _ from 'underscore';
+import AuthenticationService from '../services/Authentication';
+import MetadataList from '../components/MetadataList';
 import Organization from '../transforms/Organization';
 import OrganizationsService from '../services/Organizations';
 import ProjectsService from '../services/Projects';
 import SimpleEditPage from '../components/SimpleEditPage';
 import withEditPage from '../hooks/EditPage';
-import AuthenticationService from '../services/Authentication';
 
 const ProjectForm = withTranslation()((props) => {
   /**
@@ -111,6 +112,15 @@ const ProjectForm = withTranslation()((props) => {
           onChange={props.onTextInputChange.bind(this, 'api_key')}
           required={props.isRequired('api_key')}
           value={props.item.api_key}
+        />
+      </SimpleEditPage.Tab>
+      <SimpleEditPage.Tab
+        key='metadata'
+        name={props.t('Project.tabs.metadata')}
+      >
+        <MetadataList
+          items={JSON.parse(props.item.metadata || '[]')}
+          onChange={(items) => props.onSetState({ metadata: JSON.stringify(items) })}
         />
       </SimpleEditPage.Tab>
     </SimpleEditPage>

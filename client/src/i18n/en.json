@@ -10,6 +10,7 @@
   },
   "Common": {
     "buttons": {
+      "add": "Add",
       "cancel": "Cancel",
       "download": "Download",
       "iiif": "View IIIF",
@@ -47,6 +48,24 @@
   "Login": {
     "buttons": {
       "login": "Login"
+    }
+  },
+  "Metadata": {
+    "types": {
+      "checkbox": "Checkbox",
+      "date": "Date",
+      "dropdown": "Dropdown",
+      "number": "Number",
+      "string": "String",
+      "text": "Text"
+    }
+  },
+  "MetadataList": {
+    "labels": {
+      "multiple": "Allow multiple",
+      "name": "Name",
+      "required": "Required",
+      "type": "Type"
     }
   },
   "Organization": {
@@ -91,7 +110,7 @@
       }
     },
     "tabs": {
-      "resources": "Resources"
+      "metadata": "Fields"
     }
   },
   "Resource": {
