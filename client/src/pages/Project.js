@@ -7,6 +7,8 @@ import uuid from 'react-uuid';
 import { Button, Form } from 'semantic-ui-react';
 import _ from 'underscore';
 import AuthenticationService from '../services/Authentication';
+import i18n from '../i18n/i18n';
+import Metadata from '../constants/Metadata';
 import MetadataList from '../components/MetadataList';
 import Organization from '../transforms/Organization';
 import OrganizationsService from '../services/Organizations';
@@ -120,12 +122,45 @@ const ProjectForm = withTranslation()((props) => {
       >
         <MetadataList
           items={JSON.parse(props.item.metadata || '[]')}
+          isError={props.isError}
           onChange={(items) => props.onSetState({ metadata: JSON.stringify(items) })}
         />
       </SimpleEditPage.Tab>
     </SimpleEditPage>
   );
 });
+
+const ValidateProject = (project) => {
+  const errors = {};
+
+  if (project && project.metadata) {
+    const items = JSON.parse(project.metadata);
+
+    _.each(items, (item, index) => {
+      if (_.isEmpty(item.name)) {
+        _.extend(errors, { [`metadata[${index}][name]`]: i18n.t('Project.errors.metadata.name') });
+      }
+
+      if (_.isEmpty(item.type)) {
+        _.extend(errors, { [`metadata[${index}][type]`]: i18n.t('Project.errors.metadata.type') });
+      }
+
+      if (item.type === Metadata.Types.dropdown && _.isEmpty(item.options)) {
+        _.extend(errors, {
+          [`metadata[${index}][options]`]: i18n.t('Project.errors.metadata.optionsEmpty', { name: item.name })
+        });
+      }
+
+      if (item.type === Metadata.Types.dropdown && _.uniq(item.options).length !== item.options.length) {
+        _.extend(errors, {
+          [`metadata[${index}][options]`]: i18n.t('Project.errors.metadata.optionsDuplicate', { name: item.name })
+        });
+      }
+    });
+  }
+
+  return errors;
+};
 
 const Project: ComponentType<any> = withEditPage(ProjectForm, {
   id: 'projectId',
@@ -139,7 +174,8 @@ const Project: ComponentType<any> = withEditPage(ProjectForm, {
       .save(project)
       .then(({ data }) => data.project)
   ),
-  required: ['name', 'description', 'organization_id']
+  required: ['name', 'description', 'organization_id'],
+  validate: ValidateProject
 });
 
 export default Project;

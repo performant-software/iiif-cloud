@@ -96,6 +96,14 @@
     }
   },
   "Project": {
+    "errors": {
+      "metadata": {
+        "name": "Name is required",
+        "optionsDuplicate": "{{name}}: Dropdowns cannot contain duplicate options",
+        "optionsEmpty": "{{name}}: Dropdown options cannot be empty",
+        "type": "Type is required"
+      }
+    },
     "labels": {
       "apiKey": "API key",
       "bucketName": "AWS S3 bucket",

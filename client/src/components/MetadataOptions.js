@@ -83,16 +83,17 @@ const MetadataOptions: ComponentType<any> = (props: Props) => {
                 onChange={onUpdateOption.bind(this, index)}
                 value={option.value}
                 style={{
+                  marginRight: '0.5em',
                   width: 'unset'
                 }}
               />
               <Button
                 basic
                 color='green'
-                compact
                 icon='checkmark'
                 onClick={onSaveOption.bind(this, index)}
                 type='button'
+                size='tiny'
               />
             </Label>
           )}

@@ -60,6 +60,7 @@ const MetadataList: ComponentType<any> = (props) => {
               }}
             >
               <Form.Input
+                error={props.isError(`metadata[${index}][name]`)}
                 onChange={onUpdateItem.bind(this, index, 'name')}
                 placeholder={t('MetadataList.labels.name')}
                 value={item.name}
@@ -67,6 +68,7 @@ const MetadataList: ComponentType<any> = (props) => {
               />
               <Form.Dropdown
                 clearable
+                error={props.isError(`metadata[${index}][type]`)}
                 onChange={onUpdateItem.bind(this, index, 'type')}
                 options={Metadata.getOptions()}
                 placeholder={t('MetadataList.labels.type')}
