@@ -72,6 +72,7 @@ const SimpleEditPage: ComponentType<any> = (props: Props) => {
         { _.map(tabs, (item) => (
           <Menu.Item
             active={item.key === currentTab}
+            disabled={props.loading || props.saving}
             key={item.key}
             name={item.props.name}
             onClick={() => onTabClick(item)}
@@ -86,6 +87,7 @@ const SimpleEditPage: ComponentType<any> = (props: Props) => {
             <Button
               className={styles.button}
               content={props.t('Common.buttons.save')}
+              disabled={props.loading || props.saving}
               onClick={props.onSave}
               primary
             />
@@ -93,6 +95,7 @@ const SimpleEditPage: ComponentType<any> = (props: Props) => {
               basic
               className={styles.button}
               content={props.t('Common.buttons.cancel')}
+              disabled={props.loading || props.saving}
               onClick={() => navigate(-1)}
             />
           </Menu.Item>
@@ -150,6 +153,7 @@ const SimpleEditPage: ComponentType<any> = (props: Props) => {
             <div>
               <Form
                 error={!_.isEmpty(props.errors)}
+                loading={props.loading || props.saving}
                 noValidate
               >
                 <Message
