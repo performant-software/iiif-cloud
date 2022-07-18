@@ -3,6 +3,8 @@ module Images
     def self.extract(file)
       begin
         data = ::Exif::Data.new(File.open(file.path)).to_h
+        return nil unless data.is_a?(Hash)
+
         encode data
       rescue
         # Do nothing. The image may not contain EXIF data

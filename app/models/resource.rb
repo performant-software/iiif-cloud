@@ -101,8 +101,12 @@ class Resource < ApplicationRecord
     return unless content.attached? && content.image?
 
     content.open do |file|
-      self.exif = JSON.dump(Images::Exif.extract(file))
-      save
+      data = Images::Exif.extract(file)
+
+      unless data.nil?
+        self.exif = JSON.dump(data)
+        save
+      end
     end
   end
 

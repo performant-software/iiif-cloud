@@ -29,6 +29,25 @@ const ResourceForm = withTranslation()((props) => {
   const { projectId } = useParams();
 
   /**
+   * Converts the EXIF data to JSON.
+   *
+   * @type {*}
+   */
+  const exif = useMemo(() => {
+    let value;
+
+    if (props.item.exif) {
+      try {
+        value = JSON.parse(props.item.exif);
+      } catch (e) {
+        // Catch JSON parse exception
+      }
+    }
+
+    return value;
+  }, [props.item.exif]);
+
+  /**
    * Creates the manifest ID based on the blob content.
    *
    * @type {string}
@@ -98,7 +117,7 @@ const ResourceForm = withTranslation()((props) => {
                 onClick={() => setViewer(true)}
               />
             )}
-            { props.item.exif && (
+            { exif && (
               <Button
                 content={props.t('Resource.buttons.exif')}
                 icon='info circle'
@@ -152,9 +171,9 @@ const ResourceForm = withTranslation()((props) => {
             onClose={() => setViewer(false)}
           />
         )}
-        { info && props.item.exif && (
+        { info && exif && (
           <ResourceExifModal
-            exif={JSON.parse(props.item.exif)}
+            exif={exif}
             onClose={() => setInfo(false)}
           />
         )}
