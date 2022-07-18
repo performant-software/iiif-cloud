@@ -8,12 +8,111 @@
       "success": "You've successfully authenticated"
     }
   },
+  "Common": {
+    "buttons": {
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "errors": {
+      "save": "There was an problem saving the record."
+    },
+    "messages": {
+      "save": {
+        "content": "Your changes have been saved.",
+        "header": "Success!"
+      }
+    },
+    "tabs": {
+      "details": "Details",
+      "organizations": "Organizations",
+      "users": "Users"
+    }
+  },
   "Home": {
     "header": "Welcome to Rails-React Template <1>Edit <1>src/App.js</1> and save to reload.</1>"
   },
   "Login": {
     "buttons": {
       "login": "Login"
+    }
+  },
+  "Organization": {
+    "labels": {
+      "location": "Location",
+      "name": "Name"
+    },
+    "users": {
+      "columns": {
+        "email": "Email",
+        "name": "Name"
+      }
+    }
+  },
+  "OrganizationModal": {
+    "labels": {
+      "organization": "Organization"
+    },
+    "title": {
+      "add": "Add Organization",
+      "edit": "Edit Organization"
+    }
+  },
+  "Organizations": {
+    "columns": {
+      "location": "Location",
+      "name": "Name"
+    }
+  },
+  "Routes": {
+    "organizationDetails": "Organization Edit",
+    "organizations": "Organizations",
+    "userDetails": "User Edit",
+    "users": "Users"
+  },
+  "User": {
+    "errors": {
+      "noOrganization": "This user is not part of an organization"
+    },
+    "labels": {
+      "admin": "Administrator",
+      "email": "Email",
+      "name": "Name",
+      "password": "Password",
+      "passwordConfirmation": "Password confirmation"
+    },
+    "organizations": {
+      "columns": {
+        "location": "Location",
+        "name": "Name"
+      }
+    },
+    "password": {
+      "content": "Passwords must be at least eight (8) characters.",
+      "header": "Password Policy"
+    }
+  },
+  "UserModal": {
+    "labels": {
+      "user": "User"
+    },
+    "title": {
+      "add": "Add User",
+      "edit": "Edit User"
+    }
+  },
+  "UserOrganizationModal": {
+    "labels": {
+      "organization": "Organization"
+    },
+    "title": {
+      "add": "Add User Organization"
+    }
+  },
+  "Users": {
+    "columns": {
+      "admin": "Administrator",
+      "email": "Email",
+      "name": "Name"
     }
   }
 }
