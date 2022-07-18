@@ -25,7 +25,7 @@ gem 'pagy', '~> 5.10'
 gem 'rack-cors'
 
 # Resource API
-gem 'resource_api', git: 'https://github.com/performant-software/resource-api.git', tag: 'v0.4.1'
+gem 'resource_api', git: 'https://github.com/performant-software/resource-api.git', tag: 'v0.4.2'
 
 # Use Json Web Token (JWT) for token based authentication
 gem 'jwt'

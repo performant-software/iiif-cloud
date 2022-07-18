@@ -10,8 +10,8 @@ GIT
 
 GIT
   remote: https://github.com/performant-software/resource-api.git
-  revision: fee23a1eacd9fda1d5c4dcaed15a941e12cc214c
-  tag: v0.4.1
+  revision: f1de1653b67fc1d623d7418e92d3bb3134df800e
+  tag: v0.4.2
   specs:
     resource_api (0.1.0)
       pagy (~> 5.10)

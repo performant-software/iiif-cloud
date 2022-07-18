@@ -12,6 +12,8 @@ class Api::ResourcesController < Api::BaseController
   before_action :validate_new_resource, unless: -> { current_user.admin? }, only: :create
   before_action :validate_resource, unless: -> { current_user.admin? }, only: [:update, :destroy]
 
+  protected
+
   def base_query
     subquery = Project.where(Project.arel_table[:id].eq(Resource.arel_table[:project_id]))
 
