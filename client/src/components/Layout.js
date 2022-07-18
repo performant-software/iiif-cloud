@@ -38,9 +38,7 @@ const Layout: ComponentType<any> = () => {
           marginLeft: menuWidth
         }}
       >
-        <Container>
-          <Outlet />
-        </Container>
+        <Outlet />
       </div>
     </div>
   );

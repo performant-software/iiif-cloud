@@ -32,7 +32,7 @@ const Login: ComponentType<any> = () => {
       return <Navigate to='/dashboard' />;
     }
 
-    return <Navigate to='/organizations' />;
+    return <Navigate to='/projects' />;
   }
 
   return (

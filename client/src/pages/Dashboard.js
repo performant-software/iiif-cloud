@@ -1,11 +1,12 @@
 // @flow
 
 import React, { type ComponentType } from 'react';
+import AdminPage from '../components/AdminPage';
 
 const Dashboard: ComponentType<any> = () => (
-  <div>
+  <AdminPage>
     Dashboard
-  </div>
+  </AdminPage>
 );
 
 export default Dashboard;

@@ -3,20 +3,43 @@
 import { useEditContainer } from '@performant-software/shared-components';
 import React, { useCallback, type ComponentType } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import _ from 'underscore';
+import { useTranslation } from 'react-i18next';
 
 type Config = {
   onInitialize: (item: any) => Promise<any>,
   onSave: (item: any) => Promise<any>,
   required?: Array<string>,
-  validate: () => {}
+  resolveValidationError?: (params: any) => any,
+  validate?: () => {}
 };
 
 const withEditPage = (WrappedComponent: ComponentType<any>, config: Config): any => (props: any) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = useParams();
+  const { t } = useTranslation();
 
   let tab;
+
+  /**
+   * Adds the authorization error.
+   *
+   * @type {function(*): {}}
+   */
+  const resolveValidationError = useCallback((params) => {
+    const errors = {};
+
+    if (config.resolveValidationError) {
+      _.extend(errors, config.resolveValidationError(params));
+    }
+
+    if (params.status === 403) {
+      _.extend(errors, { base: t('Common.errors.unauthorized') });
+    }
+
+    return errors;
+  }, [config.resolveValidationError]);
 
   const onSave = useCallback((item) => {
     const { pathname } = location;
@@ -31,8 +54,8 @@ const withEditPage = (WrappedComponent: ComponentType<any>, config: Config): any
   const EditPage = (innerProps) => (
     <WrappedComponent
       {...innerProps}
-      onTabClick={(t) => {
-        tab = t;
+      onTabClick={(newTab) => {
+        tab = newTab;
       }}
     />
   );
@@ -46,6 +69,7 @@ const withEditPage = (WrappedComponent: ComponentType<any>, config: Config): any
       onInitialize={config.onInitialize}
       onSave={onSave}
       required={config.required}
+      resolveValidationError={resolveValidationError}
       validate={config.validate}
     />
   );

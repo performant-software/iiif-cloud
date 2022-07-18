@@ -11,10 +11,16 @@
   "Common": {
     "buttons": {
       "cancel": "Cancel",
-      "save": "Save"
+      "remove": "Remove",
+      "save": "Save",
+      "upload": "Upload"
     },
     "errors": {
-      "save": "There was an problem saving the record."
+      "save": "There was an problem saving the record.",
+      "unauthorized": "You do not have access to this record."
+    },
+    "labels": {
+      "avatar": "Avatar"
     },
     "messages": {
       "save": {
@@ -63,11 +69,34 @@
       "name": "Name"
     }
   },
+  "Project": {
+    "labels": {
+      "apiKey": "API key",
+      "bucketName": "AWS S3 bucket",
+      "description": "Description",
+      "name": "Name",
+      "organization": "Organization"
+    },
+    "messages": {
+      "bucket": {
+        "content": "A bucket on AWS S3 will be created after you save the record.",
+        "header": "AWS S3"
+      }
+    }
+  },
   "Routes": {
     "organizationDetails": "Organization Edit",
     "organizations": "Organizations",
     "userDetails": "User Edit",
     "users": "Users"
+  },
+  "Sidebar": {
+    "labels": {
+      "dashboard": "Dashboard",
+      "organizations": "Organizations",
+      "projects": "Projects",
+      "users": "Users"
+    }
   },
   "User": {
     "errors": {

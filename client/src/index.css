@@ -11,3 +11,13 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Fixing font family for textarea elements */
+.ui.form textarea {
+  font-family: unset;
+}
+
+/* Fixing top margin or ItemList component buttons */
+.item-list > .items > .item .ui.button {
+  margin-top: 0.5em;
+}
