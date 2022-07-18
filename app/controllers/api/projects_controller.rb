@@ -3,7 +3,7 @@ class Api::ProjectsController < Api::BaseController
   search_attributes :name, :description, :uid
 
   # Preloads
-  preloads Project.attachment_preloads
+  preloads Project.attachment_preloads, :organization
 
   # Actions
   before_action :validate_new_project, unless: -> { current_user.admin? }, only: :create
