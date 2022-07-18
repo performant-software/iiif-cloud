@@ -122,6 +122,9 @@
     }
   },
   "Resource": {
+    "errors": {
+      "required": "{{name}} is required"
+    },
     "labels": {
       "content": "Content"
     }

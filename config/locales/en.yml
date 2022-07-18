@@ -37,4 +37,7 @@ en:
         options_duplicate: "Dropdowns cannot contain duplicate options"
         options_empty: "Dropdown options cannot be empty."
         type_empty: "Type cannot be empty"
+    resource:
+      metadata:
+        required: "%{name} is required."
     unauthorized: "You do not have access to this record."

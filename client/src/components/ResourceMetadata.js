@@ -16,12 +16,20 @@ type Item = {
 };
 
 type Props = {
+  isError: (key: string) => boolean,
   items: Array<Item>,
   onChange: (item: any) => void,
   value: any
 };
 
 const ResourceMetadata: ComponentType<any> = (props: Props) => {
+  /**
+   * Returns true if there is a validation error for the passed item.
+   *
+   * @type {function(*): *}
+   */
+  const isError = useCallback((item) => props.isError(`metadata[${item.name}]`), [props.isError]);
+
   /**
    * Changes the value for the passed item.
    *
@@ -42,6 +50,7 @@ const ResourceMetadata: ComponentType<any> = (props: Props) => {
     if (item.type === Metadata.Types.string) {
       rendered = (
         <Form.Input
+          error={isError(item)}
           label={item.name}
           required={item.required}
           onChange={(e, { value }) => onChange(item, value)}
@@ -53,6 +62,7 @@ const ResourceMetadata: ComponentType<any> = (props: Props) => {
     if (item.type === Metadata.Types.number) {
       rendered = (
         <Form.Input
+          error={isError(item)}
           label={item.name}
           required={item.required}
           onChange={(e, { value }) => onChange(item, value)}
@@ -65,6 +75,7 @@ const ResourceMetadata: ComponentType<any> = (props: Props) => {
     if (item.type === Metadata.Types.dropdown) {
       rendered = (
         <Form.Dropdown
+          error={isError(item)}
           label={item.name}
           multiple={item.multiple}
           required={item.required}
@@ -80,6 +91,7 @@ const ResourceMetadata: ComponentType<any> = (props: Props) => {
     if (item.type === Metadata.Types.text) {
       rendered = (
         <Form.TextArea
+          error={isError(item)}
           label={item.name}
           required={item.required}
           onChange={(e, { value }) => onChange(item, value)}
@@ -91,6 +103,7 @@ const ResourceMetadata: ComponentType<any> = (props: Props) => {
     if (item.type === Metadata.Types.date) {
       rendered = (
         <Form.Input
+          error={isError(item)}
           label={item.name}
           required={item.required}
         >
@@ -106,6 +119,7 @@ const ResourceMetadata: ComponentType<any> = (props: Props) => {
       rendered = (
         <Form.Checkbox
           checked={props.value && props.value[item.name]}
+          error={isError(item)}
           label={item.name}
           onChange={(e, { checked }) => onChange(item, checked)}
         />

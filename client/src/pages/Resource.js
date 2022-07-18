@@ -1,6 +1,7 @@
 // @flow
 
 import { FileInputButton, LazyImage } from '@performant-software/semantic-components';
+import { Object as ObjectUtils } from '@performant-software/shared-components';
 import CloverIIIF from '@samvera/clover-iiif';
 import React, {
   useEffect,
@@ -17,6 +18,7 @@ import {
   Modal
 } from 'semantic-ui-react';
 import _ from 'underscore';
+import i18n from '../i18n/i18n';
 import ProjectsService from '../services/Projects';
 import ResourceMetadata from '../components/ResourceMetadata';
 import ResourcesService from '../services/Resources';
@@ -41,15 +43,22 @@ const ResourceForm = withTranslation()((props) => {
   ), [props.item.manifest]);
 
   /**
-   * Sets the project ID on the state.
+   * Loads the related project record.
    */
   useEffect(() => {
-    props.onSetState({ project_id: projectId });
-
     ProjectsService
       .fetchOne(projectId)
       .then(({ data }) => setProject(data.project));
   }, [projectId]);
+
+  /**
+   * Sets the project ID on the state.
+   */
+  useEffect(() => {
+    if (project) {
+      props.onSetState({ project, project_id: project.id });
+    }
+  }, [project]);
 
   return (
     <SimpleEditPage
@@ -123,6 +132,7 @@ const ResourceForm = withTranslation()((props) => {
         />
         { project && (
           <ResourceMetadata
+            isError={props.isError}
             items={JSON.parse(project.metadata)}
             onChange={(obj) => props.onTextInputChange('metadata', null, { value: JSON.stringify(obj) })}
             value={props.item.metadata && JSON.parse(props.item.metadata)}
@@ -150,6 +160,30 @@ const ResourceForm = withTranslation()((props) => {
   );
 });
 
+const ValidateResource = (resource) => {
+  const errors = {};
+
+  if (resource) {
+    const { project } = resource;
+
+    // Validate required metadata
+    if (project && project.metadata) {
+      const items = JSON.parse(project.metadata);
+      const values = JSON.parse(resource.metadata || '{}');
+
+      _.each(items, (item) => {
+        const { name, required } = item;
+
+        if (required && ObjectUtils.isEmpty(values[name])) {
+          _.extend(errors, { [`metadata[${name}]`]: i18n.t('Resource.errors.required', { name }) });
+        }
+      });
+    }
+  }
+
+  return errors;
+};
+
 const Resource: ComponentType<any> = withEditPage(ResourceForm, {
   id: 'resourceId',
   onInitialize: (
@@ -162,7 +196,8 @@ const Resource: ComponentType<any> = withEditPage(ResourceForm, {
       .save(resource)
       .then(({ data }) => data.resource)
   ),
-  required: ['name']
+  required: ['name'],
+  validate: ValidateResource
 });
 
 export default Resource;

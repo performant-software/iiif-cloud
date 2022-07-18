@@ -16,6 +16,9 @@ class Resource < ApplicationRecord
   has_one_attached :content
   has_one_attached :content_converted
 
+  # Validations
+  validate :validate_metadata
+
   # Overload attachable methods
   alias_method :attachable_content_url, :content_url
   alias_method :attachable_content_base_url, :content_base_url
@@ -89,5 +92,22 @@ class Resource < ApplicationRecord
 
   def set_uuid
     self.uuid = SecureRandom.uuid
+  end
+
+  def validate_metadata
+    items = JSON.parse(project.metadata || '[]')
+    return if items.nil? || items.empty?
+
+    values = JSON.parse(self.metadata || '{}')
+
+    items.each do |item|
+      required = item['required'].to_s.to_bool
+      name = item['name']
+      value = values[name]
+
+      if required && (value.nil? || value.empty?)
+        errors.add("metadata[#{name}]", I18n.t('errors.resource.metadata.required', name: name))
+      end
+    end
   end
 end
