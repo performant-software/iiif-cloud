@@ -64,8 +64,13 @@ class Resource < ApplicationRecord
   protected
 
   def after_create
+    # Convert the image to a TIFF
     convert
+
+    # Create the manifest
     create_manifest
+
+    # Extract EXIF data
     extract_exif
   end
 
