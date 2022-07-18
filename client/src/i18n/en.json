@@ -12,6 +12,7 @@
     "buttons": {
       "add": "Add",
       "cancel": "Cancel",
+      "close": "Close",
       "download": "Download",
       "iiif": "View IIIF",
       "remove": "Remove",
@@ -122,12 +123,18 @@
     }
   },
   "Resource": {
+    "buttons": {
+      "exif": "View Info"
+    },
     "errors": {
       "required": "{{name}} is required"
     },
     "labels": {
       "content": "Content"
     }
+  },
+  "ResourceExifModal": {
+    "title": "Resource EXIF Information"
   },
   "Routes": {
     "organizationDetails": "Organization Edit",

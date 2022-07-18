@@ -1,4 +1,4 @@
-module Images
+module Iiif
   class Manifest
     def self.create(resource)
       manifest = to_json('manifest.json')

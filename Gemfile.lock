@@ -116,6 +116,7 @@ GEM
       dotenv (= 2.7.6)
       railties (>= 3.2)
     erubi (1.10.0)
+    exif (2.2.3)
     globalid (1.0.0)
       activesupport (>= 5.0)
     i18n (1.10.0)
@@ -218,6 +219,7 @@ DEPENDENCIES
   controlled_vocabulary!
   debug
   dotenv-rails
+  exif (~> 2.2.3)
   jwt
   mini_magick (~> 4.11)
   pagy (~> 5.10)

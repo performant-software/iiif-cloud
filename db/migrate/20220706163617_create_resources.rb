@@ -3,8 +3,8 @@ class CreateResources < ActiveRecord::Migration[7.0]
     create_table :resources do |t|
       t.references :project, null: false, foreign_key: true, index: true
       t.string :name
-      t.jsonb :exif
-      t.jsonb :metadata
+      t.text :exif
+      t.text :metadata
 
       t.timestamps
     end

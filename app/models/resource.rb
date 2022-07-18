@@ -46,7 +46,7 @@ class Resource < ApplicationRecord
   def content_preview_url
     return attachable_content_preview_url unless content.image? && content_converted.attached?
 
-    "#{content_base_url}/full/500,/0/default.jpg"
+    "#{content_base_url}/full/^500,/0/default.jpg"
   end
 
   def content_thumbnail_url
@@ -66,6 +66,7 @@ class Resource < ApplicationRecord
   def after_create
     convert
     create_manifest
+    extract_exif
   end
 
   private
@@ -86,8 +87,18 @@ class Resource < ApplicationRecord
   end
 
   def create_manifest
-    self.manifest = Images::Manifest.create(self)
+    self.manifest = Iiif::Manifest.create(self)
     save
+  end
+
+
+  def extract_exif
+    return unless content.attached? && content.image?
+
+    content.open do |file|
+      self.exif = JSON.dump(Images::Exif.extract(file))
+      save
+    end
   end
 
   def set_uuid

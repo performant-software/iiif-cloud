@@ -2,7 +2,6 @@
 
 import { FileInputButton, LazyImage } from '@performant-software/semantic-components';
 import { Object as ObjectUtils } from '@performant-software/shared-components';
-import CloverIIIF from '@samvera/clover-iiif';
 import React, {
   useEffect,
   useMemo,
@@ -11,21 +10,19 @@ import React, {
 } from 'react';
 import { withTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import {
-  Button,
-  Form,
-  Icon,
-  Modal
-} from 'semantic-ui-react';
+import { Button, Form, Icon } from 'semantic-ui-react';
 import _ from 'underscore';
 import i18n from '../i18n/i18n';
 import ProjectsService from '../services/Projects';
+import ResourceExifModal from '../components/ResourceExifModal';
 import ResourceMetadata from '../components/ResourceMetadata';
+import ResourceViewerModal from '../components/ResourceViewerModal';
 import ResourcesService from '../services/Resources';
 import SimpleEditPage from '../components/SimpleEditPage';
 import withEditPage from '../hooks/EditPage';
 
 const ResourceForm = withTranslation()((props) => {
+  const [info, setInfo] = useState(false);
   const [project, setProject] = useState();
   const [viewer, setViewer] = useState(false);
 
@@ -101,6 +98,17 @@ const ResourceForm = withTranslation()((props) => {
                 onClick={() => setViewer(true)}
               />
             )}
+            { props.item.exif && (
+              <Button
+                content={props.t('Resource.buttons.exif')}
+                icon='info circle'
+                onClick={() => setInfo(true)}
+                style={{
+                  backgroundColor: '#219ebc',
+                  color: '#FFFFFF'
+                }}
+              />
+            )}
             { props.item.content_download_url && (
               <a
                 className='ui button green'
@@ -138,22 +146,17 @@ const ResourceForm = withTranslation()((props) => {
             value={props.item.metadata && JSON.parse(props.item.metadata)}
           />
         )}
-        { viewer && props.item.manifest && (
-          <Modal
-            centered={false}
-            closeIcon
+        { viewer && manifestId && (
+          <ResourceViewerModal
+            manifestId={manifestId}
             onClose={() => setViewer(false)}
-            open={viewer}
-          >
-            <Modal.Content>
-              <CloverIIIF
-                manifestId={manifestId}
-                options={{
-                  showIIIFBadge: false
-                }}
-              />
-            </Modal.Content>
-          </Modal>
+          />
+        )}
+        { info && props.item.exif && (
+          <ResourceExifModal
+            exif={JSON.parse(props.item.exif)}
+            onClose={() => setInfo(false)}
+          />
         )}
       </SimpleEditPage.Tab>
     </SimpleEditPage>
