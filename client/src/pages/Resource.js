@@ -105,7 +105,7 @@ const ResourceForm = withTranslation()((props) => {
                   props.onSetState({
                     content: file,
                     content_url: url,
-                    content_preview_url: url,
+                    content_preview_url: file.type.startsWith('image') ? url : undefined,
                     name: file.name,
                     content_type: file.type
                   });

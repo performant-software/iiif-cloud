@@ -11,8 +11,8 @@
     "flow": "flow"
   },
   "dependencies": {
-    "@performant-software/semantic-components": "^0.5.10",
-    "@performant-software/shared-components": "^0.5.10",
+    "@performant-software/semantic-components": "^0.5.11",
+    "@performant-software/shared-components": "^0.5.11",
     "@samvera/clover-iiif": "1.6.10",
     "classnames": "^2.3.1",
     "i18next": "^21.8.0",
