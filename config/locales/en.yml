@@ -40,4 +40,5 @@ en:
     resource:
       metadata:
         required: "%{name} is required."
+    unauthenticated: "You must be authenticate to access."
     unauthorized: "You do not have access to this record."

@@ -21,10 +21,17 @@ class Api::BaseController < Api::ResourceController
   def authenticate_request
     header = request.headers['Authorization']
     header = header.split(' ').last if header
+    api_key = request.headers['X-API-KEY']
 
     begin
-      @decoded = JsonWebToken.decode(header)
-      @current_user = User.find(@decoded[:user_id])
+      if header
+        @decoded = JsonWebToken.decode(header)
+        @current_user = User.find(@decoded[:user_id])
+      elsif api_key
+        @current_user = User.find_by_api_key(api_key)
+      else
+        render json: { errors: I18n.t('errors.unauthenticated') }, status: :unauthorized
+      end
     rescue ActiveRecord::RecordNotFound => e
       render json: { errors: e.message }, status: :unauthorized
     rescue JWT::DecodeError => e
