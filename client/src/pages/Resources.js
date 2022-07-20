@@ -1,9 +1,10 @@
 // @flow
 
-import { ItemList, FileUploadModal, LazyImage } from '@performant-software/semantic-components';
+import { ItemList, FileUploadModal } from '@performant-software/semantic-components';
 import React, { useCallback, type ComponentType } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import FileUpload from '../components/FileUpload';
+import ResourceImage from '../components/ResourceImage';
 import ResourcesService from '../services/Resources';
 import { useTranslation } from 'react-i18next';
 
@@ -51,7 +52,8 @@ const Resources: ComponentType<any> = () => {
               name: file.name,
               project_id: projectId,
               content: file,
-              content_url: URL.createObjectURL(file)
+              content_url: URL.createObjectURL(file),
+              content_type: file.type
             })}
             onSave={onUpload}
             required={[]}
@@ -64,8 +66,10 @@ const Resources: ComponentType<any> = () => {
       perPageOptions={[10, 25, 50, 100]}
       renderHeader={(resource) => resource.name}
       renderImage={(resource) => (
-        <LazyImage
+        <ResourceImage
+          contentType={resource.content_type}
           dimmable={false}
+          preview={resource.content_thumbnail_url}
           src={resource.content_thumbnail_url}
         />
       )}

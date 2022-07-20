@@ -64,7 +64,14 @@ module Attachable
         attachment = self.send(name)
         return nil unless attachment.attached?
 
-        "#{self.send("#{name}_base_url")}/full/full/0/default.jpg"
+        url_for(attachment)
+      end
+
+      define_method("#{name}_iiif_url") do |page_number = nil|
+        attachment = self.send(name)
+        return nil unless attachment.attached?
+
+        "#{self.send("#{name}_base_url")}#{page_number.nil? ? '' : ";#{page_number}"}/full/max/0/default.jpg"
       end
 
       define_method("#{name}_base_url") do
@@ -92,7 +99,7 @@ module Attachable
         attachment = self.send(name)
         return nil unless attachment.attached?
 
-        "#{self.send("#{name}_base_url")}/square/250,250/0/default.jpg"
+        "#{self.send("#{name}_base_url")}/square/^250,250/0/default.jpg"
       end
     end
 

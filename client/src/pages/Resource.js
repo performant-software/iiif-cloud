@@ -15,6 +15,7 @@ import _ from 'underscore';
 import i18n from '../i18n/i18n';
 import ProjectsService from '../services/Projects';
 import ResourceExifModal from '../components/ResourceExifModal';
+import ResourceImage from '../components/ResourceImage';
 import ResourceMetadata from '../components/ResourceMetadata';
 import ResourceViewerModal from '../components/ResourceViewerModal';
 import ResourcesService from '../services/Resources';
@@ -87,7 +88,8 @@ const ResourceForm = withTranslation()((props) => {
         <Form.Input
           label={props.t('Resource.labels.content')}
         >
-          <LazyImage
+          <ResourceImage
+            contentType={props.item.content_type}
             preview={props.item.content_preview_url}
             src={props.item.content_url}
             size='medium'
@@ -104,7 +106,8 @@ const ResourceForm = withTranslation()((props) => {
                     content: file,
                     content_url: url,
                     content_preview_url: url,
-                    name: file.name
+                    name: file.name,
+                    content_type: file.type
                   });
                 }}
               />
@@ -145,10 +148,16 @@ const ResourceForm = withTranslation()((props) => {
                 color='red'
                 content={props.t('Common.buttons.remove')}
                 icon='times'
-                onClick={() => props.onSetState({ content: null, content_url: null, content_remove: true })}
+                onClick={() => props.onSetState({
+                  content: null,
+                  content_preview_url: null,
+                  content_url: null,
+                  content_remove: true,
+                  content_type: null
+                })}
               />
             )}
-          </LazyImage>
+          </ResourceImage>
         </Form.Input>
         <Form.Input
           error={props.isError('name')}

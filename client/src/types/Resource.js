@@ -9,7 +9,9 @@ export type Resource = {
   content_download_url: string,
   content_preview_url: string,
   content_thumbnail_url: string,
+  content_type: string,
   exif: any,
+  manifest: string,
   metadata: any,
   project_id: number,
   project: Project
