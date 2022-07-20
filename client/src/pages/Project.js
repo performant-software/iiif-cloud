@@ -3,7 +3,6 @@
 import { AssociatedDropdown, FileInputButton, LazyImage } from '@performant-software/semantic-components';
 import React, { type ComponentType, useEffect } from 'react';
 import { withTranslation } from 'react-i18next';
-import uuid from 'react-uuid';
 import { Button, Form } from 'semantic-ui-react';
 import _ from 'underscore';
 import AuthenticationService from '../services/Authentication';
@@ -99,21 +98,6 @@ const ProjectForm = withTranslation()((props) => {
           onChange={props.onTextInputChange.bind(this, 'description')}
           required={props.isRequired('description')}
           value={props.item.description}
-        />
-        <Form.Input
-          action={{
-            color: 'blue',
-            icon: 'refresh',
-            content: 'Refresh',
-            onClick: () => props.onSetState({
-              api_key: uuid()
-            })
-          }}
-          error={props.isError('api_key')}
-          label={props.t('Project.labels.apiKey')}
-          onChange={props.onTextInputChange.bind(this, 'api_key')}
-          required={props.isRequired('api_key')}
-          value={props.item.api_key}
         />
       </SimpleEditPage.Tab>
       <SimpleEditPage.Tab

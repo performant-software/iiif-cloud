@@ -4,6 +4,7 @@ import { EmbeddedList, FileInputButton, LazyImage } from '@performant-software/s
 import type { EditContainerProps } from '@performant-software/shared-components/types';
 import React, { type ComponentType, useEffect } from 'react';
 import { withTranslation } from 'react-i18next';
+import uuid from 'react-uuid';
 import { Button, Form, Message } from 'semantic-ui-react';
 import _ from 'underscore';
 import AuthenticationService from '../services/Authentication';
@@ -92,6 +93,22 @@ const UserForm = withTranslation()((props: EditContainerProps & Translateable) =
             onChange={props.onCheckboxInputChange.bind(this, 'admin')}
           />
         )}
+        <Form.Input
+          action={{
+            color: 'blue',
+            icon: 'refresh',
+            content: 'Refresh',
+            onClick: () => props.onSetState({
+              api_key: uuid()
+            })
+          }}
+          error={props.isError('api_key')}
+          label={props.t('Project.labels.apiKey')}
+          onChange={props.onTextInputChange.bind(this, 'api_key')}
+          required={props.isRequired('api_key')}
+          value={props.item.api_key}
+        />
+
         <Message
           content={props.t('User.password.content')}
           header={props.t('User.password.header')}

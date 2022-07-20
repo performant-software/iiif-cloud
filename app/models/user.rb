@@ -12,7 +12,8 @@ class User < ApplicationRecord
   accepts_nested_attributes_for :user_organizations, allow_destroy: true
 
   # Resourceable parameters
-  allow_params :name, :email, :admin, :avatar, :password, :password_confirmation, user_organizations_attributes: [:id, :organization_id, :_destroy]
+  allow_params :name, :email, :admin, :api_key, :avatar, :password, :password_confirmation,
+               user_organizations_attributes: [:id, :organization_id, :_destroy]
 
   # ActiveStorage
   has_one_attached :avatar

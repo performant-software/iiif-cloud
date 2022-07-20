@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_07_15_125127) do
+ActiveRecord::Schema[7.0].define(version: 2022_07_20_195958) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -80,7 +80,6 @@ ActiveRecord::Schema[7.0].define(version: 2022_07_15_125127) do
     t.string "uid"
     t.string "name"
     t.text "description"
-    t.string "api_key"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.text "metadata"
@@ -90,12 +89,12 @@ ActiveRecord::Schema[7.0].define(version: 2022_07_15_125127) do
   create_table "resources", force: :cascade do |t|
     t.bigint "project_id", null: false
     t.string "name"
-    t.jsonb "exif"
-    t.jsonb "metadata"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "uuid"
     t.text "manifest"
+    t.text "metadata"
+    t.text "exif"
     t.index ["project_id"], name: "index_resources_on_project_id"
   end
 
@@ -115,6 +114,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_07_15_125127) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "admin", default: false
+    t.string "api_key"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
