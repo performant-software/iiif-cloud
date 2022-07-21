@@ -19,8 +19,6 @@ class Api::BaseController < Api::ResourceController
   end
 
   def check_authorization(organization_id)
-    puts current_user.email
-    puts organization_id
     deny_access unless current_user.has_access?(organization_id)
   end
 
