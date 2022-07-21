@@ -99,14 +99,16 @@ const ProjectForm = withTranslation()((props) => {
           required={props.isRequired('description')}
           value={props.item.description}
         />
-        <Form.Input
-          error={props.isError('uuid')}
-          label={props.t('Project.labels.uuid')}
-          onChange={props.onTextInputChange.bind(this, 'uuid')}
-          readOnly
-          required={props.isRequired('uuid')}
-          value={props.item.uuid}
-        />
+        <div
+          className='field'
+        >
+          <label>{ props.t('Project.labels.uuid') }</label>
+          <div
+            className='ui input'
+          >
+            { props.item.uuid }
+          </div>
+        </div>
       </SimpleEditPage.Tab>
       <SimpleEditPage.Tab
         key='metadata'
