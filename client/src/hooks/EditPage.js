@@ -7,6 +7,7 @@ import _ from 'underscore';
 import { useTranslation } from 'react-i18next';
 
 type Config = {
+  id: string,
   onInitialize: (item: any) => Promise<any>,
   onSave: (item: any) => Promise<any>,
   required?: Array<string>,
@@ -17,8 +18,10 @@ type Config = {
 const withEditPage = (WrappedComponent: ComponentType<any>, config: Config): any => (props: any) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { id } = useParams();
   const { t } = useTranslation();
+
+  const params = useParams();
+  const id = params[config.id];
 
   let tab;
 
@@ -27,14 +30,14 @@ const withEditPage = (WrappedComponent: ComponentType<any>, config: Config): any
    *
    * @type {function(*): {}}
    */
-  const resolveValidationError = useCallback((params) => {
+  const resolveValidationError = useCallback((errorProps) => {
     const errors = {};
 
     if (config.resolveValidationError) {
-      _.extend(errors, config.resolveValidationError(params));
+      _.extend(errors, config.resolveValidationError(errorProps));
     }
 
-    if (params.status === 403) {
+    if (errorProps.status === 403) {
       _.extend(errors, { base: t('Common.errors.unauthorized') });
     }
 

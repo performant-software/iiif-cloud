@@ -25,7 +25,7 @@ gem 'pagy', '~> 5.10'
 gem 'rack-cors'
 
 # Resource API
-gem 'resource_api', git: 'https://github.com/performant-software/resource-api.git', tag: 'v0.4.1'
+gem 'resource_api', git: 'https://github.com/performant-software/resource-api.git', tag: 'v0.4.2'
 
 # Use Json Web Token (JWT) for token based authentication
 gem 'jwt'
@@ -38,6 +38,15 @@ gem 'controlled_vocabulary', git: 'https://github.com/performant-software/contro
 
 # Active storage service
 gem 'aws-sdk-s3'
+
+# Image processing
+gem 'mini_magick', '~> 4.11'
+
+# EXIF data
+gem 'exif', '~> 2.2.3'
+
+# HTTP requests
+gem 'httparty', '~> 0.17.3'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

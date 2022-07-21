@@ -67,11 +67,39 @@ module Attachable
         url_for(attachment)
       end
 
+      define_method("#{name}_iiif_url") do |page_number = nil|
+        attachment = self.send(name)
+        return nil unless attachment.attached?
+
+        "#{self.send("#{name}_base_url")}#{page_number.nil? ? '' : ";#{page_number}"}/full/max/0/default.jpg"
+      end
+
+      define_method("#{name}_base_url") do
+        attachment = self.send(name)
+        return nil unless attachment.attached?
+
+        "#{ENV['IIIF_HOST']}/iiif/3/#{attachment.key}"
+      end
+
       define_method("#{name}_download_url") do
         attachment = self.send(name)
         return nil unless attachment.attached?
 
-        attachment.service_url({ disposition: 'attachment' })
+        attachment.url(disposition: 'attachment')
+      end
+
+      define_method("#{name}_preview_url") do
+        attachment = self.send(name)
+        return nil unless attachment.attached?
+
+        "#{self.send("#{name}_base_url")}/full/^500,/0/default.jpg"
+      end
+
+      define_method("#{name}_thumbnail_url") do
+        attachment = self.send(name)
+        return nil unless attachment.attached?
+
+        "#{self.send("#{name}_base_url")}/square/^250,250/0/default.jpg"
       end
     end
 

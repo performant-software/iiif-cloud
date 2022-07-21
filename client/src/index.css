@@ -21,3 +21,13 @@ code {
 .item-list > .items > .item .ui.button {
   margin-top: 0.5em;
 }
+
+.ui.items > .file-upload.item > .image > img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+}
+
+.file-upload-modal > .toaster.ui.message {
+  width: 60%;
+}

@@ -71,6 +71,7 @@ const OrganizationForm = withTranslation()((props) => (
 ));
 
 const Organization: ComponentType<any> = withEditPage(OrganizationForm, {
+  id: 'organizationId',
   onInitialize: (id) => (
     OrganizationsService
       .fetchOne(id)

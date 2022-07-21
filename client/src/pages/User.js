@@ -10,8 +10,8 @@ import AuthenticationService from '../services/Authentication';
 import i18n from '../i18n/i18n';
 import OrganizationModal from '../components/OrganizationModal';
 import SimpleEditPage from '../components/SimpleEditPage';
-import UsersService from '../services/Users';
 import type { Translateable } from '../types/Translateable';
+import UsersService from '../services/Users';
 import withEditPage from '../hooks/EditPage';
 
 const UserForm = withTranslation()((props: EditContainerProps & Translateable) => {
@@ -40,7 +40,7 @@ const UserForm = withTranslation()((props: EditContainerProps & Translateable) =
           label={props.t('Common.labels.avatar')}
         >
           <LazyImage
-            preview={props.item.avatar_url}
+            preview={props.item.avatar_preview_url}
             src={props.item.avatar_url}
             size='medium'
           >
@@ -51,7 +51,12 @@ const UserForm = withTranslation()((props: EditContainerProps & Translateable) =
                 icon='cloud upload'
                 onSelection={(files) => {
                   const file = _.first(files);
-                  props.onSetState({ avatar: file, avatar_url: URL.createObjectURL(file) });
+                  const url = URL.createObjectURL(file);
+                  props.onSetState({
+                    avatar: file,
+                    avatar_url: url,
+                    avatar_preview_url: url
+                  });
                 }}
               />
             )}
@@ -157,6 +162,7 @@ const ValidateUser = (user) => {
 };
 
 const User: ComponentType<any> = withEditPage(UserForm, {
+  id: 'userId',
   onInitialize: (id) => (
     UsersService
       .fetchOne(id)

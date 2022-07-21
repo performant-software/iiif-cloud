@@ -10,7 +10,11 @@
   },
   "Common": {
     "buttons": {
+      "add": "Add",
       "cancel": "Cancel",
+      "close": "Close",
+      "download": "Download",
+      "iiif": "View IIIF",
       "remove": "Remove",
       "save": "Save",
       "upload": "Upload"
@@ -28,6 +32,11 @@
         "header": "Success!"
       }
     },
+    "sort": {
+      "created": "Date created",
+      "name": "Name",
+      "updated": "Date updated"
+    },
     "tabs": {
       "details": "Details",
       "organizations": "Organizations",
@@ -40,6 +49,24 @@
   "Login": {
     "buttons": {
       "login": "Login"
+    }
+  },
+  "Metadata": {
+    "types": {
+      "checkbox": "Checkbox",
+      "date": "Date",
+      "dropdown": "Dropdown",
+      "number": "Number",
+      "string": "String",
+      "text": "Text"
+    }
+  },
+  "MetadataList": {
+    "labels": {
+      "multiple": "Allow multiple",
+      "name": "Name",
+      "required": "Required",
+      "type": "Type"
     }
   },
   "Organization": {
@@ -70,6 +97,14 @@
     }
   },
   "Project": {
+    "errors": {
+      "metadata": {
+        "name": "Name is required",
+        "optionsDuplicate": "{{name}}: Dropdowns cannot contain duplicate options",
+        "optionsEmpty": "{{name}}: Dropdown options cannot be empty",
+        "type": "Type is required"
+      }
+    },
     "labels": {
       "apiKey": "API key",
       "bucketName": "AWS S3 bucket",
@@ -82,7 +117,24 @@
         "content": "A bucket on AWS S3 will be created after you save the record.",
         "header": "AWS S3"
       }
+    },
+    "tabs": {
+      "metadata": "Fields"
     }
+  },
+  "Resource": {
+    "buttons": {
+      "exif": "View Info"
+    },
+    "errors": {
+      "required": "{{name}} is required"
+    },
+    "labels": {
+      "content": "Content"
+    }
+  },
+  "ResourceExifModal": {
+    "title": "Resource EXIF Information"
   },
   "Routes": {
     "organizationDetails": "Organization Edit",
@@ -93,8 +145,10 @@
   "Sidebar": {
     "labels": {
       "dashboard": "Dashboard",
+      "details": "Details",
       "organizations": "Organizations",
       "projects": "Projects",
+      "resources": "Resources",
       "users": "Users"
     }
   },

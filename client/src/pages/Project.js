@@ -4,14 +4,17 @@ import { AssociatedDropdown, FileInputButton, LazyImage } from '@performant-soft
 import React, { type ComponentType, useEffect } from 'react';
 import { withTranslation } from 'react-i18next';
 import uuid from 'react-uuid';
-import { Button, Form, Message } from 'semantic-ui-react';
+import { Button, Form } from 'semantic-ui-react';
+import _ from 'underscore';
+import AuthenticationService from '../services/Authentication';
+import i18n from '../i18n/i18n';
+import Metadata from '../constants/Metadata';
+import MetadataList from '../components/MetadataList';
 import Organization from '../transforms/Organization';
 import OrganizationsService from '../services/Organizations';
 import ProjectsService from '../services/Projects';
 import SimpleEditPage from '../components/SimpleEditPage';
 import withEditPage from '../hooks/EditPage';
-import AuthenticationService from '../services/Authentication';
-import _ from 'underscore';
 
 const ProjectForm = withTranslation()((props) => {
   /**
@@ -39,7 +42,7 @@ const ProjectForm = withTranslation()((props) => {
           label={props.t('Common.labels.avatar')}
         >
           <LazyImage
-            preview={props.item.avatar_url}
+            preview={props.item.avatar_preview_url}
             src={props.item.avatar_url}
             size='medium'
           >
@@ -50,7 +53,12 @@ const ProjectForm = withTranslation()((props) => {
                 icon='cloud upload'
                 onSelection={(files) => {
                   const file = _.first(files);
-                  props.onSetState({ avatar: file, avatar_url: URL.createObjectURL(file) });
+                  const url = URL.createObjectURL(file);
+                  props.onSetState({
+                    avatar: file,
+                    avatar_url: url,
+                    avatar_preview_url: url
+                  });
                 }}
               />
             )}
@@ -108,11 +116,54 @@ const ProjectForm = withTranslation()((props) => {
           value={props.item.api_key}
         />
       </SimpleEditPage.Tab>
+      <SimpleEditPage.Tab
+        key='metadata'
+        name={props.t('Project.tabs.metadata')}
+      >
+        <MetadataList
+          items={JSON.parse(props.item.metadata || '[]')}
+          isError={props.isError}
+          onChange={(items) => props.onSetState({ metadata: JSON.stringify(items) })}
+        />
+      </SimpleEditPage.Tab>
     </SimpleEditPage>
   );
 });
 
+const ValidateProject = (project) => {
+  const errors = {};
+
+  if (project && project.metadata) {
+    const items = JSON.parse(project.metadata);
+
+    _.each(items, (item, index) => {
+      if (_.isEmpty(item.name)) {
+        _.extend(errors, { [`metadata[${index}][name]`]: i18n.t('Project.errors.metadata.name') });
+      }
+
+      if (_.isEmpty(item.type)) {
+        _.extend(errors, { [`metadata[${index}][type]`]: i18n.t('Project.errors.metadata.type') });
+      }
+
+      if (item.type === Metadata.Types.dropdown && _.isEmpty(item.options)) {
+        _.extend(errors, {
+          [`metadata[${index}][options]`]: i18n.t('Project.errors.metadata.optionsEmpty', { name: item.name })
+        });
+      }
+
+      if (item.type === Metadata.Types.dropdown && _.uniq(item.options).length !== item.options.length) {
+        _.extend(errors, {
+          [`metadata[${index}][options]`]: i18n.t('Project.errors.metadata.optionsDuplicate', { name: item.name })
+        });
+      }
+    });
+  }
+
+  return errors;
+};
+
 const Project: ComponentType<any> = withEditPage(ProjectForm, {
+  id: 'projectId',
   onInitialize: (
     (id) => ProjectsService
       .fetchOne(id)
@@ -123,7 +174,8 @@ const Project: ComponentType<any> = withEditPage(ProjectForm, {
       .save(project)
       .then(({ data }) => data.project)
   ),
-  required: ['name', 'description', 'organization_id']
+  required: ['name', 'description', 'organization_id'],
+  validate: ValidateProject
 });
 
 export default Project;

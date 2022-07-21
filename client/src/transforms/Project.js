@@ -27,7 +27,8 @@ class Project extends FormDataTransform {
       'name',
       'description',
       'api_key',
-      'organization_id'
+      'organization_id',
+      'metadata'
     ];
   }
 

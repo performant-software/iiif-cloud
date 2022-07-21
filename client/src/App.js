@@ -11,13 +11,15 @@ import {
 import Layout from './components/Layout';
 import AuthenticatedRoute from './components/AuthenticatedRoute';
 import Dashboard from './pages/Dashboard';
-import Organizations from './pages/Organizations';
-import Users from './pages/Users';
 import Login from './pages/Login';
 import Organization from './pages/Organization';
-import Projects from './pages/Projects';
-import User from './pages/User';
+import Organizations from './pages/Organizations';
 import Project from './pages/Project';
+import Projects from './pages/Projects';
+import Resource from './pages/Resource';
+import Resources from './pages/Resources';
+import User from './pages/User';
+import Users from './pages/Users';
 
 const App: ComponentType<any> = useDragDrop(() => (
   <Router>
@@ -49,20 +51,44 @@ const App: ComponentType<any> = useDragDrop(() => (
         />
         <Route
           element={<Organization />}
-          path='/organizations/:id'
+          path='/organizations/:organizationId'
         />
         <Route
-          element={<Projects />}
           path='/projects'
-        />
-        <Route
-          element={<Project />}
-          path='/projects/new'
-        />
-        <Route
-          element={<Project />}
-          path='/projects/:id'
-        />
+        >
+          <Route
+            element={<Projects />}
+            index
+          />
+          <Route
+            element={<Project />}
+            path='new'
+          />
+          <Route
+            path=':projectId'
+          >
+            <Route
+              element={<Project />}
+              index
+            />
+            <Route
+              path='resources'
+            >
+              <Route
+                element={<Resources />}
+                index
+              />
+              <Route
+                element={<Resource />}
+                path='new'
+              />
+              <Route
+                element={<Resource />}
+                path=':resourceId'
+              />
+            </Route>
+          </Route>
+        </Route>
         <Route
           element={<Users />}
           path='/users'
@@ -73,7 +99,7 @@ const App: ComponentType<any> = useDragDrop(() => (
         />
         <Route
           element={<User />}
-          path='/users/:id'
+          path='/users/:userId'
         />
       </Route>
       <Route

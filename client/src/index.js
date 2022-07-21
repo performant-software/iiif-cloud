@@ -1,7 +1,7 @@
 // @flow
 
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import ReactDOM from 'react-dom';
 import App from './App';
 
 // Configuration
@@ -12,8 +12,10 @@ import './i18n/i18n';
 import '@performant-software/shared-components/build/main.css';
 import '@performant-software/semantic-components/build/main.css';
 import '@performant-software/semantic-components/build/semantic-ui.css';
+import 'react-calendar/dist/Calendar.css';
 import './index.css';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-
-root.render(<App />);
+ReactDOM.render(
+  <App />,
+  document.getElementById('root')
+);

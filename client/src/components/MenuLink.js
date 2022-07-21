@@ -11,12 +11,14 @@ import _ from 'underscore';
 
 type Props = {
   children?: Node | (active: boolean) => Node,
+  parent?: boolean,
   to: string
 };
 
 const MenuLink: ComponentType<any> = (props: Props) => {
-  const { pathname } = useResolvedPath(props.to);
-  const active = useMatch({ path: pathname, end: false });
+  const url = `${props.to}${props.parent ? '/*' : ''}`;
+  const { pathname } = useResolvedPath(url);
+  const active = useMatch({ path: pathname, end: true });
 
   return (
     <Menu.Item

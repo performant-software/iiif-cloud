@@ -4,6 +4,9 @@ Rails.application.routes.draw do
   namespace :api do
     resources :organizations
     resources :projects
+    resources :resources do
+      post :upload, on: :collection
+    end
     resources :users
 
     # Authentication
