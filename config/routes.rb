@@ -17,4 +17,10 @@ Rails.application.routes.draw do
       !request.xhr? && request.format.html?
     end
   end
+
+  namespace :public do
+    resources :resources, only: [:create, :show, :destroy] do
+      post :upload, on: :collection
+    end
+  end
 end
