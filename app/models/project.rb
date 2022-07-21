@@ -1,6 +1,7 @@
 class Project < ApplicationRecord
   # Includes
   include Attachable
+  include Identifiable
 
   # Relationships
   belongs_to :organization
