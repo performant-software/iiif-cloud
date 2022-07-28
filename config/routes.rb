@@ -14,9 +14,7 @@ Rails.application.routes.draw do
   end
 
   namespace :public do
-    resources :resources, only: [:create, :show, :destroy] do
-      post :upload, on: :collection
-    end
+    resources :resources, only: [:create, :show, :destroy, :update]
   end
 
   # Default route for static front-end
