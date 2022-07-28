@@ -1,6 +1,7 @@
 class Resource < ApplicationRecord
   # Includes
   include Attachable
+  include Identifiable
 
   # Relationships
   belongs_to :project
@@ -9,7 +10,6 @@ class Resource < ApplicationRecord
   allow_params :project_id, :name, :metadata, :content
 
   # Callbacks
-  before_create :set_uuid
   after_create_commit :after_create
 
   # ActiveStorage
@@ -90,10 +90,6 @@ class Resource < ApplicationRecord
         save
       end
     end
-  end
-
-  def set_uuid
-    self.uuid = SecureRandom.uuid
   end
 
   def validate_metadata

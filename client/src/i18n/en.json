@@ -110,7 +110,8 @@
       "bucketName": "AWS S3 bucket",
       "description": "Description",
       "name": "Name",
-      "organization": "Organization"
+      "organization": "Organization",
+      "uuid": "Unique identifier"
     },
     "messages": {
       "bucket": {

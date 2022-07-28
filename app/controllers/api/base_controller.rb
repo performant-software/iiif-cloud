@@ -4,20 +4,6 @@ class Api::BaseController < Api::ResourceController
 
   protected
 
-  def check_authorization(organization_id)
-    deny_access unless current_user.has_access?(organization_id)
-  end
-
-  def current_user
-    @current_user
-  end
-
-  def deny_access
-    render json: { errors: [I18n.t('errors.unauthorized')] }, status: :forbidden
-  end
-
-  private
-
   def authenticate_request
     header = request.headers['Authorization']
     header = header.split(' ').last if header
@@ -30,5 +16,17 @@ class Api::BaseController < Api::ResourceController
     rescue JWT::DecodeError => e
       render json: { errors: e.message }, status: :unauthorized
     end
+  end
+
+  def check_authorization(organization_id)
+    deny_access unless current_user.has_access?(organization_id)
+  end
+
+  def current_user
+    @current_user
+  end
+
+  def deny_access
+    render json: { errors: [I18n.t('errors.unauthorized')] }, status: :forbidden
   end
 end

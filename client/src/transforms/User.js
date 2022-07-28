@@ -26,7 +26,8 @@ class User extends FormDataTransform {
     return [
       'admin',
       'name',
-      'email'
+      'email',
+      'api_key'
     ];
   }
 
