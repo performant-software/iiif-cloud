@@ -36,7 +36,7 @@ module Iiif
       elsif resource.video?
         type = 'Video'
       elsif resource.audio?
-        type = 'Audio'
+        type = 'Sound'
       end
 
       annotation['body']['id'] = id
