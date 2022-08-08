@@ -1,7 +1,7 @@
 // @flow
 
 import { LazyIIIF } from '@performant-software/semantic-components';
-import { Object as ObjectUtils } from '@performant-software/shared-components';
+import { IIIF as IIIFUtils, Object as ObjectUtils } from '@performant-software/shared-components';
 import React, {
   useEffect,
   useMemo,
@@ -50,11 +50,7 @@ const ResourceForm = withTranslation()((props) => {
    *
    * @type {string}
    */
-  const manifest = useMemo(() => (
-    URL.createObjectURL(new Blob([props.item.manifest], {
-      type: 'application/ld+json'
-    }))
-  ), [props.item.manifest]);
+  const manifest = useMemo(() => IIIFUtils.createManifestURL(props.item.manifest), [props.item.manifest]);
 
   /**
    * Loads the related project record.

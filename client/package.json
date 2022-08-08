@@ -11,8 +11,8 @@
     "flow": "flow"
   },
   "dependencies": {
-    "@performant-software/semantic-components": "^0.5.16-beta.5",
-    "@performant-software/shared-components": "^0.5.16-beta.5",
+    "@performant-software/semantic-components": "^0.5.16-beta.10",
+    "@performant-software/shared-components": "^0.5.16-beta.10",
     "classnames": "^2.3.1",
     "i18next": "^21.8.0",
     "react": "^17.0.2",

@@ -1591,12 +1591,12 @@
     "@stitches/react" "^1.2.7"
     react "^18.2.0"
 
-"@performant-software/semantic-components@^0.5.16-beta.5":
-  version "0.5.16-beta.5"
-  resolved "https://registry.yarnpkg.com/@performant-software/semantic-components/-/semantic-components-0.5.16-beta.5.tgz#15866bd4850e104a269adf3d8e4684fd31378a45"
-  integrity sha512-50jA6XTlJItyv0fZc+5E0ugLSRV8DJNFpeh/h4xyDnj5NMW4HIul/hNcxaEExuVYTxejdWirha3AOOuB0Udb+A==
+"@performant-software/semantic-components@^0.5.16-beta.10":
+  version "0.5.16-beta.10"
+  resolved "https://registry.yarnpkg.com/@performant-software/semantic-components/-/semantic-components-0.5.16-beta.10.tgz#05a5e290a2a96e9c2c173b4a621b2d40d40d2c8c"
+  integrity sha512-nM7Ncpky1TcEvWq0WPmXQV0UH0oaUtTLBVpNUTqC5MSY93sft3Msz1/mrK5CRzOqx4zn4xXTvTRLhaZk14fiDA==
   dependencies:
-    "@performant-software/shared-components" "^0.5.16-beta.5"
+    "@performant-software/shared-components" "^0.5.16-beta.10"
     "@react-google-maps/api" "^2.8.1"
     axios "^0.26.1"
     i18next "^19.4.4"
@@ -1612,10 +1612,10 @@
     semantic-ui-react "^2.1.2"
     underscore "^1.13.2"
 
-"@performant-software/shared-components@^0.5.16-beta.5":
-  version "0.5.16-beta.5"
-  resolved "https://registry.yarnpkg.com/@performant-software/shared-components/-/shared-components-0.5.16-beta.5.tgz#bea01b497ad27e5d99b5a22b2af67835eba2c9da"
-  integrity sha512-xQpihw5NbDSjAWxW1bEfUlIK/lNTYfspjPWoGvRDIWQT8ViEBWglRwpMQGFFkKm/Vb5AZ6O/occS29U/w6lWMQ==
+"@performant-software/shared-components@^0.5.16-beta.10":
+  version "0.5.16-beta.10"
+  resolved "https://registry.yarnpkg.com/@performant-software/shared-components/-/shared-components-0.5.16-beta.10.tgz#2568103cb35d150cfe4349c1eb8b88e1b2958c6a"
+  integrity sha512-yUq/ra1Rdj01zyZM7r6ijKf0L+EiTGLIeM0Cp4Ec5F94kMa+FGTZ/jBNCjwgqdVACc3sSFKblBd/x8jvHSA6oQ==
   dependencies:
     "@react-google-maps/api" "^2.8.1"
     "@samvera/clover-iiif" "^1.10.3"
@@ -6917,7 +6917,7 @@ mkdirp@~0.5.1:
   dependencies:
     minimist "^1.2.6"
 
-moment-islamic-civil@ACGC/moment-islamic-civil:
+"moment-islamic-civil@github:ACGC/moment-islamic-civil":
   version "1.0.0"
   resolved "https://codeload.github.com/ACGC/moment-islamic-civil/tar.gz/569fc450b9cdc526d3304d6cafdd6ef41c3273b4"
   dependencies:
