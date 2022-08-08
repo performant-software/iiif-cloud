@@ -2,11 +2,13 @@
 
 import { ItemList, LazyImage } from '@performant-software/semantic-components';
 import React, { type ComponentType } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import ProjectsService from '../services/Projects';
 
 const Projects: ComponentType<any> = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <ItemList
@@ -32,6 +34,19 @@ const Projects: ComponentType<any> = () => {
         />
       )}
       renderMeta={(project) => project.organization && project.organization.name}
+      sort={[{
+        key: 'name',
+        value: 'projects.name',
+        text: t('Projects.sort.name')
+      }, {
+        key: 'created_at',
+        value: 'projects.created_at',
+        text: t('Projects.sort.created')
+      }, {
+        key: 'updated_at',
+        value: 'projects.updated_at',
+        text: t('Projects.sort.updated')
+      }]}
     />
   );
 };
