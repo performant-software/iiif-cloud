@@ -103,7 +103,10 @@ class Resource < ApplicationRecord
   end
 
   def create_manifest
+    return unless iiif?
+
     self.manifest = Iiif::Manifest.create(self)
+
     save
   end
 
