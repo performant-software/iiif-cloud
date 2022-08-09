@@ -1,7 +1,7 @@
 // @flow
 
-import { FileInputButton, LazyImage } from '@performant-software/semantic-components';
-import { Object as ObjectUtils } from '@performant-software/shared-components';
+import { LazyIIIF } from '@performant-software/semantic-components';
+import { IIIF as IIIFUtils, Object as ObjectUtils } from '@performant-software/shared-components';
 import React, {
   useEffect,
   useMemo,
@@ -10,14 +10,12 @@ import React, {
 } from 'react';
 import { withTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { Button, Form, Icon } from 'semantic-ui-react';
+import { Button, Form } from 'semantic-ui-react';
 import _ from 'underscore';
 import i18n from '../i18n/i18n';
 import ProjectsService from '../services/Projects';
 import ResourceExifModal from '../components/ResourceExifModal';
-import ResourceImage from '../components/ResourceImage';
 import ResourceMetadata from '../components/ResourceMetadata';
-import ResourceViewerModal from '../components/ResourceViewerModal';
 import ResourcesService from '../services/Resources';
 import SimpleEditPage from '../components/SimpleEditPage';
 import withEditPage from '../hooks/EditPage';
@@ -25,7 +23,6 @@ import withEditPage from '../hooks/EditPage';
 const ResourceForm = withTranslation()((props) => {
   const [info, setInfo] = useState(false);
   const [project, setProject] = useState();
-  const [viewer, setViewer] = useState(false);
 
   const { projectId } = useParams();
 
@@ -53,11 +50,7 @@ const ResourceForm = withTranslation()((props) => {
    *
    * @type {string}
    */
-  const manifestId = useMemo(() => (
-    URL.createObjectURL(new Blob([props.item.manifest], {
-      type: 'application/ld+json'
-    }))
-  ), [props.item.manifest]);
+  const manifest = useMemo(() => IIIFUtils.createManifestURL(props.item.manifest), [props.item.manifest]);
 
   /**
    * Loads the related project record.
@@ -88,38 +81,17 @@ const ResourceForm = withTranslation()((props) => {
         <Form.Input
           label={props.t('Resource.labels.content')}
         >
-          <ResourceImage
+          <LazyIIIF
             contentType={props.item.content_type}
+            downloadUrl={props.item.content_download_url}
+            manifest={manifest}
+            onUpload={(file) => props.onSetState({
+              name: file.name,
+              content: file
+            })}
             preview={props.item.content_preview_url}
             src={props.item.content_url}
-            size='medium'
           >
-            { !props.item.content_url && (
-              <FileInputButton
-                color='orange'
-                content={props.t('Common.buttons.upload')}
-                icon='cloud upload'
-                onSelection={(files) => {
-                  const file = _.first(files);
-                  const url = URL.createObjectURL(file);
-                  props.onSetState({
-                    content: file,
-                    content_url: url,
-                    content_preview_url: file.type.startsWith('image') ? url : undefined,
-                    name: file.name,
-                    content_type: file.type
-                  });
-                }}
-              />
-            )}
-            { props.item.manifest && (
-              <Button
-                color='yellow'
-                content={props.t('Common.buttons.iiif')}
-                icon='file image outline'
-                onClick={() => setViewer(true)}
-              />
-            )}
             { exif && (
               <Button
                 content={props.t('Resource.buttons.exif')}
@@ -131,33 +103,7 @@ const ResourceForm = withTranslation()((props) => {
                 }}
               />
             )}
-            { props.item.content_download_url && (
-              <a
-                className='ui button green'
-                download={props.item.name}
-                href={props.item.content_download_url}
-              >
-                <Icon
-                  name='cloud download'
-                />
-                { props.t('Common.buttons.download') }
-              </a>
-            )}
-            { props.item.content_url && (
-              <Button
-                color='red'
-                content={props.t('Common.buttons.remove')}
-                icon='times'
-                onClick={() => props.onSetState({
-                  content: null,
-                  content_preview_url: null,
-                  content_url: null,
-                  content_remove: true,
-                  content_type: null
-                })}
-              />
-            )}
-          </ResourceImage>
+          </LazyIIIF>
         </Form.Input>
         <Form.Input
           error={props.isError('name')}
@@ -172,12 +118,6 @@ const ResourceForm = withTranslation()((props) => {
             items={JSON.parse(project.metadata)}
             onChange={(obj) => props.onTextInputChange('metadata', null, { value: JSON.stringify(obj) })}
             value={props.item.metadata && JSON.parse(props.item.metadata)}
-          />
-        )}
-        { viewer && manifestId && (
-          <ResourceViewerModal
-            manifestId={manifestId}
-            onClose={() => setViewer(false)}
           />
         )}
         { info && exif && (

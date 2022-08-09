@@ -71,6 +71,8 @@ module Attachable
         attachment = self.send(name)
         return nil unless attachment.attached?
 
+        return nil if attachment.audio?
+
         "#{self.send("#{name}_base_url")}#{page_number.nil? ? '' : ";#{page_number}"}/full/max/0/default.jpg"
       end
 
@@ -92,12 +94,16 @@ module Attachable
         attachment = self.send(name)
         return nil unless attachment.attached?
 
+        return nil if attachment.audio?
+
         "#{self.send("#{name}_base_url")}/full/^500,/0/default.jpg"
       end
 
       define_method("#{name}_thumbnail_url") do
         attachment = self.send(name)
         return nil unless attachment.attached?
+
+        return nil if attachment.audio?
 
         "#{self.send("#{name}_base_url")}/square/^250,250/0/default.jpg"
       end

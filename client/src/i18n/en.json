@@ -123,6 +123,13 @@
       "metadata": "Fields"
     }
   },
+  "Projects": {
+    "sort": {
+      "created": "Date created",
+      "name": "Name",
+      "updated": "Last modified"
+    }
+  },
   "Resource": {
     "buttons": {
       "exif": "View Info"
