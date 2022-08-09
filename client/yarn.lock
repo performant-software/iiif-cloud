@@ -1591,12 +1591,12 @@
     "@stitches/react" "^1.2.7"
     react "^18.2.0"
 
-"@performant-software/semantic-components@^0.5.16-beta.10":
-  version "0.5.16-beta.10"
-  resolved "https://registry.yarnpkg.com/@performant-software/semantic-components/-/semantic-components-0.5.16-beta.10.tgz#05a5e290a2a96e9c2c173b4a621b2d40d40d2c8c"
-  integrity sha512-nM7Ncpky1TcEvWq0WPmXQV0UH0oaUtTLBVpNUTqC5MSY93sft3Msz1/mrK5CRzOqx4zn4xXTvTRLhaZk14fiDA==
+"@performant-software/semantic-components@^0.5.16":
+  version "0.5.16"
+  resolved "https://registry.yarnpkg.com/@performant-software/semantic-components/-/semantic-components-0.5.16.tgz#6fb1bb91eee3e7f04f603b435c63f6075eb63cbc"
+  integrity sha512-t0MBzGtP/mHbWFf5Xr27Xb3XZoNa6aBDO9T/wBncF9VfaUd4UXqajA4MObrlt2bB1vqAl3MAWIuosuCmBZktSA==
   dependencies:
-    "@performant-software/shared-components" "^0.5.16-beta.10"
+    "@performant-software/shared-components" "^0.5.16"
     "@react-google-maps/api" "^2.8.1"
     axios "^0.26.1"
     i18next "^19.4.4"
@@ -1612,10 +1612,10 @@
     semantic-ui-react "^2.1.2"
     underscore "^1.13.2"
 
-"@performant-software/shared-components@^0.5.16-beta.10":
-  version "0.5.16-beta.10"
-  resolved "https://registry.yarnpkg.com/@performant-software/shared-components/-/shared-components-0.5.16-beta.10.tgz#2568103cb35d150cfe4349c1eb8b88e1b2958c6a"
-  integrity sha512-yUq/ra1Rdj01zyZM7r6ijKf0L+EiTGLIeM0Cp4Ec5F94kMa+FGTZ/jBNCjwgqdVACc3sSFKblBd/x8jvHSA6oQ==
+"@performant-software/shared-components@^0.5.16":
+  version "0.5.16"
+  resolved "https://registry.yarnpkg.com/@performant-software/shared-components/-/shared-components-0.5.16.tgz#e022df46a880f84c45d0bd66316d02d1cfb12177"
+  integrity sha512-fyyJ3BKnyyUm5WuSZRe5nae4OLTGYhuseaYgzFxUzfZxdyEINWobRfwpAp94TGTqcdI+cnDa8xvD9UpzUH//Dg==
   dependencies:
     "@react-google-maps/api" "^2.8.1"
     "@samvera/clover-iiif" "^1.10.3"
