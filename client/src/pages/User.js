@@ -108,7 +108,6 @@ const UserForm = withTranslation()((props: EditContainerProps & Translateable) =
           required={props.isRequired('api_key')}
           value={props.item.api_key}
         />
-
         <Message
           content={props.t('User.password.content')}
           header={props.t('User.password.header')}
