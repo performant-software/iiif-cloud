@@ -73,7 +73,7 @@ module Iiif
       begin
         response = HTTParty.get("#{resource.content_base_url}/info.json")
         context = JSON.parse(response.body)
-        page_count = context['page_count']
+        page_count = context['page_count'] || 1
       rescue
         # Do nothing. There's a possibility there may be no response from the server.
       end
