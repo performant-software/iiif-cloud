@@ -1,6 +1,7 @@
 class Api::ResourcesController < Api::BaseController
   # Includes
   include Api::Uploadable
+  include UserDefinedFields::Queryable
 
   # Search attributes
   search_attributes :name
@@ -9,6 +10,7 @@ class Api::ResourcesController < Api::BaseController
   preloads Resource.attachment_preloads
 
   # Actions
+  before_action :set_defineable_params, only: :index
   before_action :validate_new_resource, unless: -> { current_user.admin? }, only: :create
   before_action :validate_resource, unless: -> { current_user.admin? }, only: [:update, :destroy]
 
@@ -29,6 +31,13 @@ class Api::ResourcesController < Api::BaseController
   end
 
   private
+
+  def set_defineable_params
+    return unless params[:project_id].present?
+
+    params[:defineable_id] = params[:project_id]
+    params[:defineable_type] = Project.to_s
+  end
 
   def validate_new_resource
     project = Project.find(params[:resource][:project_id])

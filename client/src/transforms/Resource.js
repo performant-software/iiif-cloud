@@ -1,6 +1,7 @@
 // @flow
 
 import { Attachments, FormDataTransform } from '@performant-software/shared-components';
+import { FieldableTransform } from '@performant-software/user-defined-fields';
 import _ from 'underscore';
 import type { Resource as ResourceType } from '../types/Resource';
 import String from '../utils/String';
@@ -26,8 +27,7 @@ class Resource extends FormDataTransform {
   getPayloadKeys(): Array<string> {
     return [
       'name',
-      'project_id',
-      'metadata'
+      'project_id'
     ];
   }
 
@@ -41,6 +41,7 @@ class Resource extends FormDataTransform {
   toPayload(resource: ResourceType): FormData {
     const formData = super.toPayload(resource);
     Attachments.toPayload(formData, this.getParameterName(), resource, 'content');
+    FieldableTransform.toFormData(formData, this.getParameterName(), resource);
 
     return formData;
   }

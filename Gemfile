@@ -25,16 +25,13 @@ gem 'pagy', '~> 5.10'
 gem 'rack-cors'
 
 # Resource API
-gem 'resource_api', git: 'https://github.com/performant-software/resource-api.git', tag: 'v0.4.2'
+gem 'resource_api', git: 'https://github.com/performant-software/resource-api.git', tag: 'v0.4.3'
 
 # Use Json Web Token (JWT) for token based authentication
 gem 'jwt'
 
 # Use ActiveModel has_secure_password
 gem 'bcrypt', '~> 3.1.7'
-
-# Controlled vocabularies
-gem 'controlled_vocabulary', git: 'https://github.com/performant-software/controlled-vocabulary.git', tag: 'v0.1.1'
 
 # Active storage service
 gem 'aws-sdk-s3'
@@ -47,6 +44,12 @@ gem 'exif', '~> 2.2.3'
 
 # HTTP requests
 gem 'httparty', '~> 0.17.3'
+
+# User defined fields
+gem 'user_defined_fields', git: 'https://github.com/performant-software/user-defined-fields.git', tag: 'v0.1.1'
+
+# Data migrations
+gem 'data_migrate', '~> 8.1.1'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

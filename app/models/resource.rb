@@ -2,12 +2,13 @@ class Resource < ApplicationRecord
   # Includes
   include Attachable
   include Identifiable
+  include UserDefinedFields::Fieldable
 
   # Relationships
   belongs_to :project
 
   # Resourceable parameters
-  allow_params :project_id, :name, :metadata, :content
+  allow_params :project_id, :name, :content
 
   # Callbacks
   after_create_commit :after_create
@@ -21,8 +22,8 @@ class Resource < ApplicationRecord
   delegate :image?, to: :content
   delegate :video?, to: :content
 
-  # Validations
-  validate :validate_metadata
+  # Fieldable
+  resolve_defineable -> (resource) { resource.project }
 
   # Overload attachable methods
   alias_method :attachable_content_base_url, :content_base_url
@@ -120,23 +121,6 @@ class Resource < ApplicationRecord
       unless data.nil?
         self.exif = JSON.dump(data)
         save
-      end
-    end
-  end
-
-  def validate_metadata
-    items = JSON.parse(project.metadata || '[]')
-    return if items.nil? || items.empty?
-
-    values = JSON.parse(metadata || '{}')
-
-    items.each do |item|
-      required = item['required'].to_s.to_bool
-      name = item['name']
-      value = values[name]
-
-      if required && (value.nil? || value.empty?)
-        errors.add("metadata[#{name}]", I18n.t('errors.resource.metadata.required', name: name))
       end
     end
   end

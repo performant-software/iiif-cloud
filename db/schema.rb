@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_07_21_122353) do
+ActiveRecord::Schema[7.0].define(version: 2022_09_23_180038) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -68,6 +68,9 @@ ActiveRecord::Schema[7.0].define(version: 2022_07_21_122353) do
     t.index ["referrable_type", "referrable_id"], name: "index_references_on_referrable"
   end
 
+  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
+  end
+
   create_table "organizations", force: :cascade do |t|
     t.string "name"
     t.string "location"
@@ -81,7 +84,6 @@ ActiveRecord::Schema[7.0].define(version: 2022_07_21_122353) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.text "metadata"
     t.string "uuid"
     t.index ["organization_id"], name: "index_projects_on_organization_id"
   end
@@ -89,13 +91,29 @@ ActiveRecord::Schema[7.0].define(version: 2022_07_21_122353) do
   create_table "resources", force: :cascade do |t|
     t.bigint "project_id", null: false
     t.string "name"
+    t.text "exif"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "uuid"
     t.text "manifest"
-    t.text "metadata"
-    t.text "exif"
+    t.jsonb "user_defined", default: {}
     t.index ["project_id"], name: "index_resources_on_project_id"
+    t.index ["user_defined"], name: "index_resources_on_user_defined", using: :gin
+  end
+
+  create_table "user_defined_fields_user_defined_fields", force: :cascade do |t|
+    t.string "defineable_type"
+    t.integer "defineable_id"
+    t.string "table_name"
+    t.string "column_name"
+    t.string "data_type"
+    t.boolean "required"
+    t.boolean "allow_multiple"
+    t.text "options", default: [], array: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "searchable", default: false, null: false
+    t.index ["defineable_type", "defineable_id"], name: "index_user_defined_fields_on_defineable"
   end
 
   create_table "user_organizations", force: :cascade do |t|

@@ -1,3 +1,3 @@
-ControlledVocabulary.configure do |config|
+UserDefinedFields.configure do |config|
   config.base_controller = 'Api::BaseController'
 end
