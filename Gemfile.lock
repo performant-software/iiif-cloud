@@ -9,8 +9,8 @@ GIT
 
 GIT
   remote: https://github.com/performant-software/user-defined-fields.git
-  revision: 4fff0bdfaad702e2dba7df305d194807d1e6b435
-  tag: v0.1.1
+  revision: 0cfd2bf667b69e04b0ec01b321f455c2f53924a4
+  tag: v0.1.2
   specs:
     user_defined_fields (0.1.0)
       rails (>= 6.0.3.2, < 8)
