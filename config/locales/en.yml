@@ -31,14 +31,5 @@
 
 en:
   errors:
-    project:
-      metadata:
-        name_empty: "Name cannot be empty"
-        options_duplicate: "Dropdowns cannot contain duplicate options"
-        options_empty: "Dropdown options cannot be empty."
-        type_empty: "Type cannot be empty"
-    resource:
-      metadata:
-        required: "%{name} is required."
     unauthenticated: "You must be authenticate to access."
     unauthorized: "You do not have access to this record."

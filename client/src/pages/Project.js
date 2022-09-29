@@ -1,14 +1,12 @@
 // @flow
 
 import { AssociatedDropdown, FileInputButton, LazyImage } from '@performant-software/semantic-components';
+import { UserDefinedFieldsEmbeddedList } from '@performant-software/user-defined-fields';
 import React, { type ComponentType, useEffect } from 'react';
 import { withTranslation } from 'react-i18next';
 import { Button, Form } from 'semantic-ui-react';
 import _ from 'underscore';
 import AuthenticationService from '../services/Authentication';
-import i18n from '../i18n/i18n';
-import Metadata from '../constants/Metadata';
-import MetadataList from '../components/MetadataList';
 import Organization from '../transforms/Organization';
 import OrganizationsService from '../services/Organizations';
 import ProjectsService from '../services/Projects';
@@ -102,59 +100,33 @@ const ProjectForm = withTranslation()((props) => {
         <div
           className='field'
         >
-          <label>{ props.t('Project.labels.uuid') }</label>
+          <label
+            htmlFor='uuid-element'
+          >
+            { props.t('Project.labels.uuid') }
+          </label>
           <div
+            id='uuid-element'
             className='ui input'
+            role='textbox'
           >
             { props.item.uuid }
           </div>
         </div>
       </SimpleEditPage.Tab>
       <SimpleEditPage.Tab
-        key='metadata'
-        name={props.t('Project.tabs.metadata')}
+        key='fields'
+        name={props.t('Project.tabs.fields')}
       >
-        <MetadataList
-          items={JSON.parse(props.item.metadata || '[]')}
-          isError={props.isError}
-          onChange={(items) => props.onSetState({ metadata: JSON.stringify(items) })}
+        <UserDefinedFieldsEmbeddedList
+          items={props.item.user_defined_fields}
+          onDelete={props.onDeleteChildAssociation.bind(this, 'user_defined_fields')}
+          onSave={props.onSaveChildAssociation.bind(this, 'user_defined_fields')}
         />
       </SimpleEditPage.Tab>
     </SimpleEditPage>
   );
 });
-
-const ValidateProject = (project) => {
-  const errors = {};
-
-  if (project && project.metadata) {
-    const items = JSON.parse(project.metadata);
-
-    _.each(items, (item, index) => {
-      if (_.isEmpty(item.name)) {
-        _.extend(errors, { [`metadata[${index}][name]`]: i18n.t('Project.errors.metadata.name') });
-      }
-
-      if (_.isEmpty(item.type)) {
-        _.extend(errors, { [`metadata[${index}][type]`]: i18n.t('Project.errors.metadata.type') });
-      }
-
-      if (item.type === Metadata.Types.dropdown && _.isEmpty(item.options)) {
-        _.extend(errors, {
-          [`metadata[${index}][options]`]: i18n.t('Project.errors.metadata.optionsEmpty', { name: item.name })
-        });
-      }
-
-      if (item.type === Metadata.Types.dropdown && _.uniq(item.options).length !== item.options.length) {
-        _.extend(errors, {
-          [`metadata[${index}][options]`]: i18n.t('Project.errors.metadata.optionsDuplicate', { name: item.name })
-        });
-      }
-    });
-  }
-
-  return errors;
-};
 
 const Project: ComponentType<any> = withEditPage(ProjectForm, {
   id: 'projectId',
@@ -168,8 +140,7 @@ const Project: ComponentType<any> = withEditPage(ProjectForm, {
       .save(project)
       .then(({ data }) => data.project)
   ),
-  required: ['name', 'description', 'organization_id'],
-  validate: ValidateProject
+  required: ['name', 'description', 'organization_id']
 });
 
 export default Project;

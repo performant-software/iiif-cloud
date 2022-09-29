@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  mount ControlledVocabulary::Engine, at: "/controlled_vocabulary"
+  mount UserDefinedFields::Engine, at: '/user_defined_fields'
 
   namespace :api do
     resources :organizations

@@ -1,7 +1,8 @@
 // @flow
 
 import { LazyIIIF } from '@performant-software/semantic-components';
-import { IIIF as IIIFUtils, Object as ObjectUtils } from '@performant-software/shared-components';
+import { IIIF as IIIFUtils } from '@performant-software/shared-components';
+import { UserDefinedFieldsForm, UserDefinedFields } from '@performant-software/user-defined-fields';
 import React, {
   useEffect,
   useMemo,
@@ -11,11 +12,8 @@ import React, {
 import { withTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { Button, Form } from 'semantic-ui-react';
-import _ from 'underscore';
-import i18n from '../i18n/i18n';
 import ProjectsService from '../services/Projects';
 import ResourceExifModal from '../components/ResourceExifModal';
-import ResourceMetadata from '../components/ResourceMetadata';
 import ResourcesService from '../services/Resources';
 import SimpleEditPage from '../components/SimpleEditPage';
 import withEditPage from '../hooks/EditPage';
@@ -112,14 +110,14 @@ const ResourceForm = withTranslation()((props) => {
           required={props.isRequired('name')}
           value={props.item.name}
         />
-        { project && (
-          <ResourceMetadata
-            isError={props.isError}
-            items={JSON.parse(project.metadata)}
-            onChange={(obj) => props.onTextInputChange('metadata', null, { value: JSON.stringify(obj) })}
-            value={props.item.metadata && JSON.parse(props.item.metadata)}
-          />
-        )}
+        <UserDefinedFieldsForm
+          data={props.item.user_defined}
+          defineableId={projectId}
+          defineableType='Project'
+          isError={props.isError}
+          onChange={(userDefined) => props.onSetState({ user_defined: userDefined })}
+          onClearValidationError={props.onClearValidationError}
+        />
         { info && exif && (
           <ResourceExifModal
             exif={exif}
@@ -130,30 +128,6 @@ const ResourceForm = withTranslation()((props) => {
     </SimpleEditPage>
   );
 });
-
-const ValidateResource = (resource) => {
-  const errors = {};
-
-  if (resource) {
-    const { project } = resource;
-
-    // Validate required metadata
-    if (project && project.metadata) {
-      const items = JSON.parse(project.metadata);
-      const values = JSON.parse(resource.metadata || '{}');
-
-      _.each(items, (item) => {
-        const { name, required } = item;
-
-        if (required && ObjectUtils.isEmpty(values[name])) {
-          _.extend(errors, { [`metadata[${name}]`]: i18n.t('Resource.errors.required', { name }) });
-        }
-      });
-    }
-  }
-
-  return errors;
-};
 
 const Resource: ComponentType<any> = withEditPage(ResourceForm, {
   id: 'resourceId',
@@ -168,7 +142,7 @@ const Resource: ComponentType<any> = withEditPage(ResourceForm, {
       .then(({ data }) => data.resource)
   ),
   required: ['name'],
-  validate: ValidateResource
+  resolveValidationError: UserDefinedFields.resolveError.bind(this)
 });
 
 export default Resource;

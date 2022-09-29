@@ -51,24 +51,6 @@
       "login": "Login"
     }
   },
-  "Metadata": {
-    "types": {
-      "checkbox": "Checkbox",
-      "date": "Date",
-      "dropdown": "Dropdown",
-      "number": "Number",
-      "string": "String",
-      "text": "Text"
-    }
-  },
-  "MetadataList": {
-    "labels": {
-      "multiple": "Allow multiple",
-      "name": "Name",
-      "required": "Required",
-      "type": "Type"
-    }
-  },
   "Organization": {
     "labels": {
       "location": "Location",
@@ -97,14 +79,6 @@
     }
   },
   "Project": {
-    "errors": {
-      "metadata": {
-        "name": "Name is required",
-        "optionsDuplicate": "{{name}}: Dropdowns cannot contain duplicate options",
-        "optionsEmpty": "{{name}}: Dropdown options cannot be empty",
-        "type": "Type is required"
-      }
-    },
     "labels": {
       "apiKey": "API key",
       "bucketName": "AWS S3 bucket",
@@ -113,14 +87,8 @@
       "organization": "Organization",
       "uuid": "Unique identifier"
     },
-    "messages": {
-      "bucket": {
-        "content": "A bucket on AWS S3 will be created after you save the record.",
-        "header": "AWS S3"
-      }
-    },
     "tabs": {
-      "metadata": "Fields"
+      "fields": "Fields"
     }
   },
   "Projects": {
@@ -133,9 +101,6 @@
   "Resource": {
     "buttons": {
       "exif": "View Info"
-    },
-    "errors": {
-      "required": "{{name}} is required"
     },
     "labels": {
       "content": "Content"

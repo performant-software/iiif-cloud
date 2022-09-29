@@ -1,6 +1,7 @@
 // @flow
 
 import { Attachments, FormDataTransform } from '@performant-software/shared-components';
+import { UserDefinedFieldsTransform } from '@performant-software/user-defined-fields';
 import type { Project as ProjectType } from '../types/Project';
 
 /**
@@ -26,8 +27,7 @@ class Project extends FormDataTransform {
       'uid',
       'name',
       'description',
-      'organization_id',
-      'metadata'
+      'organization_id'
     ];
   }
 
@@ -41,6 +41,7 @@ class Project extends FormDataTransform {
   toPayload(project: ProjectType): FormData {
     const formData = super.toPayload(project);
     Attachments.toPayload(formData, this.getParameterName(), project, 'avatar');
+    UserDefinedFieldsTransform.toFormData(formData, this.getParameterName(), project);
 
     return formData;
   }
