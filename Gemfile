@@ -51,6 +51,9 @@ gem 'user_defined_fields', git: 'https://github.com/performant-software/user-def
 # Data migrations
 gem 'data_migrate', '~> 8.1.1'
 
+# Background jobs
+gem 'sidekiq', '~> 6.5.7', group: :production
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem 'debug', platforms: %i[ mri mingw x64_mingw ]
