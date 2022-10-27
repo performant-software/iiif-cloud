@@ -6,6 +6,7 @@ class Project < ApplicationRecord
 
   # Relationships
   belongs_to :organization
+  has_many :resources, dependent: :destroy
 
   # Resourceable attributes
   allow_params :organization_id, :name, :description, :avatar
