@@ -43,6 +43,11 @@
       "users": "Users"
     }
   },
+  "FileUpload": {
+    "labels": {
+      "name": "Name"
+    }
+  },
   "Home": {
     "header": "Welcome to Rails-React Template <1>Edit <1>src/App.js</1> and save to reload.</1>"
   },

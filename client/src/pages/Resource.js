@@ -117,6 +117,7 @@ const ResourceForm = withTranslation()((props) => {
           isError={props.isError}
           onChange={(userDefined) => props.onSetState({ user_defined: userDefined })}
           onClearValidationError={props.onClearValidationError}
+          tableName='Resource'
         />
         { info && exif && (
           <ResourceExifModal
