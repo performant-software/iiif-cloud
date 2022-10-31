@@ -46,10 +46,13 @@ gem 'exif', '~> 2.2.3'
 gem 'httparty', '~> 0.17.3'
 
 # User defined fields
-gem 'user_defined_fields', git: 'https://github.com/performant-software/user-defined-fields.git', tag: 'v0.1.2'
+gem 'user_defined_fields', git: 'https://github.com/performant-software/user-defined-fields.git', tag: 'v0.1.4'
 
 # Data migrations
 gem 'data_migrate', '~> 8.1.1'
+
+# Background jobs
+gem 'sidekiq', '~> 6.5.7', group: :production
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

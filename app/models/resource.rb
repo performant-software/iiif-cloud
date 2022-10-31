@@ -69,59 +69,16 @@ class Resource < ApplicationRecord
     content.content_type == 'application/pdf'
   end
 
-  protected
+  private
 
   def after_create
     # Convert the image to a TIFF
-    convert
+    ConvertImageJob.perform_later(self.id)
 
     # Create the manifest
-    create_manifest
+    CreateManifestJob.perform_later(self.id)
 
     # Extract EXIF data
-    extract_exif
-  end
-
-  private
-
-  def convert
-    return unless image? && content.attached?
-
-    content.open do |file|
-      begin
-        filepath = Images::Convert.to_tiff(file)
-        filename = Images::Convert.filename(content.filename.to_s, 'tif')
-
-        content_converted.attach(
-          io: File.open(filepath),
-          filename:  filename,
-          content_type: 'image/tiff'
-        )
-      rescue MiniMagick::Error
-        # Content cannot be converted
-      end
-    end
-  end
-
-  def create_manifest
-    return unless iiif?
-
-    self.manifest = Iiif::Manifest.create(self)
-
-    save
-  end
-
-
-  def extract_exif
-    return unless content.attached? && content.image?
-
-    content.open do |file|
-      data = Images::Exif.extract(file)
-
-      unless data.nil?
-        self.exif = JSON.dump(data)
-        save
-      end
-    end
+    ExtractExifJob.perform_later(self.id)
   end
 end

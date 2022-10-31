@@ -30,6 +30,7 @@ const FileUpload: ComponentType<any> = withTranslation()((props) => (
         icon='trash'
         onClick={props.onDelete}
       />
+      { props.renderStatus() }
     </Item.Content>
   </Item>
 ));
