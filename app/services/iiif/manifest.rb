@@ -7,10 +7,16 @@ module Iiif
         en: [resource.name]
       }
 
+      info = resource_info(resource)
+
+      page_count = info['page_count'] || 1
+      width = info['width']
+      height = info['height']
+
       items = []
 
-      page_count(resource).times do |index|
-        items << create_canvas(resource, index + 1)
+      page_count.times do |index|
+        items << create_canvas(resource, width, height, index + 1)
       end
 
       manifest['items'] = items
@@ -54,9 +60,11 @@ module Iiif
       annotation
     end
 
-    def self.create_canvas(resource, page_number)
+    def self.create_canvas(resource, width, height, page_number)
       canvas = to_json('canvas.json')
       canvas['id'] = "https://#{resource.uuid}/canvas/#{page_number}"
+      canvas['width'] = width
+      canvas['height'] = height
 
       canvas['items'] = [{
         id: "https://#{resource.uuid}/canvas/#{page_number}/annotation_page/1",
@@ -67,18 +75,15 @@ module Iiif
       canvas
     end
 
-    def self.page_count(resource)
-      page_count = 1
-
+    def self.resource_info(resource)
       begin
         response = HTTParty.get("#{resource.content_base_url}/info.json")
-        context = JSON.parse(response.body)
-        page_count = context['page_count'] || 1
+        info = JSON.parse(response.body)
       rescue
-        # Do nothing. There's a possibility there may be no response from the server.
+        info = {}
       end
 
-      page_count
+      info
     end
 
     def self.to_json(filename)
