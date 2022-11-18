@@ -17,7 +17,7 @@
 default: &default
   adapter: postgresql
   timeout: 5000
-  pool: 20
+  pool: <%= ENV.fetch('DATABASE_POOL') { 20 } %>
   host: <%= ENV.fetch('DATABASE_HOST') { 'localhost' } %>
   port: <%= ENV.fetch('DATABASE_POST') { 5432 } %>
   username: <%= ENV.fetch('DATABASE_USERNAME') { '' } %>
