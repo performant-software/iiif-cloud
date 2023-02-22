@@ -90,6 +90,13 @@ module Attachable
         attachment.url(disposition: 'attachment')
       end
 
+      define_method("#{name}_inline_url") do
+        attachment = self.send(name)
+        return nil unless attachment.attached?
+
+        attachment.url(disposition: 'inline')
+      end
+
       define_method("#{name}_preview_url") do
         attachment = self.send(name)
         return nil unless attachment.attached?
