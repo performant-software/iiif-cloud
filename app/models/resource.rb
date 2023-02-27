@@ -12,6 +12,7 @@ class Resource < ApplicationRecord
 
   # Callbacks
   after_create_commit :after_create
+  after_update_commit :after_update
 
   # ActiveStorage
   has_one_attached :content
@@ -77,6 +78,17 @@ class Resource < ApplicationRecord
 
     # Create the manifest
     CreateManifestJob.perform_later(self.id)
+
+    # Extract EXIF data
+    ExtractExifJob.perform_later(self.id)
+  end
+
+  def after_update
+    # Only perform the update if the content attachment has been updated
+    return if !(content.attached? && content.blob.saved_changes?)
+
+    # Convert the image to a TIFF
+    ConvertImageJob.perform_later(self.id)
 
     # Extract EXIF data
     ExtractExifJob.perform_later(self.id)
