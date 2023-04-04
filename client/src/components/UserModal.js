@@ -26,7 +26,7 @@ const UserModal: ComponentType<any> = withTranslation()((props) => (
       >
         <AssociatedDropdown
           collectionName='users'
-          onSearch={(search) => UsersService.fetchAll({ search })}
+          onSearch={(search) => UsersService.fetchAll({ search, sort_by: 'name' })}
           onSelection={props.onAssociationInputChange.bind(this, 'user_id', 'user')}
           renderOption={(user) => User.toDropdown(user)}
           searchQuery={props.item.user && props.item.user.name}

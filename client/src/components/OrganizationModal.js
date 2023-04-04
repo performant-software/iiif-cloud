@@ -26,7 +26,7 @@ const OrganizationModal: ComponentType<any> = withTranslation()((props) => (
       >
         <AssociatedDropdown
           collectionName='organizations'
-          onSearch={(search) => OrganizationsService.fetchAll({ search })}
+          onSearch={(search) => OrganizationsService.fetchAll({ search, sort_by: 'name' })}
           onSelection={props.onAssociationInputChange.bind(this, 'organization_id', 'organization')}
           renderOption={(organization) => Organization.toDropdown(organization)}
           searchQuery={props.item.organization && props.item.organization.name}
