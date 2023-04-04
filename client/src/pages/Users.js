@@ -22,6 +22,7 @@ const Users: ComponentType<any> = withTranslation()(() => {
         onClick: () => navigate('/users/new')
       }}
       collectionName='users'
+      defaultSort='name'
       onLoad={(params) => UsersService.fetchAll(params)}
       onDelete={(user) => UsersService.delete(user)}
       renderHeader={(user) => user.name}
