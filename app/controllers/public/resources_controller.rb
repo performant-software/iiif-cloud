@@ -1,7 +1,12 @@
 class Public::ResourcesController < Api::ResourcesController
   # Actions
   prepend_before_action :set_project, only: [:create, :update]
-  prepend_before_action :set_resource, only: [:show, :destroy, :update]
+  prepend_before_action :set_resource, only: [:show, :destroy, :update, :manifest]
+
+  def manifest
+    resource = Resource.find(params[:id])
+    render json: JSON.parse(resource.manifest)
+  end
 
   protected
 
