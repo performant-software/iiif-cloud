@@ -10,6 +10,7 @@ import AuthenticationService from '../services/Authentication';
 import Organization from '../transforms/Organization';
 import OrganizationsService from '../services/Organizations';
 import ProjectsService from '../services/Projects';
+import ReadOnlyField from '../components/ReadOnlyField';
 import SimpleEditPage from '../components/SimpleEditPage';
 import withEditPage from '../hooks/EditPage';
 
@@ -97,22 +98,10 @@ const ProjectForm = withTranslation()((props) => {
           required={props.isRequired('description')}
           value={props.item.description}
         />
-        <div
-          className='field'
-        >
-          <label
-            htmlFor='uuid-element'
-          >
-            { props.t('Project.labels.uuid') }
-          </label>
-          <div
-            id='uuid-element'
-            className='ui input'
-            role='textbox'
-          >
-            { props.item.uuid }
-          </div>
-        </div>
+        <ReadOnlyField
+          label={props.t('Project.labels.uuid')}
+          value={props.item.uuid}
+        />
       </SimpleEditPage.Tab>
       <SimpleEditPage.Tab
         key='fields'
