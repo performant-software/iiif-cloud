@@ -14,7 +14,7 @@ Rails.application.routes.draw do
   end
 
   namespace :public do
-    resources :resources, only: [:create, :show, :destroy, :update] do
+    resources :resources, only: [:index, :create, :show, :destroy, :update] do
       member do
         get :manifest
       end

@@ -13,6 +13,7 @@ class Api::ResourcesController < Api::BaseController
   before_action :set_defineable_params, only: :index
   before_action :validate_new_resource, unless: -> { current_user.admin? }, only: :create
   before_action :validate_resource, unless: -> { current_user.admin? }, only: [:update, :destroy]
+  before_action :validate_resources, unless: -> { current_user.admin? }, only: :index
 
   protected
 
@@ -47,5 +48,10 @@ class Api::ResourcesController < Api::BaseController
   def validate_resource
     resource = Resource.find(params[:id])
     check_authorization resource.project.organization_id
+  end
+
+  def validate_resources
+    project = Project.find(params[:project_id])
+    check_authorization project.organization_id
   end
 end
