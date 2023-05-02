@@ -108,7 +108,8 @@
       "exif": "View Info"
     },
     "labels": {
-      "content": "Content"
+      "content": "Content",
+      "uuid": "Unique identifier"
     }
   },
   "ResourceExifModal": {

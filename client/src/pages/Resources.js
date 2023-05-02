@@ -48,7 +48,7 @@ const Resources: ComponentType<any> = () => {
             preview={resource.content_thumbnail_url}
           />
         )}
-        renderMeta={() => ''}
+        renderMeta={(resource) => resource.uuid}
         saved={location.state && location.state.saved}
         sort={[{
           key: 'name',

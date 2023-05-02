@@ -13,6 +13,7 @@ import { withTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { Button, Form } from 'semantic-ui-react';
 import ProjectsService from '../services/Projects';
+import ReadOnlyField from '../components/ReadOnlyField';
 import ResourceExifModal from '../components/ResourceExifModal';
 import ResourcesService from '../services/Resources';
 import SimpleEditPage from '../components/SimpleEditPage';
@@ -109,6 +110,10 @@ const ResourceForm = withTranslation()((props) => {
           onChange={props.onTextInputChange.bind(this, 'name')}
           required={props.isRequired('name')}
           value={props.item.name}
+        />
+        <ReadOnlyField
+          label={props.t('Resource.labels.uuid')}
+          value={props.item.uuid}
         />
         <UserDefinedFieldsForm
           data={props.item.user_defined}
