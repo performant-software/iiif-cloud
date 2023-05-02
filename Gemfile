@@ -46,7 +46,8 @@ gem 'exif', '~> 2.2.3'
 gem 'httparty', '~> 0.17.3'
 
 # User defined fields
-gem 'user_defined_fields', git: 'https://github.com/performant-software/user-defined-fields.git', tag: 'v0.1.4'
+#gem 'user_defined_fields', git: 'https://github.com/performant-software/user-defined-fields.git', tag: 'v0.1.4'
+gem 'user_defined_fields', path: '../user-defined-fields'
 
 # Data migrations
 gem 'data_migrate', '~> 8.1.1'
