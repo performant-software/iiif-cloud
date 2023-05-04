@@ -1,7 +1,7 @@
 // @flow
 
 import { AssociatedDropdown, FileInputButton, LazyImage } from '@performant-software/semantic-components';
-import { UserDefinedFieldsEmbeddedList } from '@performant-software/user-defined-fields';
+import { UserDefinedFields, UserDefinedFieldsEmbeddedList } from '@performant-software/user-defined-fields';
 import React, { type ComponentType, useEffect } from 'react';
 import { withTranslation } from 'react-i18next';
 import { Button, Form } from 'semantic-ui-react';
@@ -129,7 +129,8 @@ const Project: ComponentType<any> = withEditPage(ProjectForm, {
       .save(project)
       .then(({ data }) => data.project)
   ),
-  required: ['name', 'description', 'organization_id']
+  required: ['name', 'description', 'organization_id'],
+  resolveValidationError: UserDefinedFields.resolveError.bind(this)
 });
 
 export default Project;
