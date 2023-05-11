@@ -3,6 +3,7 @@ class Public::ResourcesController < Api::ResourcesController
   prepend_before_action :set_project, only: [:create, :update]
   prepend_before_action :set_project_id, only: :index
   prepend_before_action :set_resource, only: [:show, :destroy, :update, :manifest]
+  skip_before_action :authenticate_request, only: :manifest
 
   def manifest
     resource = Resource.find(params[:id])
