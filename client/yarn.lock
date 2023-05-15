@@ -1606,15 +1606,14 @@
     "@stitches/react" "^1.2.7"
     react "^18.2.0"
 
-"@performant-software/semantic-components@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@performant-software/semantic-components/-/semantic-components-1.0.4.tgz#4145b7937332b495694d26e96778176bce51e2ea"
-  integrity sha512-fkqioC01Vi6XhtWZOgrmKjbjDZb+7qkdP8grIzCwn59mbGEHzinL4H8Wiv/WU3CWCr2h5SlmT+BGNbTlczyM5w==
+"@performant-software/semantic-components@^1.0.12":
+  version "1.0.12"
+  resolved "https://registry.yarnpkg.com/@performant-software/semantic-components/-/semantic-components-1.0.12.tgz#dd99502c534b8955b9c81a123b8377f00a27b3a6"
+  integrity sha512-ovoyVpql/V9TEcZ4fNZCl3NNj/eXhE4qdslhvu37XKljJ99arR8INuYI27t2sVi2bYdGibiqIWEiBYyLWdPABw==
   dependencies:
-    "@performant-software/shared-components" "^1.0.4"
+    "@performant-software/shared-components" "^1.0.12"
     "@react-google-maps/api" "^2.8.1"
     axios "^0.26.1"
-    citeproc "^2.4.62"
     i18next "^19.4.4"
     react-calendar "^3.3.0"
     react-color "^2.18.1"
@@ -1630,14 +1629,15 @@
     zotero-api-client "^0.40.0"
     zotero-translation-client "^5.0.1"
 
-"@performant-software/shared-components@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@performant-software/shared-components/-/shared-components-1.0.4.tgz#0b2be8edb1359ef0e1da8fcd7e8379ec3156f347"
-  integrity sha512-tePGzd7fv+wZuZ3KuELl/YzGM3fY0wSnYmypQaC2iAwYV6lNuCi+JnEqJb7OSrZ5zzua4leRsn/pQ19JERDYLA==
+"@performant-software/shared-components@^1.0.12":
+  version "1.0.12"
+  resolved "https://registry.yarnpkg.com/@performant-software/shared-components/-/shared-components-1.0.12.tgz#ca08303feaa3227a38d571b00c54e33de7a915f7"
+  integrity sha512-P+/HpkCl/Gng+q6U3bFhxGQ34ZxWFzEi35SlQq1+HNH5RvYpkn4oNttOq5M7JO9Y/BbVy2sKlT2zP8QQ36FoWQ==
   dependencies:
     "@react-google-maps/api" "^2.8.1"
     "@samvera/clover-iiif" "^1.10.3"
     axios "^0.26.1"
+    citeproc "^2.4.62"
     i18next "^19.4.4"
     moment "^2.27.0"
     moment-islamic-civil ACGC/moment-islamic-civil
@@ -1650,14 +1650,15 @@
     simple-keyboard "^3.0.0"
     simple-keyboard-layouts "^3.0.0"
     underscore "^1.13.2"
+    zotero-translation-client "^5.0.1"
 
-"@performant-software/user-defined-fields@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@performant-software/user-defined-fields/-/user-defined-fields-1.0.4.tgz#091f79fec013507955deac111b8d9f73030aeead"
-  integrity sha512-gTJud8tJDnWdNF9hJynztuVCRyZUJtEZ1c2/91YwzKHMjn3Z/aUtbgoa/R8ZRfJnws6uZeID3S2kstfiJamm3w==
+"@performant-software/user-defined-fields@^1.0.12":
+  version "1.0.12"
+  resolved "https://registry.yarnpkg.com/@performant-software/user-defined-fields/-/user-defined-fields-1.0.12.tgz#e44506d39f7ec8d0f82da0b4cca67ef3456b95ca"
+  integrity sha512-HK1oW6cgPSekmvVmPikaHgB8FnnhRJe2JjSyOFG6SkXWdFCEQjKLJDR5EdUd/ee3KDVvYM/O4vyYzr5ltCFpcA==
   dependencies:
-    "@performant-software/semantic-components" "^1.0.4"
-    "@performant-software/shared-components" "^1.0.4"
+    "@performant-software/semantic-components" "^1.0.12"
+    "@performant-software/shared-components" "^1.0.12"
     i18next "^21.9.1"
     semantic-ui-react "^2.1.2"
     underscore "^1.13.2"

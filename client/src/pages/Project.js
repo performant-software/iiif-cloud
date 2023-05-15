@@ -1,7 +1,7 @@
 // @flow
 
 import { AssociatedDropdown, FileInputButton, LazyImage } from '@performant-software/semantic-components';
-import { UserDefinedFieldsEmbeddedList } from '@performant-software/user-defined-fields';
+import { UserDefinedFields, UserDefinedFieldsEmbeddedList } from '@performant-software/user-defined-fields';
 import React, { type ComponentType, useEffect } from 'react';
 import { withTranslation } from 'react-i18next';
 import { Button, Form } from 'semantic-ui-react';
@@ -10,6 +10,7 @@ import AuthenticationService from '../services/Authentication';
 import Organization from '../transforms/Organization';
 import OrganizationsService from '../services/Organizations';
 import ProjectsService from '../services/Projects';
+import ReadOnlyField from '../components/ReadOnlyField';
 import SimpleEditPage from '../components/SimpleEditPage';
 import withEditPage from '../hooks/EditPage';
 
@@ -83,7 +84,7 @@ const ProjectForm = withTranslation()((props) => {
         >
           <AssociatedDropdown
             collectionName='organizations'
-            onSearch={(params) => OrganizationsService.fetchAll(params)}
+            onSearch={(search) => OrganizationsService.fetchAll({ search, sort_by: 'name' })}
             onSelection={props.onAssociationInputChange.bind(this, 'organization_id', 'organization')}
             renderOption={(organization) => Organization.toDropdown(organization)}
             searchQuery={props.item.organization && props.item.organization.name}
@@ -97,22 +98,10 @@ const ProjectForm = withTranslation()((props) => {
           required={props.isRequired('description')}
           value={props.item.description}
         />
-        <div
-          className='field'
-        >
-          <label
-            htmlFor='uuid-element'
-          >
-            { props.t('Project.labels.uuid') }
-          </label>
-          <div
-            id='uuid-element'
-            className='ui input'
-            role='textbox'
-          >
-            { props.item.uuid }
-          </div>
-        </div>
+        <ReadOnlyField
+          label={props.t('Project.labels.uuid')}
+          value={props.item.uuid}
+        />
       </SimpleEditPage.Tab>
       <SimpleEditPage.Tab
         key='fields'
@@ -140,7 +129,8 @@ const Project: ComponentType<any> = withEditPage(ProjectForm, {
       .save(project)
       .then(({ data }) => data.project)
   ),
-  required: ['name', 'description', 'organization_id']
+  required: ['name', 'description', 'organization_id'],
+  resolveValidationError: UserDefinedFields.resolveError.bind(this)
 });
 
 export default Project;

@@ -14,7 +14,11 @@ Rails.application.routes.draw do
   end
 
   namespace :public do
-    resources :resources, only: [:create, :show, :destroy, :update]
+    resources :resources, only: [:index, :create, :show, :destroy, :update] do
+      member do
+        get :manifest
+      end
+    end
   end
 
   # Default route for static front-end
