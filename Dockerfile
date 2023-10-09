@@ -23,9 +23,10 @@ WORKDIR /app
 ADD . /app
 RUN chmod +x docker-run.sh
 ENV RAILS_ENV=production
+ENV DISABLE_ESLINT_PLUGIN=true
 WORKDIR /app/client
 ENV ESLINT_NO_DEV_ERRORS=true
-RUN ESLINT_NO_DEV_ERRORS=true yarn run build-docker
+RUN ESLINT_NO_DEV_ERRORS=true yarn run build
 WORKDIR /app
 RUN mkdir "public"
 RUN cp -Rf /app/client/build/* /app/public/
