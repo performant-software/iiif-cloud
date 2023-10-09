@@ -40,7 +40,13 @@ If using AWS S3, set the ENV variable **AWS_REGION** to the region in which the 
 
 In order to persist your DB between restarts, it is recommended that you set a local file directory as the location for the DB data.  This could be local block storage or a mounted NFS drive. Set the ENV variable **DB_VOLUME** to this directory.
 
-### 4. Run Docker Compose for the First Time
+### 4. Other Variables
+
+* `IIIF_HOST` - When running locally (localhost), this should be set to `http://localhost:8182`, If being run with a domain, it should be set to the url that will be handling Cantaloupe traffic on port 8182. The HTTPS traffic will be handle on port 8183.
+* `SECRET_KEY_BASE` - This is a rails style secret which can be generated using openssl `openssl rand -hex 64`
+* `HOSTNAME`- Should be the hostname for IIIF Cloud CMS. `http://localhost:8080` for local installs.
+
+### 5. Run Docker Compose for the First Time
 
 From the root of the project repo run:
 

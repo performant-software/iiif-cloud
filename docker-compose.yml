@@ -5,8 +5,6 @@ services:
     ports:
       - "8182:8182"
       - "8183:8183"
-    volumes:
-      - $C_STORAGE_VOLUME:/imageroot
     environment:
       - CANTALOUPE_ENDPOINT_ADMIN_SECRET=$CANTELOUPE_ADMIN_PASSWORD
       - CANTALOUPE_ENDPOINT_ADMIN_ENABLED=$CANTELOUPE_ADMIN_ENABLED
@@ -54,3 +52,5 @@ services:
       - PGDATA=/var/lib/postgresql/data/pgdata
   redis:
     image: redis:alpine
+    ports:
+      - "6379:6379"
