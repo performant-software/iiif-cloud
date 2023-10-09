@@ -37,7 +37,7 @@ services:
       - AWS_BUCKET_NAME=$AWS_BUCKET_NAME
       - RAILS_SERVE_STATIC_FILES=true
       - RAILS_LOG_TO_STDOUT=true
-      - RAILS_ENV=production
+      - RAILS_ENV=$RAILS_ENV
       - HOSTNAME=$HOSTNAME
 #      - S3_ENDPOINT=$S3_ENDPOINT
   db:
