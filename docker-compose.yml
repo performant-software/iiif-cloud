@@ -1,0 +1,56 @@
+
+services:
+  canteloupe:
+    image: "uclalibrary/cantaloupe:5.0.5-7"
+    ports:
+      - "8182:8182"
+      - "8183:8183"
+    environment:
+      - CANTALOUPE_ENDPOINT_ADMIN_SECRET=$CANTELOUPE_ADMIN_PASSWORD
+      - CANTALOUPE_ENDPOINT_ADMIN_ENABLED=$CANTELOUPE_ADMIN_ENABLED
+      - CANTALOUPE_SOURCE_STATIC=S3Source
+      - CANTALOUPE_S3SOURCE_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+      - CANTALOUPE_S3SOURCE_SECRET_KEY=$AWS_SECRET_ACCESS_KEY
+      - CANTALOUPE_S3SOURCE_BASICLOOKUPSTRATEGY_BUCKET_NAME=$AWS_BUCKET_NAME
+      - CANTALOUPE_S3SOURCE_REGION=$AWS_REGION
+#      - CANTALOUPE_S3SOURCE_ENDPOINT=$S3_ENDPOINT
+  iiif_cloud:
+    build: .
+    depends_on:
+      - db
+      - redis
+    ports:
+      - "8080:5000"
+    environment:
+      - DATABASE_HOST=$DATABASE_HOST
+      - DATABASE_PORT=$DATABASE_PORT
+      - DATABASE_USERNAME=$DATABASE_USERNAME
+      - DATABASE_PASSWORD=$DATABASE_PASSWORD
+      - DATABASE_NAME=$DATABASE_NAME
+      - IIIF_HOST=$IIIF_HOST
+      - IIIF_HOST_DOCKER=canteloupe
+      - REDIS_URL=redis://redis:6379/1
+      - SIDEKIQ_CONCURRENCY=5
+      - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+      - AWS_REGION=$AWS_REGION
+      - AWS_BUCKET_NAME=$AWS_BUCKET_NAME
+      - RAILS_SERVE_STATIC_FILES=true
+      - RAILS_LOG_TO_STDOUT=true
+      - RAILS_ENV=$RAILS_ENV
+      - HOSTNAME=$HOSTNAME
+#      - S3_ENDPOINT=$S3_ENDPOINT
+  db:
+    image: postgres:alpine
+    volumes:
+      - $DB_VOLUME:/var/lib/postgresql/data
+    ports:
+      - "54333:5432"
+    environment:
+      - POSTGRES_PASSWORD=$DATABASE_PASSWORD
+      - POSTGRES_USER=$DATABASE_USERNAME
+      - PGDATA=/var/lib/postgresql/data/pgdata
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
