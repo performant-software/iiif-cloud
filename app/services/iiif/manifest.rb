@@ -2,7 +2,7 @@ module Iiif
   class Manifest
     def self.create(resource)
       manifest = to_json('manifest.json')
-      manifest['id'] = "https://#{resource.uuid}"
+      manifest['id'] = "#{base_url(resource)}/manifest"
       manifest['label'] = {
         en: [resource.name]
       }
@@ -26,9 +26,13 @@ module Iiif
 
     private
 
+    def self.base_url(resource)
+      "#{ENV['HOSTNAME']}/public/resources/#{resource.uuid}"
+    end
+
     def self.create_annotation(resource, target, page_number)
       annotation = to_json('annotation.json')
-      annotation['id'] = "https://#{resource.uuid}/canvas/#{page_number}/annotation_page/1/annotation/1"
+      annotation['id'] = "#{base_url(resource)}/canvas/#{page_number}/annotation_page/1/annotation/1"
       annotation['target'] = target
 
       if resource.image? || resource.pdf?
@@ -62,12 +66,12 @@ module Iiif
 
     def self.create_canvas(resource, width, height, page_number)
       canvas = to_json('canvas.json')
-      canvas['id'] = "https://#{resource.uuid}/canvas/#{page_number}"
+      canvas['id'] = "#{base_url(resource)}/canvas/#{page_number}"
       canvas['width'] = width
       canvas['height'] = height
 
       canvas['items'] = [{
-        id: "https://#{resource.uuid}/canvas/#{page_number}/annotation_page/1",
+        id: "#{base_url(resource)}/canvas/#{page_number}/annotation_page/1",
         type: 'AnnotationPage',
         items: [create_annotation(resource, canvas['id'], page_number)]
       }]
