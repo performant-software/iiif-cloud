@@ -112,7 +112,7 @@ module Attachable
 
         return nil if attachment.audio?
 
-        "#{self.send("#{name}_base_url")}/square/^250,250/0/default.jpg"
+        "#{self.send("#{name}_base_url")}/square/!250,250/0/default.jpg"
       end
     end
 
