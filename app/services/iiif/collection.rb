@@ -11,7 +11,9 @@ module Iiif
         'id': id,
         'type': 'Collection',
         label: label,
-        items: items.map{ |item| to_item(item, resources[item[:thumbnail]]) }
+        items: items
+                 .sort_by{ |item| item[:label] }
+                 .map{ |item| to_item(item, resources[item[:thumbnail]]) }
       }
     end
 

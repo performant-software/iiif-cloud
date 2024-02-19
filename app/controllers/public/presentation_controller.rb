@@ -21,6 +21,7 @@ module Public
       resources = Resource
                     .preload(Resource.attachment_preloads)
                     .where(uuid: params[:resource_ids])
+                    .order(:name)
 
       json = Iiif::Manifest.create(
         id: params[:id],
