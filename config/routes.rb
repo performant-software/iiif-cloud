@@ -14,6 +14,11 @@ Rails.application.routes.draw do
   end
 
   namespace :public do
+    namespace :presentation do
+      post :collection
+      post :manifest
+    end
+
     resources :resources, only: [:index, :create, :show, :destroy, :update] do
       member do
         get :manifest
