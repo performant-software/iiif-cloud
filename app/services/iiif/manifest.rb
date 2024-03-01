@@ -4,7 +4,7 @@ module Iiif
       manifest = to_json('manifest.json')
       manifest['id'] = id
       manifest['label'] = {
-        en: label
+        en: [label]
       }
 
       resources.each do |resource|
