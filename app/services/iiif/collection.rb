@@ -8,8 +8,8 @@ module Iiif
 
       {
         '@context':"http://iiif.io/api/presentation/3/context.json",
-        'id': id,
-        'type': 'Collection',
+        id: id,
+        type: 'Collection',
         label: label,
         items: items
                  .sort_by{ |item| item[:label] }
@@ -21,6 +21,7 @@ module Iiif
 
     def self.to_item(item, resource)
       collection_item = item.slice(:id, :type, :label)
+      collection_item['item_count'] = item['item_count'].to_i
 
       if resource.present?
         collection_item[:thumbnail] = [{
