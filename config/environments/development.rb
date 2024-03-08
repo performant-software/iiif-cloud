@@ -31,7 +31,9 @@ Rails.application.configure do
   end
 
   # Store uploaded files on the local file system (see config/storage.yml for options).
-  if ENV["S3_ENDPOINT"].present?
+  if ENV["STORAGE_SERVICE"].present?
+    config.active_storage.service = ENV["STORAGE_SERVICE"].to_sym
+  elsif ENV["S3_ENDPOINT"].present?
     config.active_storage.service = :s3compatible
   else
     config.active_storage.service = :amazon
