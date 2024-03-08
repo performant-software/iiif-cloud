@@ -10,7 +10,9 @@ module Iiif
         '@context':"http://iiif.io/api/presentation/3/context.json",
         id: id,
         type: 'Collection',
-        label: label,
+        label: {
+          en: [label]
+        },
         items: items
                  .sort_by{ |item| item[:label] }
                  .map{ |item| to_item(item, resources[item[:thumbnail]]) }
@@ -20,8 +22,15 @@ module Iiif
     private
 
     def self.to_item(item, resource)
-      collection_item = item.slice(:id, :type, :label)
-      collection_item['item_count'] = item['item_count'].to_i
+      collection_item = item.slice(:id, :type)
+
+      item_count = item['item_count'].to_i
+      label = item['label']
+
+      collection_item['item_count'] = item_count
+      collection_item['label'] = {
+        en: [label]
+      }
 
       if resource.present?
         collection_item[:thumbnail] = [{
