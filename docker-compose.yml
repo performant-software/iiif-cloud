@@ -1,4 +1,4 @@
-
+version: "3.5"
 services:
   canteloupe:
     image: "uclalibrary/cantaloupe:5.0.5-7"
@@ -28,7 +28,7 @@ services:
       - DATABASE_PASSWORD=$DATABASE_PASSWORD
       - DATABASE_NAME=$DATABASE_NAME
       - IIIF_HOST=$IIIF_HOST
-      - IIIF_HOST_DOCKER=canteloupe
+      - IIIF_HOST_DOCKER=http://canteloupe:8182
       - REDIS_URL=redis://redis:6379/1
       - SIDEKIQ_CONCURRENCY=5
       - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
@@ -39,7 +39,11 @@ services:
       - RAILS_LOG_TO_STDOUT=true
       - RAILS_ENV=$RAILS_ENV
       - HOSTNAME=$HOSTNAME
+      - SECRET_KEY_BASE=$SECRET_KEY_BASE
 #      - S3_ENDPOINT=$S3_ENDPOINT
+    networks:
+      - default
+      - shared
   db:
     image: postgres:alpine
     volumes:
@@ -54,3 +58,6 @@ services:
     image: redis:alpine
     ports:
       - "6379:6379"
+networks:
+  shared:
+    name: pssexternal
