@@ -35,7 +35,7 @@ class Resource < ApplicationRecord
   def content_base_url
     return attachable_content_base_url unless content_converted.attached?
 
-    "#{ENV['IIIF_HOST']}/iiif/3/#{content_converted.key}"
+    "#{ENV['IIIF_HOST_DOCKER'] || ENV['IIIF_HOST']}/iiif/3/#{content_converted.key}"
   end
 
   def content_iiif_url(page_number = 1)

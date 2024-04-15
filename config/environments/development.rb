@@ -31,7 +31,13 @@ Rails.application.configure do
   end
 
   # Store uploaded files on the local file system (see config/storage.yml for options).
-  config.active_storage.service = :amazon
+  if ENV["STORAGE_SERVICE"].present?
+    config.active_storage.service = ENV["STORAGE_SERVICE"].to_sym
+  elsif ENV["S3_ENDPOINT"].present?
+    config.active_storage.service = :s3compatible
+  else
+    config.active_storage.service = :amazon
+  end
 
   # Use MiniMagick as the variant processor
   config.active_storage.variant_processor = :mini_magick

@@ -1,5 +1,6 @@
 class Api::ResourcesController < Api::BaseController
   # Includes
+  include ActiveStorage::SetCurrent
   include Api::Uploadable
   include UserDefinedFields::Queryable
 
