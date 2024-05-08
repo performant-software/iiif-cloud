@@ -23,6 +23,7 @@ Rails.application.routes.draw do
       member do
         get :content
         get :download
+        get :iiif
         get :inline
         get :manifest
         get :preview

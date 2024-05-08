@@ -16,6 +16,10 @@ class Public::ResourcesController < Api::ResourcesController
     redirect_resource :content_download_url
   end
 
+  def iiif
+    redirect_resource :content_iiif_url
+  end
+
   def inline
     redirect_resource :content_inline_url
   end
