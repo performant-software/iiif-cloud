@@ -21,7 +21,13 @@ Rails.application.routes.draw do
 
     resources :resources, only: [:index, :create, :show, :destroy, :update] do
       member do
+        get :content
+        get :download
+        get :iiif
+        get :inline
         get :manifest
+        get :preview
+        get :thumbnail
       end
     end
   end
