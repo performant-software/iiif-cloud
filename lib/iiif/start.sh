@@ -1,0 +1,1 @@
+java -Dcantaloupe.config=/root/cantaloupe-5.0.5/cantaloupe.properties -Xmx6g -jar /root/cantaloupe-5.0.5/cantaloupe-5.0.5.jar
