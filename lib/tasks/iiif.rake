@@ -1,10 +1,28 @@
 namespace :iiif do
 
+  desc 'Converts the source images to pyramidal TIFFs for all resources'
+  task convert_images: :environment do
+    Resource.all.in_batches do |resources|
+      resources.pluck(:id).each do |resource_id|
+        ConvertImageJob.perform_now(resource_id)
+      end
+    end
+  end
+
   desc 'Creates a new IIIF manifest for all resources'
   task create_manifests: :environment do
     Resource.all.in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
         CreateManifestJob.perform_now(resource_id)
+      end
+    end
+  end
+
+  desc 'Extracts the EXIF data from all resources'
+  task extract_exif: :environment do
+    Resource.all.in_batches do |resources|
+      resources.pluck(:id).each do |resource_id|
+        ExtractExifJob.perform_now(resource_id)
       end
     end
   end
