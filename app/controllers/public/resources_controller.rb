@@ -41,7 +41,12 @@ class Public::ResourcesController < Api::ResourcesController
 
   def redirect_resource(attribute)
     resource = Resource.find_by_uuid(params[:id])
-    redirect_to resource.send(attribute), allow_other_host: true
+    render status: :not_found and return if resource.nil?
+
+    redirect  = resource.send(attribute)
+    render status: :not_found and return if redirect.nil?
+
+    redirect_to redirect, allow_other_host: true
   end
 
   def set_project_id
