@@ -21,8 +21,10 @@ class ConvertImageJob < ApplicationJob
           content_type: 'image/tiff'
         )
 
-      rescue MiniMagick::Error
+      rescue MiniMagick::Error => e
         # Content cannot be converted
+        Rails.logger.error e.message
+        Rails.logger.error e.backtrace.join("\n")
       end
     end
   end
