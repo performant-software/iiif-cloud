@@ -103,7 +103,7 @@ module Attachable
 
         return nil if attachment.audio?
 
-        "#{self.send("#{name}_base_url")}/full/^500,/0/default.jpg"
+        "#{self.send("#{name}_base_url")}/full/^!500,500/0/default.jpg"
       end
 
       define_method("#{name}_thumbnail_url") do
@@ -112,7 +112,7 @@ module Attachable
 
         return nil if attachment.audio?
 
-        "#{self.send("#{name}_base_url")}/square/!250,250/0/default.jpg"
+        "#{self.send("#{name}_base_url")}/square/^!250,250/0/default.jpg"
       end
     end
 

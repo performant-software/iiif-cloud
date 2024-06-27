@@ -1,10 +1,64 @@
 namespace :iiif do
 
+  desc 'Converts the source images to pyramidal TIFFs for all resources'
+  task convert_images: :environment do
+    Resource.all.in_batches do |resources|
+      resources.pluck(:id).each do |resource_id|
+        ConvertImageJob.perform_now(resource_id)
+      end
+    end
+  end
+
+  desc 'Converts the source images to pyramidal TIFFs for resources with no converted content'
+  task convert_images_empty: :environment do
+    query = Resource
+              .where.not(
+                ActiveStorage::Attachment
+                  .where(ActiveStorage::Attachment.arel_table[:record_id].eq(Resource.arel_table[:id]))
+                  .where(record_type: Resource.to_s, name: 'content_converted')
+                  .arel
+                  .exists
+              )
+
+    query.in_batches do |resources|
+      resources.pluck(:id).each do |resource_id|
+        ConvertImageJob.perform_now(resource_id)
+      end
+    end
+  end
+
   desc 'Creates a new IIIF manifest for all resources'
   task create_manifests: :environment do
     Resource.all.in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
         CreateManifestJob.perform_now(resource_id)
+      end
+    end
+  end
+
+  desc 'Creates a new IIIF manifest for resources with no generated manifest'
+  task create_manifests_empty: :environment do
+    Resource.where(manifest: nil).in_batches do |resources|
+      resources.pluck(:id).each do |resource_id|
+        CreateManifestJob.perform_now(resource_id)
+      end
+    end
+  end
+
+  desc 'Extracts the EXIF data from all resources'
+  task extract_exif: :environment do
+    Resource.all.in_batches do |resources|
+      resources.pluck(:id).each do |resource_id|
+        ExtractExifJob.perform_now(resource_id)
+      end
+    end
+  end
+
+  desc 'Extracts the EXIF data from resources with no EXIF data'
+  task extract_exif_empty: :environment do
+    Resource.where(exif: nil).in_batches do |resources|
+      resources.pluck(:id).each do |resource_id|
+        ExtractExifJob.perform_now(resource_id)
       end
     end
   end

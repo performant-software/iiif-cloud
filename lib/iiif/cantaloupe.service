@@ -1,0 +1,17 @@
+[Unit]
+Description=Cantaloupe IIIF Image Server Service
+
+[Service]
+User=root
+
+# The configuration file application.properties should be here:
+
+#change this to your workspace
+WorkingDirectory=/root
+
+#path to executable.
+#executable is a bash script which calls jar file
+ExecStart=/bin/bash -c "/root/start.sh"
+
+[Install]
+WantedBy=multi-user.target
