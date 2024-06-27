@@ -4,11 +4,12 @@ Instructions for setting up a Cantaloupe IIIF instance
 ## Requirements
 - Cantaloupe 5.0
 - Java 11+
+- FFMPEG
 
 ## Install Dependencies
 
 ```bash
-sudo apt install default-jre unzip wget -y
+sudo apt install default-jre unzip wget ffmpeg -y
 ```
 
 ## Download Cantaloupe
