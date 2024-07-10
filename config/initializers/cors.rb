@@ -9,6 +9,7 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
     origins '*'
     resource '/public/resources/:id/manifest', headers: :any, methods: :get
+    resource '/public/resources/:id/content', headers: :any, methods: :get
     resource '*/rails/active_storage/blobs/redirect/*', headers: :any, methods: :get
   end
 end
