@@ -4,7 +4,7 @@ namespace :iiif do
   task convert_images: :environment do
     Resource.all.in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
-        ConvertImageJob.perform_now(resource_id)
+        ConvertImageJob.perform_later(resource_id)
       end
     end
   end
@@ -22,7 +22,7 @@ namespace :iiif do
 
     query.in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
-        ConvertImageJob.perform_now(resource_id)
+        ConvertImageJob.perform_later(resource_id)
       end
     end
   end
@@ -31,7 +31,7 @@ namespace :iiif do
   task create_manifests: :environment do
     Resource.all.in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
-        CreateManifestJob.perform_now(resource_id)
+        CreateManifestJob.perform_later(resource_id)
       end
     end
   end
@@ -40,7 +40,7 @@ namespace :iiif do
   task create_manifests_empty: :environment do
     Resource.where(manifest: nil).in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
-        CreateManifestJob.perform_now(resource_id)
+        CreateManifestJob.perform_later(resource_id)
       end
     end
   end
@@ -49,7 +49,7 @@ namespace :iiif do
   task extract_exif: :environment do
     Resource.all.in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
-        ExtractExifJob.perform_now(resource_id)
+        ExtractExifJob.perform_later(resource_id)
       end
     end
   end
@@ -58,7 +58,7 @@ namespace :iiif do
   task extract_exif_empty: :environment do
     Resource.where(exif: nil).in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
-        ExtractExifJob.perform_now(resource_id)
+        ExtractExifJob.perform_later(resource_id)
       end
     end
   end
