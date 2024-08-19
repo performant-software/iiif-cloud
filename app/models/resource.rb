@@ -32,6 +32,20 @@ class Resource < ApplicationRecord
   alias_method :attachable_content_iiif_url, :content_iiif_url
   alias_method :attachable_content_thumbnail_url, :content_thumbnail_url
 
+  def self.with_attachment(name)
+    subquery = attachment_subquery(name)
+    subquery = yield subquery if block_given?
+
+    where(subquery.arel.exists)
+  end
+
+  def self.without_attachment(name)
+    subquery = attachment_subquery(name)
+    subquery = yield subquery if block_given?
+
+    where.not(subquery.arel.exists)
+  end
+
   def content_base_url
     return attachable_content_base_url unless content_converted.attached?
 
@@ -71,6 +85,13 @@ class Resource < ApplicationRecord
   end
 
   private
+
+  def self.attachment_subquery(name)
+    ActiveStorage::Attachment
+      .where(ActiveStorage::Attachment.arel_table[:record_id].eq(Resource.arel_table[:id]))
+      .where(record_type: Resource.to_s)
+      .where(name: name)
+  end
 
   def after_create
     # Convert the image to a TIFF

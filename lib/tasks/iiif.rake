@@ -2,7 +2,14 @@ namespace :iiif do
 
   desc 'Converts the source images to pyramidal TIFFs for all resources'
   task convert_images: :environment do
-    Resource.all.in_batches do |resources|
+    query = Resource.with_attachment('content') do |subquery|
+      subquery
+        .joins(:blob)
+        .where('active_storage_blobs.byte_size > ?', 0)
+        .where('active_storage_blobs.content_type ILIKE \'%image%\'')
+    end
+
+    query.in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
         ConvertImageJob.perform_later(resource_id)
       end
@@ -12,13 +19,45 @@ namespace :iiif do
   desc 'Converts the source images to pyramidal TIFFs for resources with no converted content'
   task convert_images_empty: :environment do
     query = Resource
-              .where.not(
-                ActiveStorage::Attachment
-                  .where(ActiveStorage::Attachment.arel_table[:record_id].eq(Resource.arel_table[:id]))
-                  .where(record_type: Resource.to_s, name: 'content_converted')
-                  .arel
-                  .exists
-              )
+              .without_attachment('content_converted')
+              .with_attachment('content') do |subquery|
+                subquery
+                  .joins(:blob)
+                  .where('active_storage_blobs.byte_size > ?', 0)
+                  .where('active_storage_blobs.content_type ILIKE \'%image%\'')
+              end
+
+    query.in_batches do |resources|
+      resources.pluck(:id).each do |resource_id|
+        ConvertImageJob.perform_later(resource_id)
+      end
+    end
+  end
+
+  desc 'Converts the source images to pyramidal TIFFs for resources by the specified MIME type'
+  task convert_images_by_type: :environment do
+    # Parse the arguments
+    options = {}
+
+    opt_parser = OptionParser.new do |opts|
+      opts.banner = 'Usage: rake iiif:convert_images_by_type [options]'
+      opts.on('-t', '--type ARG', 'Image MIME type') { |type| options[:type] = type }
+    end
+
+    args = opt_parser.order!(ARGV) {}
+    opt_parser.parse!(args)
+
+    if options[:type].blank?
+      puts 'Please specify a MIME type...'
+      exit 0
+    end
+
+    query = Resource.with_attachment('content') do |subquery|
+      subquery
+        .joins(:blob)
+        .where('active_storage_blobs.byte_size > ?', 0)
+        .where('active_storage_blobs.content_type = ?', options[:type])
+    end
 
     query.in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
