@@ -16,6 +16,8 @@ module Images
       convert << '8'
       convert << '-compress'
       convert << 'jpeg'
+      convert << '-alpha'
+      convert << 'remove'
       convert << "ptif:#{output_path}"
       convert.call
 
