@@ -86,7 +86,15 @@ namespace :iiif do
 
   desc 'Extracts the EXIF data from all resources'
   task extract_exif: :environment do
-    Resource.all.in_batches do |resources|
+    query = Resource
+              .with_attachment('content') do |subquery|
+                subquery
+                  .joins(:blob)
+                  .where('active_storage_blobs.byte_size > ?', 0)
+                  .where('active_storage_blobs.content_type ILIKE \'%image%\'')
+              end
+
+    query.in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
         ExtractExifJob.perform_later(resource_id)
       end
@@ -95,7 +103,16 @@ namespace :iiif do
 
   desc 'Extracts the EXIF data from resources with no EXIF data'
   task extract_exif_empty: :environment do
-    Resource.where(exif: nil).in_batches do |resources|
+    query = Resource
+              .where(exif: nil)
+              .with_attachment('content') do |subquery|
+                subquery
+                  .joins(:blob)
+                  .where('active_storage_blobs.byte_size > ?', 0)
+                  .where('active_storage_blobs.content_type ILIKE \'%image%\'')
+              end
+
+    query.in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
         ExtractExifJob.perform_later(resource_id)
       end
