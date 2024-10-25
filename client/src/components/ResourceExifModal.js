@@ -20,32 +20,14 @@ const ResourceExifModal: ComponentType<any> = (props: Props) => {
   const { t } = useTranslation();
 
   /**
-   * Renders the header component and table structure.
+   * Renders the passed value as formatted JSON.
    *
-   * @type {function([*,*])}
+   * @type {unknown}
    */
-  const renderHeader = useCallback(([key, value]) => (
-    <>
-      <Header
-        content={key}
-      />
-      <Table
-        columns={2}
-        padded
-        striped
-      >
-        <Table.Body>
-          { _.map(Object.entries(value), renderItem) }
-          { _.isEmpty(value) && (
-            <Table.Row>
-              <Table.Cell>
-                No records
-              </Table.Cell>
-            </Table.Row>
-          )}
-        </Table.Body>
-      </Table>
-    </>
+  const renderJson = useCallback((value) => (
+    <pre>
+      { JSON.stringify(value, undefined, 2) }
+    </pre>
   ), []);
 
   /**
@@ -53,12 +35,20 @@ const ResourceExifModal: ComponentType<any> = (props: Props) => {
    *
    * @type {function([*,*])}
    */
-  const renderItem = useCallback(([key, value]) => (
-    <Table.Row>
-      <Table.Cell>{ key }</Table.Cell>
-      <Table.Cell>{ value }</Table.Cell>
-    </Table.Row>
-  ), []);
+  const renderItem = useCallback(([key, value]) => {
+    let content = value;
+
+    if (_.isObject(value)) {
+      content = renderJson(value);
+    }
+
+    return (
+      <Table.Row>
+        <Table.Cell>{ key }</Table.Cell>
+        <Table.Cell>{ content }</Table.Cell>
+      </Table.Row>
+    );
+  }, [renderJson]);
 
   return (
     <Modal
@@ -85,8 +75,18 @@ const ResourceExifModal: ComponentType<any> = (props: Props) => {
           </Grid.Column>
         </Grid>
       </Modal.Header>
-      <Modal.Content>
-        { _.map(Object.entries(props.exif), renderHeader) }
+      <Modal.Content
+        scrolling
+      >
+        <Table
+          columns={2}
+          padded
+          striped
+        >
+          <Table.Body>
+            { _.map(Object.entries(props.exif), renderItem) }
+          </Table.Body>
+        </Table>
       </Modal.Content>
       <Modal.Actions>
         <Button
