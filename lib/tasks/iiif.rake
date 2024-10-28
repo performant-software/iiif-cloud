@@ -34,6 +34,33 @@ namespace :iiif do
     end
   end
 
+  desc ''
+  task convert_images_by_colorspace: :environment do
+    # Parse the arguments
+    options = {}
+
+    opt_parser = OptionParser.new do |opts|
+      opts.banner = 'Usage: rake iiif:convert_images_by_colorspace [options]'
+      opts.on('-c', '--colorspace ARG', 'Image colorspace') { |colorspace| options[:colorspace] = colorspace }
+    end
+
+    args = opt_parser.order!(ARGV) {}
+    opt_parser.parse!(args)
+
+    if options[:colorspace].blank?
+      puts 'Please specify a colorspace...'
+      exit 0
+    end
+
+    query = Resource.where("(exif::json)->>'colorspace' = ?", options[:colorspace])
+
+    query.in_batches do |resources|
+      resources.pluck(:id).each do |resource_id|
+        ConvertImageJob.perform_later(resource_id)
+      end
+    end
+  end
+
   desc 'Converts the source images to pyramidal TIFFs for resources by the specified MIME type'
   task convert_images_by_type: :environment do
     # Parse the arguments
