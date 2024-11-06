@@ -40,7 +40,8 @@ services:
       - RAILS_ENV=$RAILS_ENV
       - HOSTNAME=$HOSTNAME
       - SECRET_KEY_BASE=$SECRET_KEY_BASE
-#      - S3_ENDPOINT=$S3_ENDPOINT
+      - STORAGE_SERVICE=$STORAGE_SERVICE
+      - S3_ENDPOINT=$S3_ENDPOINT
     networks:
       - default
       - shared
