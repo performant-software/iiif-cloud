@@ -18,6 +18,8 @@ module Images
       convert << 'jpeg'
       convert << '-alpha'
       convert << 'remove'
+      convert << '-colorspace'
+      convert << 'sRGB'
       convert << "ptif:#{output_path}"
       convert.call
 

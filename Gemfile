@@ -39,9 +39,6 @@ gem 'aws-sdk-s3'
 # Image processing
 gem 'mini_magick', '~> 4.11'
 
-# EXIF data
-gem 'exif', '~> 2.2.3'
-
 # HTTP requests
 gem 'httparty', '~> 0.17.3'
 
