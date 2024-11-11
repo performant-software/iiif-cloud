@@ -43,6 +43,7 @@ services:
       - SECRET_KEY_BASE=$SECRET_KEY_BASE
       - STORAGE_SERVICE=$STORAGE_SERVICE
       - S3_ENDPOINT=$S3_ENDPOINT
+      - S3_FORCE_PATH_STYLE=$S3_FORCE_PATH_STYLE
     networks:
       - default
       - shared
