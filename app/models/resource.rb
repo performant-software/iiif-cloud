@@ -53,18 +53,30 @@ class Resource < ApplicationRecord
   end
 
   def content_iiif_url(page_number = 1)
+    # Image files must return the converted TIF URL
+    return content_converted_iiif_url(page_number) if image?
+
+    # Only IIIF resources will return a content_iiif_url
     return attachable_content_iiif_url(page_number) if iiif?
 
     nil
   end
 
   def content_preview_url
+    # Image files must return the converted TIF URL
+    return content_converted_preview_url if image?
+
+    # Only IIIF resources will return a content_preview_url
     return attachable_content_preview_url if iiif?
 
     nil
   end
 
   def content_thumbnail_url
+    # Image files must return the converted TIF URL
+    return content_converted_thumbnail_url if image?
+
+    # Only IIIF resources will return a content_thumbnail_url
     return attachable_content_thumbnail_url if iiif?
 
     nil
