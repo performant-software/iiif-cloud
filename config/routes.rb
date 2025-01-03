@@ -24,6 +24,7 @@ Rails.application.routes.draw do
         get :content
         get :download
         get :iiif
+        get :info
         get :inline
         get :manifest
         get :preview

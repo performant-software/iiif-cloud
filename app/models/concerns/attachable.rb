@@ -90,6 +90,15 @@ module Attachable
         attachment.url(disposition: 'attachment')
       end
 
+      define_method("#{name}_info_url") do |page_number = nil|
+        attachment = self.send(name)
+        return nil unless attachment.attached?
+
+        return nil if attachment.audio?
+
+        "#{self.send("#{name}_base_url")}#{page_number.nil? ? '' : ";#{page_number}"}/info.json"
+      end
+
       define_method("#{name}_inline_url") do
         attachment = self.send(name)
         return nil unless attachment.attached?
