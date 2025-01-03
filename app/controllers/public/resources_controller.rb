@@ -6,7 +6,7 @@ class Public::ResourcesController < Api::ResourcesController
   prepend_before_action :set_project_id, only: :index
   prepend_before_action :set_resource_id, only: [:show, :destroy, :update]
   prepend_before_action :set_resource_project_id, only: [:create, :update]
-  skip_before_action :authenticate_request, only: [:content, :download, :iiif, :inline, :manifest, :preview, :thumbnail]
+  skip_before_action :authenticate_request, only: [:content, :download, :iiif, :info, :inline, :manifest, :preview, :thumbnail]
 
   def content
     redirect_resource :content_url
@@ -17,7 +17,11 @@ class Public::ResourcesController < Api::ResourcesController
   end
 
   def iiif
-    redirect_resource :content_iiif_url
+    redirect_resource :content_converted_iiif_url
+  end
+
+  def info
+    redirect_resource :content_converted_info_url
   end
 
   def inline
@@ -30,11 +34,11 @@ class Public::ResourcesController < Api::ResourcesController
   end
 
   def preview
-    redirect_resource :content_preview_url
+    redirect_resource :content_converted_preview_url
   end
 
   def thumbnail
-    redirect_resource :content_thumbnail_url
+    redirect_resource :content_converted_thumbnail_url
   end
 
   private

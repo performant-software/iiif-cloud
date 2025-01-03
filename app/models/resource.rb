@@ -30,6 +30,7 @@ class Resource < ApplicationRecord
   alias_method :attachable_content_base_url, :content_base_url
   alias_method :attachable_content_preview_url, :content_preview_url
   alias_method :attachable_content_iiif_url, :content_iiif_url
+  alias_method :attachable_content_info_url, :content_info_url
   alias_method :attachable_content_thumbnail_url, :content_thumbnail_url
 
   def self.with_attachment(name)
@@ -53,30 +54,24 @@ class Resource < ApplicationRecord
   end
 
   def content_iiif_url(page_number = 1)
-    # Image files must return the converted TIF URL
-    return content_converted_iiif_url(page_number) if image?
-
-    # Only IIIF resources will return a content_iiif_url
     return attachable_content_iiif_url(page_number) if iiif?
 
     nil
   end
 
-  def content_preview_url
-    # Image files must return the converted TIF URL
-    return content_converted_preview_url if image?
+  def content_info_url(page_number = 1)
+    return attachable_content_info_url(page_number) if iiif?
 
-    # Only IIIF resources will return a content_preview_url
+    nil
+  end
+
+  def content_preview_url
     return attachable_content_preview_url if iiif?
 
     nil
   end
 
   def content_thumbnail_url
-    # Image files must return the converted TIF URL
-    return content_converted_thumbnail_url if image?
-
-    # Only IIIF resources will return a content_thumbnail_url
     return attachable_content_thumbnail_url if iiif?
 
     nil
