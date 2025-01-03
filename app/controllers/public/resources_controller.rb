@@ -9,23 +9,23 @@ class Public::ResourcesController < Api::ResourcesController
   skip_before_action :authenticate_request, only: [:content, :download, :iiif, :info, :inline, :manifest, :preview, :thumbnail]
 
   def content
-    redirect_resource :content_url
+    redirect_resource { :content_url }
   end
 
   def download
-    redirect_resource :content_download_url
+    redirect_resource { :content_download_url }
   end
 
   def iiif
-    redirect_resource :content_converted_iiif_url
+    redirect_resource { |resource| resource.image? ? :content_converted_iiif_url : :content_iiif_url }
   end
 
   def info
-    redirect_resource :content_converted_info_url
+    redirect_resource { |resource| resource.image? ? :content_converted_iiif_url : :content_iiif_url }
   end
 
   def inline
-    redirect_resource :content_inline_url
+    redirect_resource { :content_inline_url }
   end
 
   def manifest
@@ -34,19 +34,21 @@ class Public::ResourcesController < Api::ResourcesController
   end
 
   def preview
-    redirect_resource :content_converted_preview_url
+    redirect_resource { |resource| resource.image? ? :content_converted_preview_url : :content_iiif_url }
   end
 
   def thumbnail
-    redirect_resource :content_converted_thumbnail_url
+    redirect_resource { |resource| resource.image? ? :content_converted_thumbnail_url : :content_thumbnail_url }
   end
 
   private
 
-  def redirect_resource(attribute)
+  def redirect_resource
     resource = Resource.find_by_uuid(params[:id])
     render status: :not_found and return if resource.nil?
 
+    attribute = yield resource
+    
     redirect  = resource.send(attribute)
     render status: :not_found and return if redirect.nil?
 
