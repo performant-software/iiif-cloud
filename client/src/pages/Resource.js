@@ -1,7 +1,6 @@
 // @flow
 
 import { LazyIIIF } from '@performant-software/semantic-components';
-import { IIIF as IIIFUtils } from '@performant-software/shared-components';
 import { UserDefinedFieldsForm, UserDefinedFields } from '@performant-software/user-defined-fields';
 import React, {
   useEffect,
@@ -45,13 +44,6 @@ const ResourceForm = withTranslation()((props) => {
   }, [props.item.exif]);
 
   /**
-   * Creates the manifest ID based on the blob content.
-   *
-   * @type {string}
-   */
-  const manifest = useMemo(() => IIIFUtils.createManifestURL(props.item.manifest), [props.item.manifest]);
-
-  /**
    * Loads the related project record.
    */
   useEffect(() => {
@@ -83,7 +75,7 @@ const ResourceForm = withTranslation()((props) => {
           <LazyIIIF
             contentType={props.item.content_type}
             downloadUrl={props.item.content_download_url}
-            manifest={manifest}
+            manifest={props.item.manifest_url}
             onUpload={(file) => props.onSetState({
               name: file.name,
               content: file
