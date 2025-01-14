@@ -115,6 +115,7 @@
   },
   "Resource": {
     "buttons": {
+      "convert": "Convert",
       "exif": "View Info"
     },
     "labels": {
@@ -123,6 +124,12 @@
       "convertedImage": "Converted PTIF",
       "sourceImage": "Source Image",
       "uuid": "Unique identifier"
+    },
+    "messages": {
+      "convert": {
+        "content": "A request to convert the resource to a PTIF has been submitted. Please refresh the page to view the results.",
+        "header": "Convert Resource"
+      }
     }
   },
   "ResourceExifModal": {

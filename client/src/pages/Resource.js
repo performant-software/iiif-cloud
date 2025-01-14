@@ -1,8 +1,10 @@
 // @flow
 
-import { LazyIIIF } from '@performant-software/semantic-components';
+import cx from 'classnames';
+import { LazyIIIF, Toaster } from '@performant-software/semantic-components';
 import { UserDefinedFieldsForm, UserDefinedFields } from '@performant-software/user-defined-fields';
 import React, {
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -15,8 +17,12 @@ import {
   Form,
   Header,
   Menu,
+  Message,
   Segment
 } from 'semantic-ui-react';
+import AttachmentDetails from '../components/AttachmentDetails';
+import AttachmentStatus from '../components/AttachmentStatus';
+import AuthenticationService from '../services/Authentication';
 import ProjectsService from '../services/Projects';
 import ReadOnlyField from '../components/ReadOnlyField';
 import ResourceExifModal from '../components/ResourceExifModal';
@@ -24,9 +30,6 @@ import ResourcesService from '../services/Resources';
 import SimpleEditPage from '../components/SimpleEditPage';
 import styles from './Resource.module.css';
 import withEditPage from '../hooks/EditPage';
-import AttachmentStatus from '../components/AttachmentStatus';
-import cx from 'classnames';
-import AttachmentDetails from '../components/AttachmentDetails';
 
 const Tabs = {
   content: 'content',
@@ -34,9 +37,11 @@ const Tabs = {
 };
 
 const ResourceForm = withTranslation()((props) => {
-  const [tab, setTab] = useState(Tabs.content);
+  const [converted, setConverted] = useState(false);
+  const [errors, setErrors] = useState([]);
   const [info, setInfo] = useState(false);
   const [project, setProject] = useState();
+  const [tab, setTab] = useState(Tabs.content);
 
   const { projectId } = useParams();
 
@@ -70,6 +75,18 @@ const ResourceForm = withTranslation()((props) => {
   }, [props.item.exif]);
 
   /**
+   * Calls the `/api/resources/:id/convert API endpoint and sets any errors on the state.
+   *
+   * @type {function(): Promise<*>}
+   */
+  const onConvert = useCallback(() => (
+    ResourcesService
+      .convert(props.item.id)
+      .then(() => setConverted(true))
+      .catch(({ response: { data } }) => setErrors(data.errors))
+  ), [props.item.id]);
+
+  /**
    * Loads the related project record.
    */
   useEffect(() => {
@@ -89,8 +106,9 @@ const ResourceForm = withTranslation()((props) => {
 
   return (
     <SimpleEditPage
-      className={styles.resource}
       {...props}
+      className={styles.resource}
+      errors={[...props.errors, ...errors]}
     >
       <SimpleEditPage.Tab
         key='details'
@@ -182,10 +200,38 @@ const ResourceForm = withTranslation()((props) => {
                 value={!!props.item.content_converted_info}
               />
             </Menu.Item>
+            { AuthenticationService.isAdmin() && (
+              <Menu.Menu
+                position='right'
+              >
+                <Menu.Item
+                  as={Button}
+                >
+                  <Button
+                    content={props.t('Resource.buttons.convert')}
+                    icon='exchange'
+                    onClick={onConvert}
+                  />
+                </Menu.Item>
+              </Menu.Menu>
+            )}
           </Menu>
           <AttachmentDetails
             attachment={attachment}
           />
+          { converted && (
+            <Toaster
+              onDismiss={() => setConverted(false)}
+              type={Toaster.MessageTypes.info}
+            >
+              <Message.Header
+                content={props.t('Resource.messages.convert.header')}
+              />
+              <Message.Content
+                content={props.t('Resource.messages.convert.content')}
+              />
+            </Toaster>
+          )}
         </Segment>
       </SimpleEditPage.Tab>
     </SimpleEditPage>

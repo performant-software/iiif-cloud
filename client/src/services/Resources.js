@@ -9,6 +9,17 @@ import type { Resource as ResourceType } from '../types/Resource';
  */
 class Resources extends BaseService {
   /**
+   * Calls the `/api/resources/:id/convert` API endpoint.
+   *
+   * @param id
+   *
+   * @returns {*}
+   */
+  convert(id: number): Promise<any> {
+    return this.getAxios().post(`${this.getBaseUrl()}/${id}/convert`);
+  }
+
+  /**
    * Returns the resources base URL.
    *
    * @returns {string}
