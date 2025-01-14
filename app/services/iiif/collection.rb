@@ -21,6 +21,10 @@ module Iiif
 
     private
 
+    def self.base_url(resource)
+      "#{ENV['HOSTNAME']}/public/resources/#{resource.uuid}"
+    end
+
     def self.to_item(item, resource)
       collection_item = item.slice(:id, :type)
 
@@ -34,7 +38,7 @@ module Iiif
 
       if resource.present?
         collection_item[:thumbnail] = [{
-          id: resource.content_thumbnail_url,
+          id: "#{base_url(resource)}/thumbnail",
           type: 'Image',
           format: 'image/jpeg',
           width: 250,

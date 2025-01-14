@@ -50,11 +50,11 @@ module Iiif
 
     def self.create_annotation(resource, target, page_number)
       annotation = to_json('annotation.json')
-      annotation['id'] = "#{base_url(resource)}/page/#{page_number}/annotation_page/1/annotation/1"
+      annotation['id'] = "#{base_url(resource)}/canvas/#{page_number}/page/1/annotation/1"
       annotation['target'] = target
 
       if resource.image? || resource.pdf?
-        id = resource.content_iiif_url(page_number)
+        id = "#{base_url(resource)};#{page_number}/iiif"
       else
         id = resource.content_url
       end
@@ -73,7 +73,7 @@ module Iiif
 
       if resource.image? || resource.pdf?
         annotation['body']['service'] = [{
-          id: "#{resource.content_base_url};#{page_number}",
+          id: "#{base_url(resource)};#{page_number}",
           type: 'ImageService3',
           profile: 'http://iiif.io/api/image/3/level2.json'
         }]
@@ -84,7 +84,7 @@ module Iiif
 
     def self.create_canvas(resource, width, height, page_number)
       canvas = to_json('canvas.json')
-      canvas['id'] = "#{base_url(resource)}/page/#{page_number}"
+      canvas['id'] = "#{base_url(resource)}/canvas/#{page_number}"
       canvas['width'] = width
       canvas['height'] = height
       canvas['label'] = {
@@ -94,7 +94,7 @@ module Iiif
       }
 
       canvas['items'] = [{
-        id: "#{base_url(resource)}/page/#{page_number}/annotation_page/1",
+        id: "#{base_url(resource)}/canvas/#{page_number}/page/1",
         type: 'AnnotationPage',
         items: [create_annotation(resource, canvas['id'], page_number)]
       }]
