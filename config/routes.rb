@@ -5,6 +5,7 @@ Rails.application.routes.draw do
     resources :organizations
     resources :projects
     resources :resources do
+      post :clear_cache, on: :member
       post :convert, on: :member
       post :upload, on: :collection
     end

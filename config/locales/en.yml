@@ -37,6 +37,7 @@ en:
       manifest_invalid: "Invalid parameters for creating a IIIF manifest."
 
     resources_controller:
+      clear_cache: "You do not have permissions to clear resource cache."
       convert: "You do not have permissions to convert resources."
 
     unauthenticated: "You must be authenticate to access."
