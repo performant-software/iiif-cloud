@@ -16,6 +16,15 @@ class Api::ResourcesController < Api::BaseController
   before_action :validate_resource, unless: -> { current_user.admin? }, only: [:update, :destroy]
   before_action :validate_resources, unless: -> { current_user.admin? }, only: :index
 
+  def convert
+    render json: { errors: [I18n.t('errors.resources_controller.convert')] }, status: :unauthorized and return unless current_user.admin?
+
+    resource = Resource.find(params[:id])
+    ConvertImageJob.perform_later(resource.id)
+
+    render json: {}, status: :ok
+  end
+
   protected
 
   def base_query

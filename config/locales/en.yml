@@ -36,5 +36,8 @@ en:
       collection_invalid: "Invalid parameters for creating a IIIF collection."
       manifest_invalid: "Invalid parameters for creating a IIIF manifest."
 
+    resources_controller:
+      convert: "You do not have permissions to convert resources."
+
     unauthenticated: "You must be authenticate to access."
     unauthorized: "You do not have access to this record."
