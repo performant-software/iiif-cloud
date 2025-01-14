@@ -1,3 +1,9 @@
 .resource .ui.menu i.icon.attachmentStatus {
   margin-left: 0.5em;
 }
+
+.resource .actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2em;
+}

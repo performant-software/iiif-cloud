@@ -115,6 +115,7 @@
   },
   "Resource": {
     "buttons": {
+      "clearCache": "Clear cache",
       "convert": "Convert",
       "exif": "View Info"
     },
@@ -126,6 +127,10 @@
       "uuid": "Unique identifier"
     },
     "messages": {
+      "cache": {
+        "content": "Successfully removed the {{tab}} from IIIF cache.",
+        "header": "Cache Cleared"
+      },
       "convert": {
         "content": "A request to convert the resource to a PTIF has been submitted. Please refresh the page to view the results.",
         "header": "Convert Resource"

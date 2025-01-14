@@ -37,6 +37,7 @@ const Tabs = {
 };
 
 const ResourceForm = withTranslation()((props) => {
+  const [cacheCleared, setCacheCleared] = useState(false);
   const [converted, setConverted] = useState(false);
   const [errors, setErrors] = useState([]);
   const [info, setInfo] = useState(false);
@@ -73,6 +74,18 @@ const ResourceForm = withTranslation()((props) => {
 
     return value;
   }, [props.item.exif]);
+
+  /**
+   * Calls the `/api/resources/:id/clear_cache API endpoint and sets any errors on the state.
+   *
+   * @type {function(): Promise<*>}
+   */
+  const onClearCache = useCallback(() => (
+    ResourcesService
+      .clearCache(props.item.id, tab)
+      .then(() => setCacheCleared(true))
+      .catch(({ response: { data } }) => setErrors(data.errors))
+  ), [tab, props.item.id]);
 
   /**
    * Calls the `/api/resources/:id/convert API endpoint and sets any errors on the state.
@@ -172,6 +185,7 @@ const ResourceForm = withTranslation()((props) => {
         />
         <Segment
           padded
+          secondary
         >
           <Menu
             className={cx(styles.ui, styles.menu)}
@@ -206,19 +220,28 @@ const ResourceForm = withTranslation()((props) => {
               >
                 <Menu.Item
                   as={Button}
-                >
-                  <Button
-                    content={props.t('Resource.buttons.convert')}
-                    icon='exchange'
-                    onClick={onConvert}
-                  />
-                </Menu.Item>
+                  content={props.t('Resource.buttons.convert')}
+                  icon='exchange'
+                  onClick={onConvert}
+                />
               </Menu.Menu>
             )}
           </Menu>
           <AttachmentDetails
             attachment={attachment}
           />
+          { AuthenticationService.isAdmin() && attachment && (
+            <div
+              className={styles.actions}
+            >
+              <Button
+                color='red'
+                content={props.t('Resource.buttons.clearCache')}
+                icon='trash'
+                onClick={onClearCache}
+              />
+            </div>
+          )}
           { converted && (
             <Toaster
               onDismiss={() => setConverted(false)}
@@ -229,6 +252,19 @@ const ResourceForm = withTranslation()((props) => {
               />
               <Message.Content
                 content={props.t('Resource.messages.convert.content')}
+              />
+            </Toaster>
+          )}
+          { cacheCleared && (
+            <Toaster
+              onDismiss={() => setCacheCleared(false)}
+              type={Toaster.MessageTypes.positive}
+            >
+              <Message.Header
+                content={props.t('Resource.messages.cache.header')}
+              />
+              <Message.Content
+                content={props.t('Resource.messages.cache.content', { tab })}
               />
             </Toaster>
           )}
