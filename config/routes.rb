@@ -2,7 +2,8 @@ Rails.application.routes.draw do
   mount UserDefinedFields::Engine, at: '/user_defined_fields'
 
   namespace :api do
-    get 'dashboard/status', to: "dashboard#status"
+    get 'dashboard/heap', to: 'dashboard#heap'
+    get 'dashboard/status', to: 'dashboard#status'
 
     resources :organizations
     resources :projects

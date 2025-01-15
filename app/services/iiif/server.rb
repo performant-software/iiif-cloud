@@ -28,9 +28,15 @@ module Iiif
     end
 
     def parse_response(response)
+      if response.body.nil? || response.body.empty?
+        body = '{}'
+      else
+        body = response.body
+      end
+
       {
         success?: response.success?,
-        data: JSON.parse(response.body, symbolize_names: true),
+        data: JSON.parse(body, symbolize_names: true),
         errors: response['exception'] || response['message'] || response['errors']
       }
     end

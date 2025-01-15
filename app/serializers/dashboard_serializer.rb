@@ -1,4 +1,11 @@
 class DashboardSerializer
+  def heap(info)
+    {
+      used: info.dig(:vm, :usedHeapBytes),
+      max: info.dig(:vm, :maxHeapBytes)
+    }
+  end
+
   def status(color, info)
     {
       application: {
