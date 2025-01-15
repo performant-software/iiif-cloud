@@ -21,13 +21,13 @@ import {
   Segment
 } from 'semantic-ui-react';
 import AttachmentDetails from '../components/AttachmentDetails';
-import AttachmentStatus from '../components/AttachmentStatus';
 import AuthenticationService from '../services/Authentication';
 import ProjectsService from '../services/Projects';
 import ReadOnlyField from '../components/ReadOnlyField';
 import ResourceExifModal from '../components/ResourceExifModal';
 import ResourcesService from '../services/Resources';
 import SimpleEditPage from '../components/SimpleEditPage';
+import StatusIcon from '../components/StatusIcon';
 import styles from './Resource.module.css';
 import withEditPage from '../hooks/EditPage';
 
@@ -198,9 +198,9 @@ const ResourceForm = withTranslation()((props) => {
               onClick={() => setTab(Tabs.content)}
             >
               { props.t('Resource.labels.sourceImage') }
-              <AttachmentStatus
+              <StatusIcon
                 className={cx(styles.icon, styles.attachmentStatus)}
-                value={!!props.item.content_info}
+                status={props.item.content_info ? 'positive' : 'negative'}
               />
             </Menu.Item>
             <Menu.Item
@@ -209,9 +209,9 @@ const ResourceForm = withTranslation()((props) => {
               onClick={() => setTab(Tabs.content_converted)}
             >
               { props.t('Resource.labels.convertedImage') }
-              <AttachmentStatus
+              <StatusIcon
                 className={cx(styles.icon, styles.attachmentStatus)}
-                value={!!props.item.content_converted_info}
+                status={props.item.content_converted_info ? 'positive' : 'negative'}
               />
             </Menu.Item>
             { AuthenticationService.isAdmin() && (

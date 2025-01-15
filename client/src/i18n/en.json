@@ -178,6 +178,17 @@
       "header": "Password Policy"
     }
   },
+  "SystemStatus": {
+    "labels": {
+      "application": "Application",
+      "operatingSystem": "Operating system",
+      "processors": "Processors",
+      "version": "Version",
+      "vm": "VM",
+      "vmVersion": "VM version"
+    },
+    "title": "System Status"
+  },
   "UserModal": {
     "labels": {
       "user": "User"

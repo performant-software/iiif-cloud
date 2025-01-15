@@ -1,0 +1,8 @@
+.gridItem .label {
+  color: rgba(0, 0, 0, .6);
+  padding-top: 0.25em;
+}
+
+.gridItem .value {
+  font-weight: bold;
+}
