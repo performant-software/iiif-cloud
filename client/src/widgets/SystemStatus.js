@@ -1,23 +1,19 @@
 // @flow
 
-import cx from 'classnames';
 import React, {
+  useCallback,
   useEffect,
   useMemo,
   useState,
   type ComponentType
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Dimmer,
-  Grid,
-  Header,
-  Loader
-} from 'semantic-ui-react';
+import { Grid } from 'semantic-ui-react';
 import AttributeView from '../components/AttributeView';
 import DashboardService from '../services/Dashboard';
 import StatusIcon from '../components/StatusIcon';
 import styles from './SystemStatus.module.css';
+import Widget from '../components/Widget';
 
 const StatusColors = {
   green: 'GREEN',
@@ -47,7 +43,7 @@ const SystemStatus: ComponentType<any> = () => {
   /**
    * Calls the `/api/dashboard/status` API endpoint and sets the data on the state.
    */
-  useEffect(() => {
+  const onLoad = useCallback(() => {
     setLoading(true);
 
     DashboardService
@@ -56,27 +52,30 @@ const SystemStatus: ComponentType<any> = () => {
       .finally(() => setLoading(false));
   }, []);
 
+  /**
+   * Calls the onLoad function when the component is mounted.
+   */
+  useEffect(() => onLoad(), [onLoad]);
+
   return (
-    <div
+    <Widget
       className={styles.systemStatus}
+      loading={loading}
+      onReload={onLoad}
+      title={(
+        <>
+          { t('SystemStatus.title') }
+          <StatusIcon
+            className={styles.statusIcon}
+            status={status}
+          />
+        </>
+      )}
     >
-      <Dimmer
-        active={loading}
-        inverted
-      >
-        <Loader />
-      </Dimmer>
-      <Header
-        className={cx(styles.ui, styles.header)}
-      >
-        { t('SystemStatus.title') }
-        <StatusIcon
-          className={styles.statusIcon}
-          status={status}
-        />
-      </Header>
       { data && (
-        <Grid columns={3}>
+        <Grid
+          columns={3}
+        >
           <Grid.Column>
             <AttributeView
               label={t('SystemStatus.labels.application')}
@@ -115,7 +114,7 @@ const SystemStatus: ComponentType<any> = () => {
           </Grid.Column>
         </Grid>
       )}
-    </div>
+    </Widget>
   );
 };
 

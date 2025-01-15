@@ -58,6 +58,13 @@
       "name": "Name"
     }
   },
+  "HeapSpace": {
+    "labels": {
+      "free": "Free",
+      "used": "Used"
+    },
+    "title": "Heap Space"
+  },
   "Home": {
     "header": "Welcome to Rails-React Template <1>Edit <1>src/App.js</1> and save to reload.</1>"
   },

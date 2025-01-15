@@ -60,6 +60,15 @@ class Dashboard extends BaseService {
   }
 
   /**
+   * Calls the `/api/dashboard/heap` API endpoint.
+   *
+   * @returns {*}
+   */
+  heap(): Promise<any> {
+    return this.getAxios().get(`${this.getBaseUrl()}/heap`, null, this.getConfig());
+  }
+
+  /**
    * Not implemented.
    *
    * @param args

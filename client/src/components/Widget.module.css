@@ -1,0 +1,16 @@
+.widget > .headerContainer {
+  display: flex;
+  justify-content: space-between;
+}
+
+.widget > .headerContainer > .ui.header {
+  margin-top: 0;
+}
+
+.widget > .headerContainer > .ui.button.reload,
+.widget > .headerContainer > .ui.button.reload:active,
+.widget > .headerContainer > .ui.button.reload:hover,
+.widget > .headerContainer > .ui.button.reload:focus {
+  background: none !important;
+  box-shadow: none !important;
+}

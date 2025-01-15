@@ -25,6 +25,7 @@
     "react-router-dom": "^6.3.0",
     "react-scripts": "5.0.1",
     "react-uuid": "^1.0.2",
+    "recharts": "^2.15.0",
     "semantic-ui-react": "^2.1.2",
     "underscore": "^1.13.3"
   },

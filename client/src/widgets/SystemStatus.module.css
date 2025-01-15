@@ -1,11 +1,3 @@
 .systemStatus .statusIcon {
   margin-left: 0.25em;
 }
-
-.systemStatus > .ui.header {
-  margin-top: 0;
-}
-
-.systemStatus > .ui.list.horizontal > .listItem {
-  margin-right: 2em;
-}
