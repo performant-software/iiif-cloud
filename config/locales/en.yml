@@ -30,7 +30,13 @@
 # available at https://guides.rubyonrails.org/i18n.html.
 
 en:
+  dashboard_serializer:
+    application_name: Cantaloupe
+
   errors:
+
+    dashboard_controller:
+      unauthorized: "You do not have access to the system dashboard."
 
     presentation_controller:
       collection_invalid: "Invalid parameters for creating a IIIF collection."

@@ -23,12 +23,12 @@ class Api::ResourcesController < Api::BaseController
     key = resource.send(params[:attribute])&.key
 
     service = Iiif::Server.new
-    success, error = service.clear_cache(key)
+    response = service.clear_cache(key)
 
-    if success
+    if response[:success?]
       render json: {}, status: :ok
     else
-      render json: { errors: [error] }, status: :bad_request
+      render json: { errors: [response[:errors]] }, status: :bad_request
     end
   end
 
