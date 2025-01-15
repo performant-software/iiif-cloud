@@ -16,6 +16,32 @@ class Api::ResourcesController < Api::BaseController
   before_action :validate_resource, unless: -> { current_user.admin? }, only: [:update, :destroy]
   before_action :validate_resources, unless: -> { current_user.admin? }, only: :index
 
+  def clear_cache
+    render json: { errors: [I18n.t('errors.resources_controller.clear_cache')] }, status: :unauthorized and return unless can_clear_cache?
+
+    resource = Resource.find(params[:id])
+    key = resource.send(params[:attribute])&.key
+
+    service = Cantaloupe::Api.new
+    response = service.clear_cache(key)
+
+    if response.success?
+      render json: {}, status: :ok
+    else
+      error = response['exception'] || response['message'] || response['errors']
+      render json: { errors: [error] }, status: :bad_request
+    end
+  end
+
+  def convert
+    render json: { errors: [I18n.t('errors.resources_controller.convert')] }, status: :unauthorized and return unless current_user.admin?
+
+    resource = Resource.find(params[:id])
+    ConvertImageJob.perform_later(resource.id)
+
+    render json: {}, status: :ok
+  end
+
   protected
 
   def base_query
@@ -33,6 +59,20 @@ class Api::ResourcesController < Api::BaseController
   end
 
   private
+
+  def can_clear_cache?
+    # Only admin users can clear the cache
+    return false unless current_user.admin?
+
+    # Only clear the cache if the "attribute" param is present
+    return false unless params[:attribute].present?
+
+    # Only clear the cache if we have the necessary environment variables set
+    vars = %w(CANTALOUPE_API_USERNAME CANTALOUPE_API_PASSWORD IIIF_HOST)
+    return false unless vars.all? {|v| ENV[v].present? }
+
+    true
+  end
 
   def set_defineable_params
     return unless params[:project_id].present?

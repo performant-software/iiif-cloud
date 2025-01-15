@@ -8,6 +8,16 @@
       "success": "You've successfully authenticated"
     }
   },
+  "AttachmentDetails": {
+    "labels": {
+      "fileSize": "File size",
+      "key": "Key",
+      "type": "Type"
+    },
+    "messages": {
+      "noContent": "No attached content."
+    }
+  },
   "Common": {
     "buttons": {
       "add": "Add",
@@ -105,11 +115,26 @@
   },
   "Resource": {
     "buttons": {
+      "clearCache": "Clear cache",
+      "convert": "Convert",
       "exif": "View Info"
     },
     "labels": {
+      "attachments": "Attachments",
       "content": "Content",
+      "convertedImage": "Converted PTIF",
+      "sourceImage": "Source Image",
       "uuid": "Unique identifier"
+    },
+    "messages": {
+      "cache": {
+        "content": "Successfully removed the {{tab}} from IIIF cache.",
+        "header": "Cache Cleared"
+      },
+      "convert": {
+        "content": "A request to convert the resource to a PTIF has been submitted. Please refresh the page to view the results.",
+        "header": "Convert Resource"
+      }
     }
   },
   "ResourceExifModal": {

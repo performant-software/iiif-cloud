@@ -12,7 +12,20 @@ class ResourcesSerializer < BaseSerializer
 
   show_attributes(:manifest_url) { |resource| manifest_url(resource) }
 
+  show_attributes(:content_info) { |resource| content_info(resource.content) }
+  show_attributes(:content_converted_info) { |resource| content_info(resource.content_converted) }
+
   def self.manifest_url(resource)
     "#{ENV['HOSTNAME']}/public/resources/#{resource.uuid}/manifest"
+  end
+
+  def self.content_info(attachment)
+    return unless attachment.attached?
+
+    {
+      key: attachment.key,
+      byte_size: attachment.byte_size,
+      content_type: attachment.content_type
+    }
   end
 end

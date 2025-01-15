@@ -1,0 +1,9 @@
+.attachmentDetails {
+  margin-top: 1.5em;
+}
+
+.attachmentDetails > .ui.list.horizontal {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
