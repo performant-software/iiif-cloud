@@ -22,14 +22,13 @@ class Api::ResourcesController < Api::BaseController
     resource = Resource.find(params[:id])
     key = resource.send(params[:attribute])&.key
 
-    service = Cantaloupe::Api.new
+    service = Iiif::Server.new
     response = service.clear_cache(key)
 
-    if response.success?
+    if response[:success?]
       render json: {}, status: :ok
     else
-      error = response['exception'] || response['message'] || response['errors']
-      render json: { errors: [error] }, status: :bad_request
+      render json: { errors: [response[:errors]] }, status: :bad_request
     end
   end
 

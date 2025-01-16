@@ -58,6 +58,13 @@
       "name": "Name"
     }
   },
+  "HeapSpace": {
+    "labels": {
+      "free": "Free",
+      "used": "Used"
+    },
+    "title": "Heap Space"
+  },
   "Home": {
     "header": "Welcome to Rails-React Template <1>Edit <1>src/App.js</1> and save to reload.</1>"
   },
@@ -177,6 +184,17 @@
       "content": "Passwords must be at least eight (8) characters.",
       "header": "Password Policy"
     }
+  },
+  "SystemStatus": {
+    "labels": {
+      "application": "Application",
+      "operatingSystem": "Operating system",
+      "processors": "Processors",
+      "version": "Version",
+      "vm": "VM",
+      "vmVersion": "VM version"
+    },
+    "title": "System Status"
   },
   "UserModal": {
     "labels": {
