@@ -3,11 +3,11 @@ class Public::ResourcesController < Api::ResourcesController
   include Public::Authenticateable
 
   # Actions
-  prepend_before_action :set_page, only: [:iiif, :info]
+  prepend_before_action :set_page, only: [:iiif, :image_api, :info]
   prepend_before_action :set_project_id, only: :index
   prepend_before_action :set_resource_id, only: [:show, :destroy, :update]
   prepend_before_action :set_resource_project_id, only: [:create, :update]
-  skip_before_action :authenticate_request, only: [:content, :download, :iiif, :info, :inline, :manifest, :preview, :thumbnail]
+  skip_before_action :authenticate_request, only: [:content, :download, :iiif, :image_api, :info, :inline, :manifest, :preview, :thumbnail]
 
   def content
     redirect_resource do |resource|
@@ -26,6 +26,23 @@ class Public::ResourcesController < Api::ResourcesController
 
     redirect_resource do |resource|
       resource.image? ? resource.content_converted_iiif_url(page_number) : resource.content_iiif_url(page_number)
+    end
+  end
+
+  def image_api
+    page_number = params[:page] || 1
+
+    redirect_resource do |resource|
+      if resource.image?
+        resource.content_converted_image_api_url(
+          page_number,
+          params[:region],
+          params[:size],
+          params[:rotation],
+          params[:quality],
+          params[:format]
+        )
+      end
     end
   end
 
