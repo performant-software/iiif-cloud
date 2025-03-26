@@ -30,11 +30,21 @@
 # available at https://guides.rubyonrails.org/i18n.html.
 
 en:
+  dashboard_serializer:
+    application_name: Cantaloupe
+
   errors:
+
+    dashboard_controller:
+      unauthorized: "You do not have access to the system dashboard."
 
     presentation_controller:
       collection_invalid: "Invalid parameters for creating a IIIF collection."
       manifest_invalid: "Invalid parameters for creating a IIIF manifest."
+
+    resources_controller:
+      clear_cache: "You do not have permissions to clear resource cache."
+      convert: "You do not have permissions to convert resources."
 
     unauthenticated: "You must be authenticate to access."
     unauthorized: "You do not have access to this record."

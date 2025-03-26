@@ -30,6 +30,8 @@ class Resource < ApplicationRecord
   alias_method :attachable_content_base_url, :content_base_url
   alias_method :attachable_content_preview_url, :content_preview_url
   alias_method :attachable_content_iiif_url, :content_iiif_url
+  alias_method :attachable_content_image_api_url, :content_image_api_url
+  alias_method :attachable_content_info_url, :content_info_url
   alias_method :attachable_content_thumbnail_url, :content_thumbnail_url
 
   def self.with_attachment(name)
@@ -54,6 +56,18 @@ class Resource < ApplicationRecord
 
   def content_iiif_url(page_number = 1)
     return attachable_content_iiif_url(page_number) if iiif?
+
+    nil
+  end
+
+  def content_info_url(page_number = 1)
+    return attachable_content_info_url(page_number) if iiif?
+
+    nil
+  end
+
+  def content_image_api_url(page_number, region, size, rotation, quality, format)
+    return attachable_content_image_api_url(page_number, region, size, rotation, quality, format) if iiif?
 
     nil
   end

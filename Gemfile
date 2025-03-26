@@ -1,13 +1,13 @@
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby '3.1.1'
+ruby '3.2.2'
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem 'rails', '~> 7.0.2', '>= 7.0.2.3'
+gem 'rails', '~> 7.0.7'
 
 # Use Postgres as the database for Active Record
-gem 'pg'
+gem 'pg', '~> 1.5.3'
 
 # Use the Puma web server [https://github.com/puma/puma]
 gem 'puma', '~> 5.0'
@@ -22,19 +22,19 @@ gem 'bootsnap', require: false
 gem 'pagy', '~> 5.10'
 
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin AJAX possible
-gem 'rack-cors'
+gem 'rack-cors', '~> 2.0.1'
 
 # Resource API
 gem 'resource_api', git: 'https://github.com/performant-software/resource-api.git', tag: 'v0.4.3'
 
 # Use Json Web Token (JWT) for token based authentication
-gem 'jwt'
+gem 'jwt', '~> 2.4', '>= 2.4.1'
 
 # Use ActiveModel has_secure_password
 gem 'bcrypt', '~> 3.1.7'
 
 # Active storage service
-gem 'aws-sdk-s3'
+gem 'aws-sdk-s3', '~> 1.177'
 
 # Image processing
 gem 'mini_magick', '~> 4.11'

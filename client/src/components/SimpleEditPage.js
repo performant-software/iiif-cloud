@@ -27,6 +27,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import type { Translateable } from '../types/Translateable';
 
 type Props = EditContainerProps & Translateable & {
+  className?: string,
   onTabClick?: (tab: string) => void,
   stickyMenu?: boolean
 };
@@ -138,7 +139,7 @@ const SimpleEditPage: ComponentType<any> = (props: Props) => {
 
   return (
     <Grid
-      className={styles.simpleEditPage}
+      className={cx(styles.simpleEditPage, props.className)}
     >
       <Grid.Row>
         <Grid.Column>

@@ -1,9 +1,10 @@
 // @flow
 
-import { LazyIIIF } from '@performant-software/semantic-components';
-import { IIIF as IIIFUtils } from '@performant-software/shared-components';
+import cx from 'classnames';
+import { LazyIIIF, Toaster } from '@performant-software/semantic-components';
 import { UserDefinedFieldsForm, UserDefinedFields } from '@performant-software/user-defined-fields';
 import React, {
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -11,19 +12,49 @@ import React, {
 } from 'react';
 import { withTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { Button, Form } from 'semantic-ui-react';
+import {
+  Button,
+  Form,
+  Header,
+  Menu,
+  Message,
+  Segment
+} from 'semantic-ui-react';
+import AttachmentDetails from '../components/AttachmentDetails';
+import AuthenticationService from '../services/Authentication';
 import ProjectsService from '../services/Projects';
 import ReadOnlyField from '../components/ReadOnlyField';
 import ResourceExifModal from '../components/ResourceExifModal';
 import ResourcesService from '../services/Resources';
 import SimpleEditPage from '../components/SimpleEditPage';
+import StatusIcon from '../components/StatusIcon';
+import styles from './Resource.module.css';
 import withEditPage from '../hooks/EditPage';
 
+const Tabs = {
+  content: 'content',
+  content_converted: 'content_converted'
+};
+
 const ResourceForm = withTranslation()((props) => {
+  const [cacheCleared, setCacheCleared] = useState(false);
+  const [converted, setConverted] = useState(false);
+  const [errors, setErrors] = useState([]);
   const [info, setInfo] = useState(false);
   const [project, setProject] = useState();
+  const [tab, setTab] = useState(Tabs.content);
 
   const { projectId } = useParams();
+
+  /**
+   * Memo-izes the current attachment info.
+   *
+   * @type {AttachmentInfo}
+   */
+  const attachment = useMemo(() => (tab === Tabs.content
+    ? props.item.content_info
+    : props.item.content_converted_info
+  ), [tab, props.item]);
 
   /**
    * Converts the EXIF data to JSON.
@@ -45,11 +76,28 @@ const ResourceForm = withTranslation()((props) => {
   }, [props.item.exif]);
 
   /**
-   * Creates the manifest ID based on the blob content.
+   * Calls the `/api/resources/:id/clear_cache API endpoint and sets any errors on the state.
    *
-   * @type {string}
+   * @type {function(): Promise<*>}
    */
-  const manifest = useMemo(() => IIIFUtils.createManifestURL(props.item.manifest), [props.item.manifest]);
+  const onClearCache = useCallback(() => (
+    ResourcesService
+      .clearCache(props.item.id, tab)
+      .then(() => setCacheCleared(true))
+      .catch(({ response: { data } }) => setErrors(data.errors))
+  ), [tab, props.item.id]);
+
+  /**
+   * Calls the `/api/resources/:id/convert API endpoint and sets any errors on the state.
+   *
+   * @type {function(): Promise<*>}
+   */
+  const onConvert = useCallback(() => (
+    ResourcesService
+      .convert(props.item.id)
+      .then(() => setConverted(true))
+      .catch(({ response: { data } }) => setErrors(data.errors))
+  ), [props.item.id]);
 
   /**
    * Loads the related project record.
@@ -72,18 +120,24 @@ const ResourceForm = withTranslation()((props) => {
   return (
     <SimpleEditPage
       {...props}
+      className={styles.resource}
+      errors={[...props.errors, ...errors]}
     >
       <SimpleEditPage.Tab
         key='details'
         name={props.t('Common.tabs.details')}
       >
+        <ReadOnlyField
+          label={props.t('Resource.labels.uuid')}
+          value={props.item.uuid}
+        />
         <Form.Input
           label={props.t('Resource.labels.content')}
         >
           <LazyIIIF
             contentType={props.item.content_type}
             downloadUrl={props.item.content_download_url}
-            manifest={manifest}
+            manifest={props.item.manifest_url}
             onUpload={(file) => props.onSetState({
               name: file.name,
               content: file
@@ -111,10 +165,6 @@ const ResourceForm = withTranslation()((props) => {
           required={props.isRequired('name')}
           value={props.item.name}
         />
-        <ReadOnlyField
-          label={props.t('Resource.labels.uuid')}
-          value={props.item.uuid}
-        />
         <UserDefinedFieldsForm
           data={props.item.user_defined}
           defineableId={projectId}
@@ -130,6 +180,95 @@ const ResourceForm = withTranslation()((props) => {
             onClose={() => setInfo(false)}
           />
         )}
+        <Header
+          content={props.t('Resource.labels.attachments')}
+        />
+        <Segment
+          padded
+          secondary
+        >
+          <Menu
+            className={cx(styles.ui, styles.menu)}
+            pointing
+            secondary
+          >
+            <Menu.Item
+              name={Tabs.content}
+              active={tab === Tabs.content}
+              onClick={() => setTab(Tabs.content)}
+            >
+              { props.t('Resource.labels.sourceImage') }
+              <StatusIcon
+                className={cx(styles.icon, styles.attachmentStatus)}
+                status={props.item.content_info ? 'positive' : 'negative'}
+              />
+            </Menu.Item>
+            <Menu.Item
+              name={Tabs.content_converted}
+              active={tab === Tabs.content_converted}
+              onClick={() => setTab(Tabs.content_converted)}
+            >
+              { props.t('Resource.labels.convertedImage') }
+              <StatusIcon
+                className={cx(styles.icon, styles.attachmentStatus)}
+                status={props.item.content_converted_info ? 'positive' : 'negative'}
+              />
+            </Menu.Item>
+            { AuthenticationService.isAdmin() && (
+              <Menu.Menu
+                position='right'
+              >
+                <Menu.Item
+                  as={Button}
+                  content={props.t('Resource.buttons.convert')}
+                  icon='exchange'
+                  onClick={onConvert}
+                />
+              </Menu.Menu>
+            )}
+          </Menu>
+          <AttachmentDetails
+            attachment={attachment}
+          />
+          { AuthenticationService.isAdmin() && attachment && (
+            <div
+              className={styles.actions}
+            >
+              <Button
+                color='red'
+                content={props.t('Resource.buttons.clearCache')}
+                icon='trash'
+                onClick={onClearCache}
+              />
+            </div>
+          )}
+          { converted && (
+            <Toaster
+              onDismiss={() => setConverted(false)}
+              type={Toaster.MessageTypes.info}
+            >
+              <Message.Header
+                content={props.t('Resource.messages.convert.header')}
+              />
+              <Message.Content
+                content={props.t('Resource.messages.convert.content')}
+              />
+            </Toaster>
+          )}
+          { cacheCleared && (
+            <Toaster
+              onDismiss={() => setCacheCleared(false)}
+              type={Toaster.MessageTypes.positive}
+            >
+              <Message.Header
+                content={props.t('Resource.messages.cache.header')}
+              />
+              <Message.Content
+                content={props.t('Resource.messages.cache.content', { tab })}
+              />
+            </Toaster>
+          )}
+        </Segment>
       </SimpleEditPage.Tab>
     </SimpleEditPage>
   );

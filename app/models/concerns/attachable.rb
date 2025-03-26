@@ -76,6 +76,15 @@ module Attachable
         "#{self.send("#{name}_base_url")}#{page_number.nil? ? '' : ";#{page_number}"}/full/max/0/default.jpg"
       end
 
+      define_method("#{name}_image_api_url") do |page_number = nil, region = 'full', size = 'max', rotation = '0', quality = 'default', format= 'jpg'|
+        attachment = self.send(name)
+        return nil unless attachment.attached?
+
+        return nil if attachment.audio?
+
+        "#{self.send("#{name}_base_url")}#{page_number.nil? ? '' : ";#{page_number}"}/#{region}/#{size}/#{rotation}/#{quality}.#{format}"
+      end
+
       define_method("#{name}_base_url") do
         attachment = self.send(name)
         return nil unless attachment.attached?
@@ -88,6 +97,15 @@ module Attachable
         return nil unless attachment.attached?
 
         attachment.url(disposition: 'attachment')
+      end
+
+      define_method("#{name}_info_url") do |page_number = nil|
+        attachment = self.send(name)
+        return nil unless attachment.attached?
+
+        return nil if attachment.audio?
+
+        "#{self.send("#{name}_base_url")}#{page_number.nil? ? '' : ";#{page_number}"}/info.json"
       end
 
       define_method("#{name}_inline_url") do
