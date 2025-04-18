@@ -14,7 +14,7 @@ module Iiif
       JSON.dump(manifest)
     end
 
-    def self.create_for_resource(resource)
+    def self.create_for_resource(resource, metadata)
       manifest = to_json('manifest.json')
       manifest['id'] = "#{base_url(resource)}/manifest"
       manifest['label'] = {
@@ -22,6 +22,9 @@ module Iiif
       }
 
       manifest['items'] = add_resource(resource)
+      if !metadata.nil?
+        manifest['metadata'] = JSON.parse(metadata)
+      end
 
       JSON.dump(manifest)
     end

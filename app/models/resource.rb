@@ -7,8 +7,11 @@ class Resource < ApplicationRecord
   # Relationships
   belongs_to :project
 
+  # Transient attributes
+  attr_accessor :metadata
+
   # Resourceable parameters
-  allow_params :project_id, :name, :content
+  allow_params :project_id, :name, :content, :metadata
 
   # Callbacks
   after_create_commit :after_create
@@ -112,14 +115,19 @@ class Resource < ApplicationRecord
     ConvertImageJob.perform_later(self.id)
 
     # Create the manifest
-    CreateManifestJob.perform_later(self.id)
+    CreateManifestJob.perform_later(self.id, self.metadata)
 
     # Extract EXIF data
     ExtractExifJob.perform_later(self.id)
   end
 
   def after_update
-    # Only perform the update if the content attachment has been updated
+    if !self.metadata.nil?
+      # Recreate the manifest if :metadata transient attribute is currently set
+      CreateManifestJob.perform_later(self.id, self.metadata)
+    end
+
+    # Only perform the image updates if the content attachment has been updated
     return if !(content.attached? && content.blob.saved_changes?)
 
     # Convert the image to a TIFF
