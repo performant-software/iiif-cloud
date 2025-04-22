@@ -100,6 +100,8 @@ module Iiif
         items: [create_annotation(resource, canvas['id'], page_number)]
       }]
 
+      canvas['metadata'] = resource.metadata
+
       canvas
     end
 
