@@ -8,9 +8,10 @@ class Resource < ApplicationRecord
   belongs_to :project
 
   # Resourceable parameters
-  allow_params :project_id, :name, :content
+  allow_params :project_id, :name, :content, :metadata
 
   # Callbacks
+  before_save :parse_metadata
   after_create_commit :after_create
   after_update_commit :after_update
 
@@ -107,6 +108,10 @@ class Resource < ApplicationRecord
       .where(name: name)
   end
 
+  def parse_metadata
+    self.metadata = JSON.parse metadata if metadata.instance_of? String
+  end
+
   def after_create
     # Convert the image to a TIFF
     ConvertImageJob.perform_later(self.id)
@@ -119,7 +124,12 @@ class Resource < ApplicationRecord
   end
 
   def after_update
-    # Only perform the update if the content attachment has been updated
+    if saved_change_to_metadata?
+      # Recreate the manifest if metadata updated
+      CreateManifestJob.perform_later(self.id)
+    end
+
+    # Only perform the image updates if the content attachment has been updated
     return if !(content.attached? && content.blob.saved_changes?)
 
     # Convert the image to a TIFF
