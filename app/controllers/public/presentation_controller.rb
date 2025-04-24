@@ -21,7 +21,10 @@ module Public
       resources = Resource
                     .preload(Resource.attachment_preloads)
                     .where(uuid: params[:resource_ids])
-                    .order(:name)
+
+      # ensure resources ordered by params[:resource_ids]
+      resources_by_id = resources.index_by(&:uuid)
+      resources = params[:resource_ids].map { |uuid| resources_by_id[uuid] }.compact
 
       json = Iiif::Manifest.create(
         id: params[:id],
