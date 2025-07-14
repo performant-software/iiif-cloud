@@ -39,7 +39,7 @@ Rails.application.routes.draw do
 
     get 'resources/:id/:region/:size/:rotation/:quality', to: 'resources#image_api', defaults: { format: 'jpg' }
   end
-  
+
   # Default route for static front-end
   get '*path', to: "application#fallback_index_html", constraints: -> (request) do
     !request.xhr? && request.format.html?

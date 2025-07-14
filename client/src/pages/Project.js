@@ -75,7 +75,7 @@ const ProjectForm = withTranslation()((props) => {
           label={props.t('Project.labels.name')}
           onChange={props.onTextInputChange.bind(this, 'name')}
           required={props.isRequired('name')}
-          value={props.item.name}
+          value={props.item.name || ''}
         />
         <Form.Input
           error={props.isError('organization_id')}
@@ -96,7 +96,7 @@ const ProjectForm = withTranslation()((props) => {
           label={props.t('Project.labels.description')}
           onChange={props.onTextInputChange.bind(this, 'description')}
           required={props.isRequired('description')}
-          value={props.item.description}
+          value={props.item.description || ''}
         />
         <ReadOnlyField
           label={props.t('Project.labels.uuid')}
