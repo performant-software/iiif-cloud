@@ -22,6 +22,7 @@ module Iiif
       }
 
       manifest['items'] = add_resource(resource)
+      manifest['metadata'] = resource.metadata
 
       JSON.dump(manifest)
     end
@@ -98,6 +99,8 @@ module Iiif
         type: 'AnnotationPage',
         items: [create_annotation(resource, canvas['id'], page_number)]
       }]
+
+      canvas['metadata'] = resource.metadata
 
       canvas
     end
