@@ -16,7 +16,8 @@
     "sourceType": "module",
     "babelOptions": {
       "presets": [
-        "@babel/preset-react"
+        "@babel/preset-react",
+        "@babel/preset-flow"
       ]
     }
   },

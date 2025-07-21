@@ -163,7 +163,7 @@ const ResourceForm = withTranslation()((props) => {
           label={props.t('Project.labels.name')}
           onChange={props.onTextInputChange.bind(this, 'name')}
           required={props.isRequired('name')}
-          value={props.item.name}
+          value={props.item.name || ''}
         />
         <UserDefinedFieldsForm
           data={props.item.user_defined}

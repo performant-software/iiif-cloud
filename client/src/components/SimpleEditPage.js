@@ -12,7 +12,8 @@ import React, {
   useState,
   type ComponentType
 } from 'react';
-import _ from 'underscore';
+import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Button,
   Form,
@@ -22,9 +23,9 @@ import {
   Ref,
   Sticky
 } from 'semantic-ui-react';
-import styles from './SimpleEditPage.module.css';
-import { useLocation, useNavigate } from 'react-router-dom';
+import _ from 'underscore';
 import type { Translateable } from '../types/Translateable';
+import styles from './SimpleEditPage.module.css';
 
 type Props = EditContainerProps & Translateable & {
   className?: string,
@@ -39,6 +40,7 @@ const SimpleEditPage: ComponentType<any> = (props: Props) => {
   const contentRef = useRef();
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // $FlowIgnore
   const tabs = Element.findByType(props.children, SimpleEditPage.Tab);
@@ -87,7 +89,7 @@ const SimpleEditPage: ComponentType<any> = (props: Props) => {
           >
             <Button
               className={styles.button}
-              content={props.t('Common.buttons.save')}
+              content={t('Common.buttons.save')}
               disabled={props.loading || props.saving}
               onClick={props.onSave}
               primary
@@ -95,7 +97,7 @@ const SimpleEditPage: ComponentType<any> = (props: Props) => {
             <Button
               basic
               className={styles.button}
-              content={props.t('Common.buttons.cancel')}
+              content={t('Common.buttons.cancel')}
               disabled={props.loading || props.saving}
               onClick={() => navigate(-1)}
             />
@@ -159,7 +161,7 @@ const SimpleEditPage: ComponentType<any> = (props: Props) => {
               >
                 <Message
                   error
-                  header={props.t('Common.errors.save')}
+                  header={t('Common.errors.save')}
                   list={props.errors}
                 />
                 { tab && tab.props.children }
@@ -170,10 +172,10 @@ const SimpleEditPage: ComponentType<any> = (props: Props) => {
                   type={Toaster.MessageTypes.positive}
                 >
                   <Message.Header
-                    content={props.t('Common.messages.save.header')}
+                    content={t('Common.messages.save.header')}
                   />
                   <Message.Content
-                    content={props.t('Common.messages.save.content')}
+                    content={t('Common.messages.save.content')}
                   />
                 </Toaster>
               )}

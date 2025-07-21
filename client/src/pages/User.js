@@ -76,14 +76,14 @@ const UserForm = withTranslation()((props: EditContainerProps & Translateable) =
           label={props.t('User.labels.name')}
           onChange={props.onTextInputChange.bind(this, 'name')}
           required={props.isRequired('name')}
-          value={props.item.name}
+          value={props.item.name || ''}
         />
         <Form.Input
           error={props.isError('email')}
           label={props.t('User.labels.email')}
           onChange={props.onTextInputChange.bind(this, 'email')}
           required={props.isRequired('email')}
-          value={props.item.email}
+          value={props.item.email || ''}
         />
         { AuthenticationService.isAdmin() && (
           <Form.Checkbox
@@ -106,7 +106,7 @@ const UserForm = withTranslation()((props: EditContainerProps & Translateable) =
           label={props.t('Project.labels.apiKey')}
           onChange={props.onTextInputChange.bind(this, 'api_key')}
           required={props.isRequired('api_key')}
-          value={props.item.api_key}
+          value={props.item.api_key || ''}
         />
         <Message
           content={props.t('User.password.content')}
