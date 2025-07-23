@@ -2,6 +2,7 @@
 
 import cx from 'classnames';
 import { LazyIIIF, Toaster } from '@performant-software/semantic-components';
+import type { EditContainerProps } from '@performant-software/shared-components/types';
 import { UserDefinedFieldsForm, UserDefinedFields } from '@performant-software/user-defined-fields';
 import React, {
   useCallback,
@@ -10,7 +11,7 @@ import React, {
   useState,
   type ComponentType
 } from 'react';
-import { withTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 import {
   Button,
@@ -24,6 +25,7 @@ import AttachmentDetails from '../components/AttachmentDetails';
 import AuthenticationService from '../services/Authentication';
 import ProjectsService from '../services/Projects';
 import ReadOnlyField from '../components/ReadOnlyField';
+import type { Resource as ResourceType } from '../types/Resource';
 import ResourceExifModal from '../components/ResourceExifModal';
 import ResourcesService from '../services/Resources';
 import SimpleEditPage from '../components/SimpleEditPage';
@@ -31,12 +33,16 @@ import StatusIcon from '../components/StatusIcon';
 import styles from './Resource.module.css';
 import withEditPage from '../hooks/EditPage';
 
+type Props = EditContainerProps & {
+  item: ResourceType
+}
+
 const Tabs = {
   content: 'content',
   content_converted: 'content_converted'
 };
 
-const ResourceForm = withTranslation()((props) => {
+const ResourceForm = (props: Props) => {
   const [cacheCleared, setCacheCleared] = useState(false);
   const [converted, setConverted] = useState(false);
   const [errors, setErrors] = useState([]);
@@ -45,6 +51,7 @@ const ResourceForm = withTranslation()((props) => {
   const [tab, setTab] = useState(Tabs.content);
 
   const { projectId } = useParams();
+  const { t } = useTranslation();
 
   /**
    * Memo-izes the current attachment info.
@@ -67,7 +74,7 @@ const ResourceForm = withTranslation()((props) => {
     if (props.item.exif) {
       try {
         value = JSON.parse(props.item.exif);
-      } catch (e) {
+      } catch {
         // Catch JSON parse exception
       }
     }
@@ -125,14 +132,14 @@ const ResourceForm = withTranslation()((props) => {
     >
       <SimpleEditPage.Tab
         key='details'
-        name={props.t('Common.tabs.details')}
+        name={t('Common.tabs.details')}
       >
         <ReadOnlyField
-          label={props.t('Resource.labels.uuid')}
+          label={t('Resource.labels.uuid')}
           value={props.item.uuid}
         />
         <Form.Input
-          label={props.t('Resource.labels.content')}
+          label={t('Resource.labels.content')}
         >
           <LazyIIIF
             contentType={props.item.content_type}
@@ -147,7 +154,7 @@ const ResourceForm = withTranslation()((props) => {
           >
             { exif && (
               <Button
-                content={props.t('Resource.buttons.exif')}
+                content={t('Resource.buttons.exif')}
                 icon='info circle'
                 onClick={() => setInfo(true)}
                 style={{
@@ -160,7 +167,7 @@ const ResourceForm = withTranslation()((props) => {
         </Form.Input>
         <Form.Input
           error={props.isError('name')}
-          label={props.t('Project.labels.name')}
+          label={t('Project.labels.name')}
           onChange={props.onTextInputChange.bind(this, 'name')}
           required={props.isRequired('name')}
           value={props.item.name || ''}
@@ -181,7 +188,7 @@ const ResourceForm = withTranslation()((props) => {
           />
         )}
         <Header
-          content={props.t('Resource.labels.attachments')}
+          content={t('Resource.labels.attachments')}
         />
         <Segment
           padded
@@ -197,7 +204,7 @@ const ResourceForm = withTranslation()((props) => {
               active={tab === Tabs.content}
               onClick={() => setTab(Tabs.content)}
             >
-              { props.t('Resource.labels.sourceImage') }
+              { t('Resource.labels.sourceImage') }
               <StatusIcon
                 className={cx(styles.icon, styles.attachmentStatus)}
                 status={props.item.content_info ? 'positive' : 'negative'}
@@ -208,7 +215,7 @@ const ResourceForm = withTranslation()((props) => {
               active={tab === Tabs.content_converted}
               onClick={() => setTab(Tabs.content_converted)}
             >
-              { props.t('Resource.labels.convertedImage') }
+              { t('Resource.labels.convertedImage') }
               <StatusIcon
                 className={cx(styles.icon, styles.attachmentStatus)}
                 status={props.item.content_converted_info ? 'positive' : 'negative'}
@@ -220,7 +227,7 @@ const ResourceForm = withTranslation()((props) => {
               >
                 <Menu.Item
                   as={Button}
-                  content={props.t('Resource.buttons.convert')}
+                  content={t('Resource.buttons.convert')}
                   icon='exchange'
                   onClick={onConvert}
                 />
@@ -236,7 +243,7 @@ const ResourceForm = withTranslation()((props) => {
             >
               <Button
                 color='red'
-                content={props.t('Resource.buttons.clearCache')}
+                content={t('Resource.buttons.clearCache')}
                 icon='trash'
                 onClick={onClearCache}
               />
@@ -248,10 +255,10 @@ const ResourceForm = withTranslation()((props) => {
               type={Toaster.MessageTypes.info}
             >
               <Message.Header
-                content={props.t('Resource.messages.convert.header')}
+                content={t('Resource.messages.convert.header')}
               />
               <Message.Content
-                content={props.t('Resource.messages.convert.content')}
+                content={t('Resource.messages.convert.content')}
               />
             </Toaster>
           )}
@@ -261,10 +268,10 @@ const ResourceForm = withTranslation()((props) => {
               type={Toaster.MessageTypes.positive}
             >
               <Message.Header
-                content={props.t('Resource.messages.cache.header')}
+                content={t('Resource.messages.cache.header')}
               />
               <Message.Content
-                content={props.t('Resource.messages.cache.content', { tab })}
+                content={t('Resource.messages.cache.content', { tab })}
               />
             </Toaster>
           )}
@@ -272,7 +279,7 @@ const ResourceForm = withTranslation()((props) => {
       </SimpleEditPage.Tab>
     </SimpleEditPage>
   );
-});
+};
 
 const Resource: ComponentType<any> = withEditPage(ResourceForm, {
   id: 'resourceId',

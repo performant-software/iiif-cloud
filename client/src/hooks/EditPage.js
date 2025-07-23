@@ -53,7 +53,6 @@ const withEditPage = (WrappedComponent: ComponentType<any>, config: Config): any
       .then((record) => navigate(`${url}/${record.id}`, { state: { saved: true, tab } }));
   }, [config.onSave, location, navigate]);
 
-  // eslint-disable-next-line react/no-unstable-nested-components
   const EditPage = (innerProps) => (
     <WrappedComponent
       {...innerProps}
