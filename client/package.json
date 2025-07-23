@@ -14,7 +14,7 @@
     "@performant-software/shared-components": "^3.1.0",
     "@performant-software/user-defined-fields": "^3.1.0",
     "@vitejs/plugin-react": "^4.6.0",
-    "classnames": "^2.3.1",
+    "classnames": "^2.5.1",
     "i18next": "^21.8.0",
     "react": "18.2.0",
     "react-calendar": "^3.7.0",
