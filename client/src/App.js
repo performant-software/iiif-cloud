@@ -8,7 +8,7 @@ import {
   Navigate,
   Route,
   Routes
-} from 'react-router-dom';
+} from 'react-router';
 import Layout from './components/Layout';
 import AuthenticatedRoute from './components/AuthenticatedRoute';
 import Dashboard from './pages/Dashboard';

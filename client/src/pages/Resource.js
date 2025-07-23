@@ -11,7 +11,7 @@ import React, {
   type ComponentType
 } from 'react';
 import { withTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import {
   Button,
   Form,
