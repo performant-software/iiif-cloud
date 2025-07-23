@@ -9,7 +9,11 @@ const FILE_SIZE_UNITS = ['B', 'kB', 'MB', 'GB', 'TB'];
  *
  * @returns {`${number} ${string}`}
  */
-const getFileSize = (size: number): string => {
+const getFileSize = (size: ?number): string => {
+  if (!size) {
+    return '';
+  }
+
   const i = size === 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
   const fileSize = `${((size / 1024 ** i).toFixed(2))}`;
 

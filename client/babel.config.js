@@ -1,6 +1,6 @@
 export default {
   plugins: [
-    'transform-flow-strip-types'
+    'babel-plugin-transform-flow-strip-types'
   ],
   presets: [
     '@babel/preset-flow',
