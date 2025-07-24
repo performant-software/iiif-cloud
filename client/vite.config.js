@@ -42,6 +42,11 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false
         },
+        '/rails/active_storage': {
+          target: env.VITE_PROXY_URL,
+          changeOrigin: true,
+          secure: false
+        },
         '/sidekiq': {
           target: env.VITE_PROXY_URL,
           changeOrigin: true,

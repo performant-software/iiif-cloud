@@ -9,6 +9,7 @@ module Attachable
 
     # Callbacks
     before_save :delete_attachments
+    before_validation :set_storage_key
 
     def delete_attachments
       self.class.list_attachments&.each do |name|
@@ -18,6 +19,21 @@ module Attachable
         return unless attachment.attached?
 
         attachment.purge
+      end
+    end
+
+    def set_storage_key
+      # Nothing to set if the attachble object does not implement the :storage_key method
+      return unless self.respond_to?(:storage_key)
+
+      # Nothing to set of the storage_key is empty
+      return unless self.storage_key.present?
+
+      self.class.list_attachments&.each do |name|
+        attachment = self.send(name)
+        next unless attachment.new_record?
+
+        attachment.key = "#{self.storage_key}/#{ActiveStorage::Blob.generate_unique_secure_token}"
       end
     end
   end
@@ -89,7 +105,7 @@ module Attachable
         attachment = self.send(name)
         return nil unless attachment.attached?
 
-        "#{ENV['IIIF_HOST']}/iiif/3/#{attachment.key}"
+        "#{ENV['IIIF_HOST']}/iiif/3/#{CGI.escape(attachment.key)}"
       end
 
       define_method("#{name}_download_url") do

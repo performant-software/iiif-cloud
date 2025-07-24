@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_22_100261) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_23_194140) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -99,6 +99,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_22_100261) do
     t.text "manifest"
     t.jsonb "user_defined", default: {}
     t.jsonb "metadata", default: {}
+    t.string "storage_key"
     t.index ["project_id"], name: "index_resources_on_project_id"
     t.index ["user_defined"], name: "index_resources_on_user_defined", using: :gin
   end
