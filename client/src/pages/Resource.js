@@ -167,7 +167,7 @@ const ResourceForm = (props: Props) => {
         </Form.Input>
         <Form.Input
           error={props.isError('name')}
-          label={t('Project.labels.name')}
+          label={t('Resource.labels.name')}
           onChange={props.onTextInputChange.bind(this, 'name')}
           required={props.isRequired('name')}
           value={props.item.name || ''}
