@@ -1,16 +1,16 @@
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby '3.2.2'
+ruby file: '.ruby-version'
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem 'rails', '~> 7.0.7'
+gem 'rails', '~> 8.0.2'
 
 # Use Postgres as the database for Active Record
-gem 'pg', '~> 1.5.3'
+gem 'pg', '~> 1.5.9'
 
 # Use the Puma web server [https://github.com/puma/puma]
-gem 'puma', '~> 5.0'
+gem 'puma', '~> 6.6.0'
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: %i[ mingw mswin x64_mingw jruby ]
@@ -18,38 +18,38 @@ gem 'tzinfo-data', platforms: %i[ mingw mswin x64_mingw jruby ]
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', require: false
 
-# Pagination
-gem 'pagy', '~> 5.10'
-
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin AJAX possible
-gem 'rack-cors', '~> 2.0.1'
+gem 'rack-cors', '~> 3.0.0'
 
 # Resource API
-gem 'resource_api', git: 'https://github.com/performant-software/resource-api.git', tag: 'v0.4.3'
+gem 'resource_api', git: 'https://github.com/performant-software/resource-api.git', tag: 'v0.5.14'
 
 # Use Json Web Token (JWT) for token based authentication
-gem 'jwt', '~> 2.4', '>= 2.4.1'
+gem 'jwt', '~> 3.1.2'
+
+# JWT authentication
+gem 'jwt_auth', git: 'https://github.com/performant-software/jwt-auth.git', tag: 'v0.1.3'
 
 # Use ActiveModel has_secure_password
-gem 'bcrypt', '~> 3.1.7'
+gem 'bcrypt', '~> 3.1.20'
 
 # Active storage service
-gem 'aws-sdk-s3', '~> 1.177'
+gem 'aws-sdk-s3', '~> 1.193'
 
 # Image processing
-gem 'mini_magick', '~> 4.11'
+gem 'mini_magick', '~> 5.3.0'
 
 # HTTP requests
-gem 'httparty', '~> 0.17.3'
+gem 'httparty', '~> 0.23.1'
 
 # User defined fields
-gem 'user_defined_fields', git: 'https://github.com/performant-software/user-defined-fields.git', tag: 'v0.1.5'
+gem 'user_defined_fields', git: 'https://github.com/performant-software/user-defined-fields.git', tag: 'v0.1.14'
 
 # Data migrations
-gem 'data_migrate', '~> 8.1.1'
+gem 'data_migrate', '~> 11.3'
 
 # Background jobs
-gem 'sidekiq', '~> 6.5.7', group: :production
+gem 'sidekiq', '~> 8.0.5', group: :production
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

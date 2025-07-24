@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => {
     esbuild: {
       include: /\.js$/,
       exclude: [],
-      loader: 'jsx',
+      loader: 'jsx'
     },
     optimizeDeps: {
       esbuildOptions: {
@@ -33,6 +33,16 @@ export default defineConfig(({ mode }) => {
           secure: false
         },
         '/auth': {
+          target: env.VITE_PROXY_URL,
+          changeOrigin: true,
+          secure: false
+        },
+        '/public': {
+          target: env.VITE_PROXY_URL,
+          changeOrigin: true,
+          secure: false
+        },
+        '/sidekiq': {
           target: env.VITE_PROXY_URL,
           changeOrigin: true,
           secure: false

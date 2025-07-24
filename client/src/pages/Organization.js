@@ -1,16 +1,22 @@
 // @flow
 
 import { EmbeddedList } from '@performant-software/semantic-components';
+import type { EditContainerProps } from '@performant-software/shared-components/types';
 import React, { type ComponentType } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Form } from 'semantic-ui-react';
 import AdminPage from '../components/AdminPage';
+import type { Organization as OrganizationType } from '../types/Organization';
 import OrganizationsService from '../services/Organizations';
 import SimpleEditPage from '../components/SimpleEditPage';
 import UserModal from '../components/UserModal';
 import withEditPage from '../hooks/EditPage';
 
-const OrganizationForm = (props) => {
+type Props = EditContainerProps & {
+  item: OrganizationType
+}
+
+const OrganizationForm = (props: Props) => {
   const { t } = useTranslation();
 
   return (

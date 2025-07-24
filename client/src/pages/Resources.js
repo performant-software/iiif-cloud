@@ -3,7 +3,7 @@
 import { FileUploadModal, ItemList, LazyMedia } from '@performant-software/semantic-components';
 import React, { type ComponentType, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router';
 import FileUpload from '../components/FileUpload';
 import ResourcesService from '../services/Resources';
 

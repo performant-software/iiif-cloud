@@ -8,7 +8,7 @@ module Images
       output_file = "#{File.basename(file.path, '.*')}.tif"
       output_path = File.join(File.dirname(file.path), output_file)
 
-      convert = MiniMagick::Tool::Convert.new
+      convert = MiniMagick.convert
       convert << file.path
       convert << '-define'
       convert << 'tiff:tile-geometry=1024x1024'

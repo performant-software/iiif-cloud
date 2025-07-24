@@ -2,7 +2,7 @@
 
 import cx from 'classnames';
 import React, { useCallback, type ComponentType } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Icon, Menu, Popup } from 'semantic-ui-react';
 import AuthenticationService from '../services/Authentication';

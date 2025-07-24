@@ -1,4 +1,18 @@
+require 'rack/session/cookie'
+require 'sidekiq/web'
+
+# Enable Rack session middleware only for Sidekiq Web UI
+Sidekiq::Web.use Rack::Session::Cookie, secret: Rails.application.credentials.secret_key_base, same_site: :lax, max_age: 86400
+
+# Add Basic Authentication for Security
+Sidekiq::Web.use Rack::Auth::Basic  do |email, password|
+  user = User.find_by(email:,)
+  user.present? && user.admin? && user.authenticate(password)
+end
+
 Rails.application.routes.draw do
+  mount JwtAuth::Engine, at: '/auth'
+  mount Sidekiq::Web => '/sidekiq'
   mount UserDefinedFields::Engine, at: '/user_defined_fields'
 
   namespace :api do
