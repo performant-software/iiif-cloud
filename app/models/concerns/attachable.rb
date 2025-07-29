@@ -9,7 +9,7 @@ module Attachable
 
     # Callbacks
     before_save :delete_attachments
-    before_validation :set_storage_key
+    before_validation :set_attachment_key
 
     def delete_attachments
       self.class.list_attachments&.each do |name|
@@ -22,7 +22,7 @@ module Attachable
       end
     end
 
-    def set_storage_key
+    def set_attachment_key
       # Nothing to set if the attachble object does not implement the :storage_key method
       return unless self.respond_to?(:storage_key)
 
