@@ -2,8 +2,7 @@
   margin-top: 1.5em;
 }
 
-.attachmentDetails > .ui.list.horizontal {
+.attachmentDetails > .ui.list > .item {
   display: flex;
-  justify-content: space-between;
-  width: 100%;
+  align-items: center;
 }

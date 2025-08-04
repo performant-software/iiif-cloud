@@ -22,5 +22,6 @@ export type Resource = {
   project_id: number,
   project: Project,
   content_info: AttachmentInfo,
-  content_converted_info: AttachmentInfo
+  content_converted_info: AttachmentInfo,
+  storage_key: string
 };

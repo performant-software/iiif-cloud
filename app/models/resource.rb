@@ -7,8 +7,11 @@ class Resource < ApplicationRecord
   # Relationships
   belongs_to :project
 
+  # Read only attributes
+  attr_readonly :storage_key
+
   # Resourceable parameters
-  allow_params :project_id, :name, :content, :metadata
+  allow_params :project_id, :name, :content, :metadata, :storage_key
 
   # Callbacks
   before_save :parse_metadata
@@ -52,7 +55,7 @@ class Resource < ApplicationRecord
   def content_base_url
     return attachable_content_base_url unless content_converted.attached?
 
-    "#{ENV['IIIF_HOST_DOCKER'] || ENV['IIIF_HOST']}/iiif/3/#{content_converted.key}"
+    "#{ENV['IIIF_HOST_DOCKER'] || ENV['IIIF_HOST']}/iiif/3/#{CGI.escape(content_converted.key)}"
   end
 
   def content_iiif_url(page_number = 1)
