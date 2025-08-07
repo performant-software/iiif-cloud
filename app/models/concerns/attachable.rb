@@ -148,6 +148,13 @@ module Attachable
 
         "#{self.send("#{name}_base_url")}/square/^!250,250/0/default.jpg"
       end
+
+      define_method("#{name}_uploaded?") do
+        attachment = self.send(name)
+        return false unless attachment.attached?
+
+        ActiveStorage::Blob.service.exist?(attachment.key)
+      end
     end
 
     def attachment_preloads
