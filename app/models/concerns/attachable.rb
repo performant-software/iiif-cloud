@@ -31,7 +31,12 @@ module Attachable
 
       self.class.list_attachments&.each do |name|
         attachment = self.send(name)
+
+        # Only set the storage key for a new record
         next unless attachment.new_record?
+
+        # If the "storage_key" attribute is set on the metadata, this blob was created as a direct upload
+        next if attachment.metadata && attachment.metadata[:storage_key].present?
 
         attachment.key = "#{self.storage_key}/#{ActiveStorage::Blob.generate_unique_secure_token}"
       end
