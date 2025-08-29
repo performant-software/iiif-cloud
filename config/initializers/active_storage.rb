@@ -13,7 +13,7 @@ Rails.application.config.to_prepare do
       object_prefix = self.metadata[:storage_key]
       object_key = self.class.generate_unique_secure_token(length: self.class::MINIMUM_TOKEN_LENGTH)
 
-      [object_prefix, object_key].compact.join('/')
+      [object_prefix, object_key].reject(&:blank?).join('/')
     end
   end
 
