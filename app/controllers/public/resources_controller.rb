@@ -33,16 +33,14 @@ class Public::ResourcesController < Api::ResourcesController
     page_number = params[:page] || 1
 
     redirect_resource do |resource|
-      if resource.image?
-        resource.content_converted_image_api_url(
-          page_number,
-          params[:region],
-          params[:size],
-          params[:rotation],
-          params[:quality],
-          params[:format]
-        )
-      end
+      resource.content_image_api_url(
+        page_number,
+        params[:region],
+        params[:size],
+        params[:rotation],
+        params[:quality],
+        params[:format]
+      )
     end
   end
 

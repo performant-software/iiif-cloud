@@ -9,6 +9,7 @@ module Attachable
 
     # Callbacks
     before_save :delete_attachments
+    before_validation :set_attachment_keys
 
     def delete_attachments
       self.class.list_attachments&.each do |name|
@@ -18,6 +19,26 @@ module Attachable
         return unless attachment.attached?
 
         attachment.purge
+      end
+    end
+
+    def set_attachment_keys
+      # Nothing to set if the attachble object does not implement the :storage_key method
+      return unless self.respond_to?(:storage_key)
+
+      # Nothing to set of the storage_key is empty
+      return unless self.storage_key.present?
+
+      self.class.list_attachments&.each do |name|
+        attachment = self.send(name)
+
+        # Only set the storage key for a new record
+        next unless attachment.new_record?
+
+        # If the "storage_key" attribute is set on the metadata, this blob was created as a direct upload
+        next if attachment.metadata && attachment.metadata[:storage_key].present?
+
+        attachment.key = "#{self.storage_key}/#{ActiveStorage::Blob.generate_unique_secure_token}"
       end
     end
   end
@@ -89,7 +110,7 @@ module Attachable
         attachment = self.send(name)
         return nil unless attachment.attached?
 
-        "#{ENV['IIIF_HOST']}/iiif/3/#{attachment.key}"
+        "#{ENV['IIIF_HOST']}/iiif/3/#{CGI.escape(attachment.key)}"
       end
 
       define_method("#{name}_download_url") do
@@ -131,6 +152,13 @@ module Attachable
         return nil if attachment.audio?
 
         "#{self.send("#{name}_base_url")}/square/^!250,250/0/default.jpg"
+      end
+
+      define_method("#{name}_uploaded?") do
+        attachment = self.send(name)
+        return false unless attachment.attached?
+
+        ActiveStorage::Blob.service.exist?(attachment.key)
       end
     end
 

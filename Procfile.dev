@@ -1,2 +1,2 @@
-web: cd client && npm start --port 6789
-api: bundle exec rails s -p 6780
+api: bundle exec rails s
+web: cd client && yarn run dev

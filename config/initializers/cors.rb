@@ -14,4 +14,9 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
     resource '/public/resources/:id/info*', headers: :any, methods: :get
     resource '*/rails/active_storage/blobs/redirect/*', headers: :any, methods: :get
   end
+
+  allow do
+    origins '*'
+    resource '*/rails/active_storage/direct_uploads', headers: :any, methods: [:options, :post, :put]
+  end
 end

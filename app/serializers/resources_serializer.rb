@@ -8,7 +8,8 @@ class ResourcesSerializer < BaseSerializer
   index_attributes(:manifest_url) { |resource| manifest_url(resource) }
 
   show_attributes :id, :uuid, :name, :exif, :project_id, :content_url, :content_thumbnail_url, :content_iiif_url,
-                  :content_preview_url, :content_download_url, :content_inline_url, :manifest, :content_type
+                  :content_preview_url, :content_download_url, :content_inline_url, :manifest, :content_type,
+                  :storage_key
 
   show_attributes(:manifest_url) { |resource| manifest_url(resource) }
 

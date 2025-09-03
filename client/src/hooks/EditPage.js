@@ -2,7 +2,7 @@
 
 import { useEditContainer } from '@performant-software/shared-components';
 import React, { useCallback, type ComponentType } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router';
 import _ from 'underscore';
 import { useTranslation } from 'react-i18next';
 
@@ -53,7 +53,6 @@ const withEditPage = (WrappedComponent: ComponentType<any>, config: Config): any
       .then((record) => navigate(`${url}/${record.id}`, { state: { saved: true, tab } }));
   }, [config.onSave, location, navigate]);
 
-  // eslint-disable-next-line react/no-unstable-nested-components
   const EditPage = (innerProps) => (
     <WrappedComponent
       {...innerProps}

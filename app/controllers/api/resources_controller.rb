@@ -57,6 +57,14 @@ class Api::ResourcesController < Api::BaseController
     Resource.where(subquery.arel.exists)
   end
 
+  def permitted_params(item = nil)
+    p_params = super
+
+    p_params -= [:storage_key] if action_name == 'update'
+
+    p_params
+  end
+
   private
 
   def can_clear_cache?

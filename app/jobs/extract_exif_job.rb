@@ -1,8 +1,13 @@
 class ExtractExifJob < ApplicationJob
 
+  # In the event the job is started before the file is fully uploaded, we'll retry
+  retry_on Exceptions::FileNotUploadedError, wait: 10.seconds
+
   def perform(resource_id)
     resource = Resource.find(resource_id)
     return unless resource.content.image?
+
+    raise Exceptions::FileNotUploadedError unless resource.content_uploaded?
 
     exif = nil
 

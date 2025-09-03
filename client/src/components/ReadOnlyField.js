@@ -1,13 +1,13 @@
 // @flow
 
-import React from 'react';
+import React, { type Node } from 'react';
 
 type Props = {
   label?: string,
   value: string
 };
 
-const ReadOnlyField = (props: Props) => (
+const ReadOnlyField = (props: Props): Node => (
   <div
     className='field'
   >

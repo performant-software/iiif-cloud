@@ -29,10 +29,12 @@ const AttachmentDetails: ComponentType<any> = (props: Props) => {
       )}
       { props.attachment && (
         <List
-          className={cx(styles.ui, styles.list, styles.horizontal)}
-          horizontal
+          className={cx(styles.ui, styles.list)}
+          padded='very'
+          relaxed='very'
         >
           <List.Item
+            className={styles.item}
             content={props.attachment?.key}
             header={t('AttachmentDetails.labels.key')}
             image={(

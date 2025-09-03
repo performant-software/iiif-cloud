@@ -4,7 +4,7 @@ import { ItemList, LazyImage } from '@performant-software/semantic-components';
 import React, { type ComponentType } from 'react';
 import { withTranslation } from 'react-i18next';
 import UsersService from '../services/Users';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 const Users: ComponentType<any> = withTranslation()(() => {
   const navigate = useNavigate();

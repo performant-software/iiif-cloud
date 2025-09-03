@@ -1,6 +1,6 @@
 // @flow
 
-import React, { useCallback, type ComponentType } from 'react';
+import React, { useCallback, type Node } from 'react';
 import {
   Button,
   Grid,
@@ -16,7 +16,7 @@ type Props = {
   onClose: () => void
 };
 
-const ResourceExifModal: ComponentType<any> = (props: Props) => {
+const ResourceExifModal = (props: Props): Node => {
   const { t } = useTranslation();
 
   /**
@@ -24,7 +24,7 @@ const ResourceExifModal: ComponentType<any> = (props: Props) => {
    *
    * @type {unknown}
    */
-  const renderJson = useCallback((value) => (
+  const renderJson = useCallback((value: any) => (
     <pre>
       { JSON.stringify(value, undefined, 2) }
     </pre>
@@ -35,7 +35,7 @@ const ResourceExifModal: ComponentType<any> = (props: Props) => {
    *
    * @type {function([*,*])}
    */
-  const renderItem = useCallback(([key, value]) => {
+  const renderItem = useCallback(([key, value]: Array<any>) => {
     let content = value;
 
     if (_.isObject(value)) {

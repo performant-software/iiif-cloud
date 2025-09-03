@@ -6,8 +6,7 @@ import React, {
   useState,
   type ComponentType
 } from 'react';
-import { Outlet } from 'react-router-dom';
-import { Container } from 'semantic-ui-react';
+import { Outlet } from 'react-router';
 import Sidebar from './Sidebar';
 import styles from './Layout.module.css';
 

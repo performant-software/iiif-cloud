@@ -10,10 +10,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_04_21_155502) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_23_194140) do
   # These are extensions that must be enabled in order to support this database
+  enable_extension "pg_catalog.plpgsql"
+  enable_extension "pg_stat_statements"
   enable_extension "pgcrypto"
-  enable_extension "plpgsql"
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -99,6 +100,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_04_21_155502) do
     t.text "manifest"
     t.jsonb "user_defined", default: {}
     t.jsonb "metadata", default: {}
+    t.string "storage_key"
     t.index ["project_id"], name: "index_resources_on_project_id"
     t.index ["user_defined"], name: "index_resources_on_user_defined", using: :gin
   end
@@ -116,6 +118,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_04_21_155502) do
     t.datetime "updated_at", null: false
     t.boolean "searchable", default: false, null: false
     t.integer "order", default: 0, null: false
+    t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
     t.index ["defineable_type", "defineable_id"], name: "index_user_defined_fields_on_defineable"
   end
 

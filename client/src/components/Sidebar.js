@@ -2,12 +2,12 @@
 
 import cx from 'classnames';
 import React, { useCallback, type ComponentType } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { Icon, Menu, Popup } from 'semantic-ui-react';
 import AuthenticationService from '../services/Authentication';
 import MenuLink from './MenuLink';
 import styles from './Sidebar.module.css';
-import { withTranslation } from 'react-i18next';
 import type { Translateable } from '../types/Translateable';
 
 type Props = Translateable & {
@@ -16,9 +16,10 @@ type Props = Translateable & {
   }
 };
 
-const Sidebar: ComponentType<any> = withTranslation()((props: Props) => {
+const Sidebar: ComponentType<any> = (props: Props) => {
   const navigate = useNavigate();
   const params = useParams();
+  const { t } = useTranslation();
 
   /**
    * Logs the user out and navigates to the index page.
@@ -51,7 +52,7 @@ const Sidebar: ComponentType<any> = withTranslation()((props: Props) => {
         </Menu.Item>
         { AuthenticationService.isAdmin() && (
           <Popup
-            content={props.t('Sidebar.labels.dashboard')}
+            content={t('Sidebar.labels.dashboard')}
             mouseEnterDelay={1000}
             position='right center'
             trigger={(
@@ -69,7 +70,7 @@ const Sidebar: ComponentType<any> = withTranslation()((props: Props) => {
         )}
         { AuthenticationService.isAdmin() && (
           <Popup
-            content={props.t('Sidebar.labels.organizations')}
+            content={t('Sidebar.labels.organizations')}
             mouseEnterDelay={1000}
             position='right center'
             trigger={(
@@ -88,7 +89,7 @@ const Sidebar: ComponentType<any> = withTranslation()((props: Props) => {
           />
         )}
         <Popup
-          content={props.t('Sidebar.labels.projects')}
+          content={t('Sidebar.labels.projects')}
           mouseEnterDelay={1000}
           position='right center'
           trigger={(
@@ -105,11 +106,11 @@ const Sidebar: ComponentType<any> = withTranslation()((props: Props) => {
               { params.projectId && (
                 <Menu.Menu>
                   <MenuLink
-                    content={props.t('Sidebar.labels.details')}
+                    content={t('Sidebar.labels.details')}
                     to={`/projects/${params.projectId}`}
                   />
                   <MenuLink
-                    content={props.t('Sidebar.labels.resources')}
+                    content={t('Sidebar.labels.resources')}
                     parent
                     to={`/projects/${params.projectId}/resources`}
                   />
@@ -119,7 +120,7 @@ const Sidebar: ComponentType<any> = withTranslation()((props: Props) => {
           )}
         />
         <Popup
-          content={props.t('Sidebar.labels.users')}
+          content={t('Sidebar.labels.users')}
           mouseEnterDelay={1000}
           position='right center'
           trigger={(
@@ -148,6 +149,6 @@ const Sidebar: ComponentType<any> = withTranslation()((props: Props) => {
       </Menu>
     </div>
   );
-});
+};
 
 export default Sidebar;

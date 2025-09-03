@@ -130,7 +130,9 @@
       "attachments": "Attachments",
       "content": "Content",
       "convertedImage": "Converted PTIF",
+      "name": "Name",
       "sourceImage": "Source Image",
+      "storageKey": "Storage key",
       "uuid": "Unique identifier"
     },
     "messages": {
