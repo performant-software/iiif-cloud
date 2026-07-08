@@ -76,7 +76,7 @@ module Iiif
         annotation['body']['service'] = [{
           id: "#{base_url(resource)};#{page_number}",
           type: 'ImageService3',
-          profile: 'http://iiif.io/api/image/3/level2.json'
+          profile: 'level2'
         }]
       end
 
