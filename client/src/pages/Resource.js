@@ -47,6 +47,7 @@ const ResourceForm = (props: Props) => {
   const [converted, setConverted] = useState(false);
   const [errors, setErrors] = useState([]);
   const [info, setInfo] = useState(false);
+  const [manifestRebuilt, setManifestRebuilt] = useState(false);
   const [project, setProject] = useState();
   const [tab, setTab] = useState(Tabs.content);
 
@@ -103,6 +104,18 @@ const ResourceForm = (props: Props) => {
     ResourcesService
       .convert(props.item.id)
       .then(() => setConverted(true))
+      .catch(({ response: { data } }) => setErrors(data.errors))
+  ), [props.item.id]);
+
+  /**
+   * Calls the `/api/resources/:id/create_manifest API endpoint and sets any errors on the state.
+   *
+   * @type {function(): Promise<*>}
+   */
+  const onCreateManifest = useCallback(() => (
+    ResourcesService
+      .createManifest(props.item.id)
+      .then(() => setManifestRebuilt(true))
       .catch(({ response: { data } }) => setErrors(data.errors))
   ), [props.item.id]);
 
@@ -181,6 +194,40 @@ const ResourceForm = (props: Props) => {
           onClearValidationError={props.onClearValidationError}
           tableName='Resource'
         />
+        <Form.Field>
+          <Button
+            basic
+            content={t('Resource.buttons.rebuildManifest')}
+            icon='refresh'
+            onClick={onCreateManifest}
+            type='button'
+          />
+          { props.item.manifest && (
+            <Button
+              as='a'
+              basic
+              content={t('Resource.buttons.viewManifest')}
+              href={props.item.manifest_url}
+              icon='file code outline'
+              rel='noopener noreferrer'
+              target='_blank'
+              type='button'
+            />
+          )}
+        </Form.Field>
+        { manifestRebuilt && (
+          <Toaster
+            onDismiss={() => setManifestRebuilt(false)}
+            type={Toaster.MessageTypes.info}
+          >
+            <Message.Header
+              content={t('Resource.messages.manifest.header')}
+            />
+            <Message.Content
+              content={t('Resource.messages.manifest.content')}
+            />
+          </Toaster>
+        )}
         { info && exif && (
           <ResourceExifModal
             exif={exif}

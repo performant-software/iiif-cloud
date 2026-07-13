@@ -24,6 +24,7 @@ Rails.application.routes.draw do
     resources :resources do
       post :clear_cache, on: :member
       post :convert, on: :member
+      post :create_manifest, on: :member
       post :upload, on: :collection
     end
     resources :users
