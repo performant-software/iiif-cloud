@@ -135,6 +135,7 @@
       "name": "Name",
       "sourceImage": "Source Image",
       "storageKey": "Storage key",
+      "externalMetadata": "External Metadata",
       "uuid": "Unique identifier"
     },
     "messages": {
@@ -149,6 +150,9 @@
       "manifest": {
         "content": "A request to rebuild the IIIF manifest has been submitted. It may take a moment to process.",
         "header": "Rebuild Manifest"
+      },
+      "externalMetadata": {
+        "content": "This metadata is synced from an external source, such as FairData, and can't be edited here. To change these values, edit them in the source system."
       }
     }
   },

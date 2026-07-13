@@ -324,6 +324,29 @@ const ResourceForm = (props: Props) => {
           )}
         </Segment>
       </SimpleEditPage.Tab>
+      { props.item.metadata && props.item.metadata.length > 0 && (
+        <SimpleEditPage.Tab
+          key='external'
+          name={t('Resource.labels.externalMetadata')}
+        >
+          <Message
+            content={t('Resource.messages.externalMetadata.content')}
+            info
+          />
+          { props.item.metadata
+            .filter((entry) => entry
+              && entry.value !== null
+              && entry.value !== undefined
+              && entry.value !== '')
+            .map((entry, index) => (
+              <ReadOnlyField
+                key={index}
+                label={typeof entry.label === 'string' ? entry.label : JSON.stringify(entry.label)}
+                value={String(entry.value)}
+              />
+            ))}
+        </SimpleEditPage.Tab>
+      )}
     </SimpleEditPage>
   );
 };
