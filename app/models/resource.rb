@@ -127,8 +127,8 @@ class Resource < ApplicationRecord
   end
 
   def after_update
-    if saved_change_to_metadata?
-      # Recreate the manifest if metadata updated
+    if saved_change_to_metadata? || saved_change_to_user_defined?
+      # Recreate the manifest if the metadata or user-defined field values were updated
       CreateManifestJob.perform_later(self.id)
     end
 

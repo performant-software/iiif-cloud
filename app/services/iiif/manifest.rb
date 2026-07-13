@@ -8,7 +8,7 @@ module Iiif
       }
 
       resources.each do |resource|
-        manifest['items'] += add_resource(resource)
+        manifest['items'] += add_resource(resource, canvas_metadata: true)
       end
 
       JSON.dump(manifest)
@@ -21,15 +21,17 @@ module Iiif
         en: [resource.name]
       }
 
-      manifest['items'] = add_resource(resource)
-      manifest['metadata'] = resource.metadata
+      manifest['items'] = add_resource(resource, canvas_metadata: false)
+
+      metadata = resource_metadata(resource)
+      manifest['metadata'] = metadata if metadata.present?
 
       JSON.dump(manifest)
     end
 
     private
 
-    def self.add_resource(resource)
+    def self.add_resource(resource, canvas_metadata: false)
       items = []
 
       info = resource_info(resource)
@@ -37,9 +39,10 @@ module Iiif
       page_count = info['page_count'] || 1
       width = info['width']
       height = info['height']
+      metadata = canvas_metadata ? resource_metadata(resource) : nil
 
       page_count.times do |index|
-        items << create_canvas(resource, width, height, index + 1)
+        items << create_canvas(resource, width, height, index + 1, metadata)
       end
 
       items
@@ -83,7 +86,7 @@ module Iiif
       annotation
     end
 
-    def self.create_canvas(resource, width, height, page_number)
+    def self.create_canvas(resource, width, height, page_number, metadata = nil)
       canvas = to_json('canvas.json')
       canvas['id'] = "#{base_url(resource)}/canvas/#{page_number}"
       canvas['width'] = width
@@ -100,9 +103,47 @@ module Iiif
         items: [create_annotation(resource, canvas['id'], page_number)]
       }]
 
-      canvas['metadata'] = resource.metadata
+      canvas['metadata'] = metadata if metadata.present?
 
       canvas
+    end
+
+    def self.resource_metadata(resource)
+      # use UDFs to build metadata JSON
+      return [] unless resource.respond_to?(:user_defined)
+
+      build_metadata(user_defined_fields(resource), resource.user_defined || {})
+    end
+
+    def self.user_defined_fields(resource)
+      # get UDFs from resource type + project
+      query = UserDefinedFields::UserDefinedField.where(table_name: resource.class.to_s)
+
+      project = resource.class.respond_to?(:resolve_defineable) && resource.class.resolve_defineable&.call(resource)
+
+      if project
+        query = query.where(defineable_id: project.id, defineable_type: project.class.to_s)
+      end
+
+      query.order(:order)
+    end
+
+    def self.build_metadata(fields, user_defined)
+      # build IIIF Presentation v3 Manifest metadata array
+      fields.filter_map do |field|
+        value = user_defined[field.uuid]
+
+        values = Array.wrap(value)
+                   .map { |v| v.to_s }
+                   .reject(&:blank?)
+
+        next if values.empty?
+
+        {
+          label: { en: [field.column_name] },
+          value: { en: values }
+        }
+      end
     end
 
     def self.resource_info(resource)
