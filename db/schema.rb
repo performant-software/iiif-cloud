@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_13_181018) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_14_185244) do
   create_schema "heroku_ext"
 
   # These are extensions that must be enabled in order to support this database
@@ -142,6 +142,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_13_181018) do
     t.boolean "admin", default: false
     t.string "api_key"
     t.string "sso_id"
+    t.string "avatar_url"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"

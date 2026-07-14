@@ -42,11 +42,12 @@ class Api::UsersController < Api::BaseController
   private
 
   def update_user_from_sso(local_user, sso_user)
-    if sso_user.private_metadata['is_global_admin'] == true
-      local_user[:admin] = true
-    else
-      local_user[:admin] = false
-    end
+    local_user.assign_attributes(
+      admin: sso_user.private_metadata['is_global_admin'] == true,
+      avatar_url: sso_user.profile_image_url
+    )
+
+    current_user.save!
   end
 
   def sync_organizations_from_sso(user)
