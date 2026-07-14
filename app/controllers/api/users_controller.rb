@@ -10,6 +10,20 @@ class Api::UsersController < Api::BaseController
   before_action :validate_new_user, unless: -> { current_user.admin? }, only: :create
   before_action :validate_user, unless: -> { current_user.admin? }, only: [:update, :destroy]
 
+  def me
+    return unless current_user
+
+    puts "Attempting to authenticate user #{current_user.id}"
+
+    clerk_user = get_clerk_data(current_user.sso_id)
+
+    update_user_from_sso(current_user, clerk_user)
+
+    serializer = UsersSerializer.new
+
+    render json: serializer.render_show(current_user), status: :ok
+  end
+
   protected
 
   def base_query
@@ -25,6 +39,14 @@ class Api::UsersController < Api::BaseController
   end
 
   private
+
+  def update_user_from_sso(local_user, sso_user)
+    if sso_user.private_metadata['is_global_admin'] == true
+      local_user[:admin] = true
+    else
+      local_user[:admin] = false
+    end
+  end
 
   def validate_new_user
     organization_ids = params[:user][:user_organizations].map{ |uo| uo[:organization_id] }

@@ -6,6 +6,7 @@ import type { EditContainerProps } from '@performant-software/shared-components/
 import { UserDefinedFieldsForm, UserDefinedFields } from '@performant-software/user-defined-fields';
 import React, {
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useState,
@@ -22,7 +23,6 @@ import {
   Segment
 } from 'semantic-ui-react';
 import AttachmentDetails from '../components/AttachmentDetails';
-import AuthenticationService from '../services/Authentication';
 import ProjectsService from '../services/Projects';
 import ReadOnlyField from '../components/ReadOnlyField';
 import type { Resource as ResourceType } from '../types/Resource';
@@ -32,6 +32,7 @@ import SimpleEditPage from '../components/SimpleEditPage';
 import StatusIcon from '../components/StatusIcon';
 import styles from './Resource.module.css';
 import withEditPage from '../hooks/EditPage';
+import { AuthenticationContext } from '../contexts/AuthenticationContext';
 
 type Props = EditContainerProps & {
   item: ResourceType
@@ -52,6 +53,8 @@ const ResourceForm = (props: Props) => {
 
   const { projectId } = useParams();
   const { t } = useTranslation();
+
+  const { user } = useContext(AuthenticationContext);
 
   /**
    * Memo-izes the current attachment info.
@@ -221,7 +224,7 @@ const ResourceForm = (props: Props) => {
                 status={props.item.content_converted_info ? 'positive' : 'negative'}
               />
             </Menu.Item>
-            { AuthenticationService.isAdmin() && (
+            { user.admin && (
               <Menu.Menu
                 position='right'
               >
@@ -237,7 +240,7 @@ const ResourceForm = (props: Props) => {
           <AttachmentDetails
             attachment={attachment}
           />
-          { AuthenticationService.isAdmin() && attachment && (
+          { user.admin && attachment && (
             <div
               className={styles.actions}
             >

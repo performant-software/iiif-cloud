@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@bunchtogether/vite-plugin-flow": "^1.0.2",
+    "@clerk/react": "^6.12.2",
     "@performant-software/semantic-components": "^3.1.0",
     "@performant-software/shared-components": "^3.1.0",
     "@performant-software/user-defined-fields": "^3.1.0",

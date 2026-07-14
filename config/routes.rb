@@ -11,7 +11,6 @@ Sidekiq::Web.use Rack::Auth::Basic  do |email, password|
 end
 
 Rails.application.routes.draw do
-  mount JwtAuth::Engine, at: '/auth'
   mount Sidekiq::Web => '/sidekiq'
   mount UserDefinedFields::Engine, at: '/user_defined_fields'
 
@@ -26,10 +25,9 @@ Rails.application.routes.draw do
       post :convert, on: :member
       post :upload, on: :collection
     end
-    resources :users
-
-    # Authentication
-    post '/auth/login', to: 'authentication#login'
+    resources :users do
+      get :me, on: :collection
+    end
   end
 
   namespace :public do
