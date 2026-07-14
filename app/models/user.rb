@@ -1,22 +1,9 @@
 class User < ApplicationRecord
-  # Includes
-  include Attachable
-
   # Relationships
   has_many :user_organizations, dependent: :destroy
 
-  # Nested attributes
-  accepts_nested_attributes_for :user_organizations, allow_destroy: true
-
   # Resourceable parameters
-  allow_params :name, :email, :admin, :api_key, :avatar,
-               user_organizations_attributes: [:id, :organization_id, :_destroy]
-
-  # ActiveStorage
-  has_one_attached :avatar
-
-  # Validations
-  validates :user_organizations, presence: true, unless: :admin?
+  allow_params :api_key
 
   def has_access?(organization_ids)
     if organization_ids.is_a?(Integer)

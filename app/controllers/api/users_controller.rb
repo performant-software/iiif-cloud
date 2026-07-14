@@ -3,7 +3,6 @@ class Api::UsersController < Api::BaseController
   search_attributes :name, :email
 
   # Preloads
-  preloads User.attachment_preloads
   preloads user_organizations: :organization, only: :show
 
   # Actions
@@ -47,7 +46,7 @@ class Api::UsersController < Api::BaseController
       avatar_url: sso_user.profile_image_url
     )
 
-    current_user.save!
+    local_user.save!
   end
 
   def sync_organizations_from_sso(user)

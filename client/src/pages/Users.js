@@ -23,7 +23,7 @@ const Users: ComponentType<any> = withTranslation()(() => {
       renderImage={(user) => (
         <LazyImage
           dimmable={false}
-          src={user.avatar_thumbnail_url}
+          src={user.avatar_url}
         />
       )}
       renderMeta={(user) => user.email}
