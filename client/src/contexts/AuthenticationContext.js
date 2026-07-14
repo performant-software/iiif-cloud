@@ -14,7 +14,7 @@ interface AuthenticationContextType {
 export const AuthenticationContext = createContext<AuthenticationContextType>({
   setUser: () => {},
   signOut: () => {},
-  user: null,
+  user: null
 });
 
 interface AuthenticationContextProps {

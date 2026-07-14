@@ -27,9 +27,6 @@ gem 'resource_api', git: 'https://github.com/performant-software/resource-api.gi
 # Use Json Web Token (JWT) for token based authentication
 gem 'jwt', '~> 3.1.2'
 
-# Use ActiveModel has_secure_password
-gem 'bcrypt', '~> 3.1.20'
-
 # Active storage service
 gem 'aws-sdk-s3', '~> 1.193'
 
