@@ -124,7 +124,9 @@
     "buttons": {
       "clearCache": "Clear cache",
       "convert": "Convert",
-      "exif": "View Info"
+      "exif": "View Info",
+      "rebuildManifest": "Rebuild manifest",
+      "viewManifest": "View manifest"
     },
     "labels": {
       "attachments": "Attachments",
@@ -133,6 +135,7 @@
       "name": "Name",
       "sourceImage": "Source Image",
       "storageKey": "Storage key",
+      "externalMetadata": "External Metadata",
       "uuid": "Unique identifier"
     },
     "messages": {
@@ -143,6 +146,13 @@
       "convert": {
         "content": "A request to convert the resource to a PTIF has been submitted. Please refresh the page to view the results.",
         "header": "Convert Resource"
+      },
+      "manifest": {
+        "content": "A request to rebuild the IIIF manifest has been submitted. It may take a moment to process.",
+        "header": "Rebuild Manifest"
+      },
+      "externalMetadata": {
+        "content": "This metadata is synced from an external source, such as FairData, and can't be edited here. To change these values, edit them in the source system."
       }
     }
   },
