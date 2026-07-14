@@ -14,13 +14,7 @@ const Users: ComponentType<any> = withTranslation()(() => {
       actions={[{
         name: 'edit',
         onClick: (item) => navigate(`/users/${item.id}`)
-      }, {
-        name: 'delete'
       }]}
-      addButton={{
-        location: 'top',
-        onClick: () => navigate('/users/new')
-      }}
       collectionName='users'
       defaultSort='name'
       onLoad={(params) => UsersService.fetchAll(params)}

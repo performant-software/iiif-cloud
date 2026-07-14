@@ -40,9 +40,11 @@ export const AuthenticationContextProvider = ({ children }: AuthenticationContex
     }
   }, [clerkAuth.isSignedIn, user]);
 
-  const value = useMemo(() => {
-    return { user, setUser, signOut: clerkAuth.signOut };
-  }, [user, setUser, clerkAuth.signOut]);
+  const value = useMemo(() => ({
+    user,
+    setUser,
+    signOut: clerkAuth.signOut
+  }), [user, setUser, clerkAuth.signOut]);
 
   return (
     <AuthenticationContext.Provider value={value}>
