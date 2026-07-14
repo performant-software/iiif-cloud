@@ -8,7 +8,9 @@ To run FairImage locally, you'll need to set up Clerk. Follow these steps:
 2. Create a new application in Clerk.
 3. Make sure organizations are enabled 
 4. Obtain your Clerk API keys under Instance -> Configure -> API Keys.
-5. Plug them into your `.env` file as `VITE_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY`.
+5. Plug them into your `client/.env` file as `VITE_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY`.
+6. Obtain your Clerk sign in URL under Configure -> Developers -> Paths -> Component paths -> `<SignIn />`
+7. Plug it inot your `client/.env` file as `VITE_CLERK_SIGN_IN_URL`.
 
 You won't be able to sign in until the `sso_id` value is set on the FairImage user record you want to use.
 
