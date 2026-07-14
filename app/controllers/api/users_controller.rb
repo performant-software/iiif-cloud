@@ -18,6 +18,7 @@ class Api::UsersController < Api::BaseController
     clerk_user = get_clerk_data(current_user.sso_id)
 
     update_user_from_sso(current_user, clerk_user)
+    sync_organizations_from_sso(current_user)
 
     serializer = UsersSerializer.new
 
@@ -46,6 +47,21 @@ class Api::UsersController < Api::BaseController
     else
       local_user[:admin] = false
     end
+  end
+
+  def sync_organizations_from_sso(user)
+    memberships = get_clerk_organization_memberships(user.sso_id)
+    clerk_organization_ids = memberships.map { |membership| membership.organization.id }
+
+    local_organization_ids = Organization.where(sso_id: clerk_organization_ids).pluck(:id)
+    current_organization_ids = user.user_organizations.pluck(:organization_id)
+
+    (local_organization_ids - current_organization_ids).each do |organization_id|
+      user.user_organizations.create!(organization_id: organization_id)
+    end
+
+    removed_organization_ids = current_organization_ids - local_organization_ids
+    user.user_organizations.where(organization_id: removed_organization_ids).destroy_all if removed_organization_ids.any?
   end
 
   def validate_new_user

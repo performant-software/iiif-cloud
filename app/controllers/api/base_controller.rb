@@ -49,6 +49,10 @@ class Api::BaseController < Api::ResourceController
     clerk_client.users.get(user_id: clerk_id).user
   end
 
+  def get_clerk_organization_memberships(clerk_id)
+    clerk_client.users.get_organization_memberships(user_id: clerk_id, limit: 500).organization_memberships.data
+  end
+
   def get_clerk_role(clerk_user)
     clerk_user.public_metadata["role"]
   end
