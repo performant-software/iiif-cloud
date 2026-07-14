@@ -22,4 +22,4 @@ For each user you want to work with (you'll probably want one admin and one non-
 For each organization:
 1. Create a corresponding organization in the Organizations tab in Clerk.
 2. Copy the Organization ID value from Clerk and plug it into the FairImage organization's `sso_id` field.
-3. Add whichever users you want under the Members tab on the organization's Clerk page. (Note: roles are irrelevant to FairImage, but you may want to set these if you're planning to use this Clerk org for other apps.)
+3. Add whichever users you want under the Members tab on the organization's Clerk page. (Note: roles are irrelevant to FairImage, but you may want to set them to reasonable values if you're planning to use this Clerk org for other apps.)
