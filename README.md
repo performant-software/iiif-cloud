@@ -1,5 +1,12 @@
 # FairImage
 
+## Setup
+
+1. Run `bundle install` to install the Rails dependencies.
+2. `cd` into `client` and run `yarn` to install the client dependencies.
+
+To start FairImage, run `bundle exec rake start`.
+
 ## Local Development with Clerk
 
 To run FairImage locally, you'll need to set up Clerk. Follow these steps:
@@ -8,9 +15,9 @@ To run FairImage locally, you'll need to set up Clerk. Follow these steps:
 2. Create a new application in Clerk.
 3. Make sure organizations are enabled 
 4. Obtain your Clerk API keys under Instance -> Configure -> API Keys.
-5. Plug them into your `client/.env` file as `VITE_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY`.
+5. Plug them into your `.env` file as `VITE_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY`.
 6. Obtain your Clerk sign in URL under Configure -> Developers -> Paths -> Component paths -> `<SignIn />`
-7. Plug it inot your `client/.env` file as `VITE_CLERK_SIGN_IN_URL`.
+7. Plug it into your `.env` file as `VITE_CLERK_SIGN_IN_URL`.
 
 You won't be able to sign in until the `sso_id` value is set on the FairImage user record you want to use.
 
