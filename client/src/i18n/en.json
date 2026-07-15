@@ -18,6 +18,10 @@
       "noContent": "No attached content."
     }
   },
+  "ClerkLoginModal": {
+    "header": "Welcome to FairImage",
+    "login": "Sign in with Performant Studio"
+  },
   "Common": {
     "buttons": {
       "add": "Add",
@@ -83,15 +87,6 @@
         "email": "Email",
         "name": "Name"
       }
-    }
-  },
-  "OrganizationModal": {
-    "labels": {
-      "organization": "Organization"
-    },
-    "title": {
-      "add": "Add Organization",
-      "edit": "Edit Organization"
     }
   },
   "Organizations": {
@@ -182,19 +177,13 @@
     "labels": {
       "admin": "Administrator",
       "email": "Email",
-      "name": "Name",
-      "password": "Password",
-      "passwordConfirmation": "Password confirmation"
+      "name": "Name"
     },
     "organizations": {
       "columns": {
         "location": "Location",
         "name": "Name"
       }
-    },
-    "password": {
-      "content": "Passwords must be at least eight (8) characters.",
-      "header": "Password Policy"
     }
   },
   "SystemStatus": {
@@ -215,14 +204,6 @@
     "title": {
       "add": "Add User",
       "edit": "Edit User"
-    }
-  },
-  "UserOrganizationModal": {
-    "labels": {
-      "organization": "Organization"
-    },
-    "title": {
-      "add": "Add User Organization"
     }
   },
   "Users": {
