@@ -37,8 +37,8 @@ module Iiif
       info = resource_info(resource)
 
       page_count = info['page_count'] || 1
-      width = info['width']
       height = info['height']
+      width = info['width']
       metadata = canvas_metadata ? resource_metadata(resource) : nil
 
       page_count.times do |index|
@@ -71,6 +71,17 @@ module Iiif
         type = 'Sound'
       end
 
+      info = resource_info(resource)
+
+      if resource.image? || resource.pdf? || resource.video?
+        annotation['body']['height'] = info['height']
+        annotation['body']['width'] = info['width']
+      end
+
+      if resource.audio? || resource.video?
+        annotation['body']['duration'] = resource.content&.blob&.metadata[:duration]
+      end
+
       annotation['body']['id'] = id
       annotation['body']['type'] = type
       annotation['body']['format'] = resource.content_type
@@ -89,8 +100,9 @@ module Iiif
     def self.create_canvas(resource, width, height, page_number, metadata = nil)
       canvas = to_json('canvas.json')
       canvas['id'] = "#{base_url(resource)}/canvas/#{page_number}"
-      canvas['width'] = width
-      canvas['height'] = height
+      canvas['height'] = height if height
+      canvas['width'] = width if width
+      canvas['duration'] = resource.content&.blob&.metadata[:duration] if (resource.video? || resource.audio?)
       canvas['label'] = {
         en: [
           resource.name
