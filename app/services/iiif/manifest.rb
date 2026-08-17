@@ -52,7 +52,7 @@ module Iiif
       "#{ENV['HOSTNAME']}/public/resources/#{resource.uuid}"
     end
 
-    def self.create_annotation(resource, target, page_number)
+    def self.create_annotation(resource, target, page_number, width, height)
       annotation = to_json('annotation.json')
       annotation['id'] = "#{base_url(resource)}/canvas/#{page_number}/page/1/annotation/1"
       annotation['target'] = target
@@ -71,11 +71,9 @@ module Iiif
         type = 'Sound'
       end
 
-      info = resource_info(resource)
-
       if resource.image? || resource.pdf? || resource.video?
-        annotation['body']['height'] = info['height']
-        annotation['body']['width'] = info['width']
+        annotation['body']['height'] = height
+        annotation['body']['width'] = width
       end
 
       if resource.audio? || resource.video?
@@ -112,7 +110,7 @@ module Iiif
       canvas['items'] = [{
         id: "#{base_url(resource)}/canvas/#{page_number}/page/1",
         type: 'AnnotationPage',
-        items: [create_annotation(resource, canvas['id'], page_number)]
+        items: [create_annotation(resource, canvas['id'], page_number, width, height)]
       }]
 
       canvas['metadata'] = metadata if metadata.present?
