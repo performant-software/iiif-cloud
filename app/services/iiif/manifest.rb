@@ -34,11 +34,17 @@ module Iiif
     def self.add_resource(resource, canvas_metadata: false)
       items = []
 
-      info = resource_info(resource)
-
-      page_count = info['page_count'] || 1
-      height = info['height']
-      width = info['width']
+      if resource.image? || resource.pdf?
+        info = resource_info(resource)
+        page_count = info['page_count'] || 1
+        height = info['height']
+        width = info['width']
+      else
+        page_count = 1
+        height = resource.content&.blob&.metadata[:height]
+        width = resource.content&.blob&.metadata[:width]
+      end
+      
       metadata = canvas_metadata ? resource_metadata(resource) : nil
 
       page_count.times do |index|
