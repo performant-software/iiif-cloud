@@ -18,7 +18,12 @@ module Attachable
         attachment = self.send(name)
         return unless attachment.attached?
 
-        attachment.purge
+        # Handle both has_one_attached and has_many_attached
+        if attachment.is_a?(ActiveStorage::Attached::Many)
+          attachment.purge_all
+        else
+          attachment.purge
+        end
       end
     end
 
@@ -31,14 +36,21 @@ module Attachable
 
       self.class.list_attachments&.each do |name|
         attachment = self.send(name)
-
-        # Only set the storage key for a new record
-        next unless attachment.new_record?
-
-        # If the "storage_key" attribute is set on the metadata, this blob was created as a direct upload
-        next if attachment.metadata && attachment.metadata[:storage_key].present?
-
-        attachment.key = "#{self.storage_key}/#{ActiveStorage::Blob.generate_unique_secure_token}"
+        
+        # Handle both has_one_attached and has_many_attached
+        if attachment.is_a?(ActiveStorage::Attached::Many)
+          # For has_many_attached, iterate through each attachment
+          attachment.each do |attach|
+            next unless attach.new_record?
+            next if attach.metadata && attach.metadata[:storage_key].present?
+            attach.key = "#{self.storage_key}/#{ActiveStorage::Blob.generate_unique_secure_token}"
+          end
+        else
+          # For has_one_attached
+          next unless attachment.new_record?
+          next if attachment.metadata && attachment.metadata[:storage_key].present?
+          attachment.key = "#{self.storage_key}/#{ActiveStorage::Blob.generate_unique_secure_token}"
+        end
       end
     end
   end
@@ -163,7 +175,16 @@ module Attachable
     end
 
     def attachment_preloads
-      @attachments.map{ |a| { "#{a}_attachment".to_sym => :blob } }
+      @attachments.map do |a|
+        # For has_many_attached, the association is plural: {name}_attachments
+        # For has_one_attached, the association is singular: {name}_attachment
+        # Check if the reflection exists to determine which pattern to use
+        if reflect_on_association("#{a}_attachments")
+          { "#{a}_attachments".to_sym => :blob }
+        else
+          { "#{a}_attachment".to_sym => :blob }
+        end
+      end
     end
 
     def list_attachments

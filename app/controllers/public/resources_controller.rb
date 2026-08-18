@@ -25,7 +25,13 @@ class Public::ResourcesController < Api::ResourcesController
     page_number = params[:page] || 1
 
     redirect_resource do |resource|
-      resource.image? ? resource.content_converted_iiif_url(page_number) : resource.content_iiif_url(page_number)
+      if resource.converted_pages?
+        resource.content_converted_pages_iiif_url(page_number.to_i)
+      elsif resource.image?
+        resource.content_converted_iiif_url(page_number)
+      else
+        resource.content_iiif_url(page_number)
+      end
     end
   end
 
