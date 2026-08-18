@@ -21,7 +21,8 @@ class Resource < ApplicationRecord
   # ActiveStorage
   has_one_attached :content
   has_one_attached :content_converted
-  has_many_attached :content_converted_pages
+  # Page URLs are page-indexed and defined below, so skip the generic (page-unaware) macro-generated ones.
+  has_many_attached :content_converted_pages, generate_urls: false
 
   # Delegates
   delegate :audio?, to: :content
@@ -54,9 +55,9 @@ class Resource < ApplicationRecord
   end
 
   def content_base_url
-    # For multi-page PDFs, return the first page's base URL
+    # For multi-page PDFs, this should return the info for the whole PDF (including page count)
     if content_converted_pages.attached?
-      return content_converted_pages_base_url(1)
+      return "#{ENV['IIIF_HOST_DOCKER'] || ENV['IIIF_HOST']}/iiif/3/#{CGI.escape(content.key)}"
     end
 
     return attachable_content_base_url unless content_converted.attached?

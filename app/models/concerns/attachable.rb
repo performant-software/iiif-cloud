@@ -59,18 +59,20 @@ module Attachable
 
     # This method overrides model#has_one_attached in order to facilitate generating a <name>_url method for easily
     # accessing the attachment URL in serializers.
-    def has_one_attached(name, dependent: :purge_later)
-      super
-      generate_url_method name
+    # Pass generate_urls: false when the model defines its own <name>_*_url methods (e.g. page-indexed URLs).
+    def has_one_attached(name, dependent: :purge_later, generate_urls: true)
+      super(name, dependent: dependent)
+      generate_url_method name if generate_urls
       generate_remove_method name
       @attachments << name
     end
 
     # This method overrides model#has_many_attached in order to facilitate generating a <name>_url method for easily
     # accessing the attachment URL in serializers.
-    def has_many_attached(name, dependent: :purge_later)
-      super
-      generate_url_method name
+    # Pass generate_urls: false when the model defines its own <name>_*_url methods (e.g. page-indexed URLs).
+    def has_many_attached(name, dependent: :purge_later, generate_urls: true)
+      super(name, dependent: dependent)
+      generate_url_method name if generate_urls
       generate_remove_method name
       @attachments << name
     end

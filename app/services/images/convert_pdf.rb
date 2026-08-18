@@ -46,7 +46,7 @@ module Images
         convert = MiniMagick.convert
         convert << "#{file.path}[#{page_number}]"  # Specify page index (0-indexed)
         convert << '-quality'
-        convert << '85'  # Good quality for intermediate conversion
+        convert << '90'  # Good quality for intermediate conversion
         convert << '-density'
         convert << '300'  # High DPI for better quality
         convert << output_path

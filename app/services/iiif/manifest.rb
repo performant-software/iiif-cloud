@@ -63,8 +63,10 @@ module Iiif
       annotation['id'] = "#{base_url(resource)}/canvas/#{page_number}/page/1/annotation/1"
       annotation['target'] = target
 
-      if resource.image? || resource.pdf?
+      if resource.image?
         id = "#{base_url(resource)};#{page_number}/iiif"
+      elsif resource.pdf?
+        id = resource.content_converted_pages_iiif_url(page_number)
       else
         id = resource.content_url
       end
@@ -92,7 +94,7 @@ module Iiif
 
       if resource.image? || resource.pdf?
         annotation['body']['service'] = [{
-          id: "#{base_url(resource)};#{page_number}",
+          id: resource.image? ? "#{base_url(resource)};#{page_number}" : resource.content_converted_pages_base_url(page_number),
           type: 'ImageService3',
           profile: 'level2'
         }]
