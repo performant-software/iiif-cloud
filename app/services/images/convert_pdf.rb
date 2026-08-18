@@ -13,8 +13,8 @@ module Images
         output = identify.call
 
         # Parse output to extract page count
-        # ImageMagick identify on a PDF returns info for each page
-        pages = output.scan(/\d+(?=\[0\]|\[\d+\])/m).count
+        # ImageMagick identify on a PDF returns one line per page, e.g. "file.pdf[3] PDF ..."
+        pages = output.scan(/\[(\d+)\]/).flatten.uniq.count
         
         if pages.zero?
           # Fallback: try to use pdftoppm or count with strings
@@ -118,8 +118,8 @@ module Images
       # This is a simple heuristic and may not work for all PDF types
       pdf_content = File.read(file.path, encoding: 'ISO-8859-1')
       
-      # Count /Type /Page occurrences
-      count = pdf_content.scan(%r{/Type\s*/Page(?!/s)}).count
+      # Count /Type /Page occurrences, excluding /Type /Pages tree/container nodes
+      count = pdf_content.scan(%r{/Type\s*/Page(?!s)}).count
       count = 1 if count.zero?  # At minimum, a PDF has 1 page
       
       count
