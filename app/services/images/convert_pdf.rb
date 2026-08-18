@@ -82,6 +82,8 @@ module Images
         convert << '-strip'
         convert << '-alpha'
         convert << 'remove'
+        convert << '-alpha'
+        convert << 'off'
         convert << '-colorspace'
         convert << 'sRGB'
         convert << "ptif:#{output_path}"
