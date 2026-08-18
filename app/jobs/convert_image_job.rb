@@ -90,7 +90,7 @@ class ConvertImageJob < ApplicationJob
             )
 
             # Clean up intermediate files as we go
-            # Images::ConvertPdf.cleanup_temp_files([temp_image_path, tiff_path])
+            Images::ConvertPdf.cleanup_temp_files([temp_image_path, tiff_path])
             temp_files -= [temp_image_path, tiff_path]
 
           rescue Exceptions::PDFExtractionError => e
@@ -114,7 +114,7 @@ class ConvertImageJob < ApplicationJob
       Rails.logger.error "Failed to extract pages from PDF resource #{resource.id}: #{e.message}"
     ensure
       # Ensure all temporary files are cleaned up
-      # Images::ConvertPdf.cleanup_temp_files(temp_files)
+      Images::ConvertPdf.cleanup_temp_files(temp_files)
     end
   end
 end
