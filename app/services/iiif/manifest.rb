@@ -34,11 +34,17 @@ module Iiif
     def self.add_resource(resource, canvas_metadata: false)
       items = []
 
-      info = resource_info(resource)
-
-      page_count = info['page_count'] || 1
-      width = info['width']
-      height = info['height']
+      if resource.image? || resource.pdf?
+        info = resource_info(resource)
+        page_count = info['page_count'] || 1
+        height = info['height']
+        width = info['width']
+      else
+        page_count = 1
+        height = resource.content&.blob&.metadata[:height]
+        width = resource.content&.blob&.metadata[:width]
+      end
+      
       metadata = canvas_metadata ? resource_metadata(resource) : nil
 
       page_count.times do |index|
@@ -52,7 +58,7 @@ module Iiif
       "#{ENV['HOSTNAME']}/public/resources/#{resource.uuid}"
     end
 
-    def self.create_annotation(resource, target, page_number)
+    def self.create_annotation(resource, target, page_number, width, height)
       annotation = to_json('annotation.json')
       annotation['id'] = "#{base_url(resource)}/canvas/#{page_number}/page/1/annotation/1"
       annotation['target'] = target
@@ -69,6 +75,15 @@ module Iiif
         type = 'Video'
       elsif resource.audio?
         type = 'Sound'
+      end
+
+      if resource.image? || resource.pdf? || resource.video?
+        annotation['body']['height'] = height
+        annotation['body']['width'] = width
+      end
+
+      if resource.audio? || resource.video?
+        annotation['body']['duration'] = resource.content&.blob&.metadata[:duration]
       end
 
       annotation['body']['id'] = id
@@ -89,8 +104,9 @@ module Iiif
     def self.create_canvas(resource, width, height, page_number, metadata = nil)
       canvas = to_json('canvas.json')
       canvas['id'] = "#{base_url(resource)}/canvas/#{page_number}"
-      canvas['width'] = width
-      canvas['height'] = height
+      canvas['height'] = height if height
+      canvas['width'] = width if width
+      canvas['duration'] = resource.content&.blob&.metadata[:duration] if (resource.video? || resource.audio?)
       canvas['label'] = {
         en: [
           resource.name
@@ -100,7 +116,7 @@ module Iiif
       canvas['items'] = [{
         id: "#{base_url(resource)}/canvas/#{page_number}/page/1",
         type: 'AnnotationPage',
-        items: [create_annotation(resource, canvas['id'], page_number)]
+        items: [create_annotation(resource, canvas['id'], page_number, width, height)]
       }]
 
       canvas['metadata'] = metadata if metadata.present?
