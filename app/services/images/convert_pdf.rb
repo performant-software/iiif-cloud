@@ -44,11 +44,11 @@ module Images
 
         # Use ImageMagick to extract the specific PDF page
         convert = MiniMagick.convert
+        convert << '-density'
+        convert << '300'  # High DPI for better quality
         convert << "#{file.path}[#{page_number}]"  # Specify page index (0-indexed)
         convert << '-quality'
         convert << '90'  # Good quality for intermediate conversion
-        convert << '-density'
-        convert << '300'  # High DPI for better quality
         convert << output_path
         convert.call
 

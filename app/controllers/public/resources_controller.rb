@@ -39,14 +39,25 @@ class Public::ResourcesController < Api::ResourcesController
     page_number = params[:page] || 1
 
     redirect_resource do |resource|
-      resource.content_image_api_url(
-        page_number,
-        params[:region],
-        params[:size],
-        params[:rotation],
-        params[:quality],
-        params[:format]
-      )
+      if resource.converted_pages?
+        resource.content_converted_pages_image_api_url(
+          page_number,
+          params[:region],
+          params[:size],
+          params[:rotation],
+          params[:quality],
+          params[:format]
+        )
+      else
+        resource.content_image_api_url(
+          page_number,
+          params[:region],
+          params[:size],
+          params[:rotation],
+          params[:quality],
+          params[:format]
+        )
+      end
     end
   end
 
@@ -54,7 +65,13 @@ class Public::ResourcesController < Api::ResourcesController
     page_number = params[:page] || 1
 
     redirect_resource do |resource|
-      resource.image? ? resource.content_converted_info_url(page_number) : resource.content_info_url(page_number)
+      if resource.converted_pages
+        resource.content_converted_pages_info_url(page_number)
+      elsif resource.image?
+        resource.content_converted_info_url(page_number)
+      else
+        resource.content_info_url(page_number)    
+      end
     end
   end
 
@@ -70,14 +87,30 @@ class Public::ResourcesController < Api::ResourcesController
   end
 
   def preview
+    page_number = params[:page] || 1
+
     redirect_resource do |resource|
-      resource.image? ? resource.content_converted_preview_url : resource.content_preview_url
+      if resource.converted_pages?
+        resource.content_converted_pages_preview_url(page_number)
+      elsif resource.image?
+        resource.content_converted_preview_url
+      else
+        resource.content_preview_url
+      end
     end
   end
 
   def thumbnail
+    page_number = params[:page] || 1
+
     redirect_resource do |resource|
-      resource.image? ? resource.content_converted_thumbnail_url : resource.content_thumbnail_url
+      if resource.converted_pages?
+        resource.content_converted_pages_thumbnail_url(page_number)
+      elsif resource.image?
+        resource.content_converted_thumbnail_url
+      else
+        resource.content_thumbnail_url
+      end
     end
   end
 

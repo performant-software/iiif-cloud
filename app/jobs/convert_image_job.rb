@@ -105,6 +105,9 @@ class ConvertImageJob < ApplicationJob
         # Store page count on resource for tracking
         resource.update(pages_count: page_count)
 
+        # Regenerate manifest with converted pages
+        CreateManifestJob.perform_later(resource.id)
+
         Rails.logger.info "Successfully converted PDF resource #{resource.id} with #{page_count} pages"
 
       end

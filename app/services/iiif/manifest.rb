@@ -36,7 +36,7 @@ module Iiif
 
       if resource.image? || resource.pdf?
         info = resource_info(resource)
-        page_count = info['page_count'] || 1
+        page_count = resource.pdf? ? resource.page_count : (info['page_count'] || 1)
         height = info['height']
         width = info['width']
       else
