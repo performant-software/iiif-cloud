@@ -80,7 +80,7 @@ namespace :iiif do
       exit 0
     end
 
-    query = Resource.with_attachment('content') do |subquery|
+    query = Resource.with_attachment('content_converted') do |subquery|
       subquery = subquery
         .joins(:blob)
         .where('active_storage_blobs.byte_size > ?', 0)
