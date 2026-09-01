@@ -12,6 +12,8 @@ module Images
       convert << file.path
       convert << '-define'
       convert << 'tiff:tile-geometry=1024x1024'
+      convert << '-define'
+      convert << 'ptif:pyramid=1024x8'
       convert << '-depth'
       convert << '8'
       convert << '-compress'
