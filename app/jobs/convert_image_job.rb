@@ -87,6 +87,7 @@ class ConvertImageJob < ApplicationJob
               io: File.open(tiff_path),
               content_type: CONTENT_TYPE_TIFF,
               filename: page_filename,
+              metadata: { original_page_number: page_number + 1 },
             )
 
             # Clean up intermediate files as we go

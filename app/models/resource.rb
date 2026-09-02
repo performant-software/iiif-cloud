@@ -113,9 +113,12 @@ class Resource < ApplicationRecord
   def content_converted_pages_base_url(page_number)
     return nil unless content_converted_pages.attached?
     page_number = page_number.to_i
-    return nil if page_number < 1 || page_number > content_converted_pages.count
+    return nil unless pages_count
+    return nil if page_number < 1 || page_number > pages_count
 
-    page = content_converted_pages.to_a[page_number - 1]
+    page = content_converted_pages.to_a.find do |attachment|
+      attachment.blob.metadata['original_page_number'].to_i == page_number
+    end
     return nil unless page
 
     "#{ENV['IIIF_HOST_DOCKER'] || ENV['IIIF_HOST']}/iiif/3/#{CGI.escape(page.key)}"
