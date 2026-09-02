@@ -61,6 +61,47 @@ namespace :iiif do
     end
   end
 
+  desc 'Converts the source images to pyramidal TIFFs for resources created in a given date range'
+  task convert_images_by_date_range: :environment do
+    # Parse the arguments
+    options = {}
+
+    opt_parser = OptionParser.new do |opts|
+      opts.banner = 'Usage: rake iiif:convert_images_by_date_range [options]'
+      opts.on('--after after_date', 'After this date') { |after| options[:after] = after }
+      opts.on('--before before_date', 'Before this date') { |before| options[:before] = before }
+    end
+
+    args = opt_parser.order!(ARGV) {}
+    opt_parser.parse!(args)
+
+    if options[:after].blank? && options[:before].blank?
+      puts 'Please specify at least one date (--after and/or --before)...'
+      exit 0
+    end
+
+    query = Resource.with_attachment('content_converted') do |subquery|
+      subquery = subquery
+        .joins(:blob)
+        .where('active_storage_blobs.byte_size > ?', 0)
+      
+      subquery = subquery.where('active_storage_blobs.created_at > ?', options[:after]) if options[:after].present?
+      subquery = subquery.where('active_storage_blobs.created_at < ?', options[:before]) if options[:before].present?
+      
+      subquery
+    end
+
+    total_queued = 0
+    query.in_batches do |resources|
+      resources.pluck(:id).each do |resource_id|
+        ConvertImageJob.perform_later(resource_id)
+        total_queued += 1
+      end
+    end
+
+    puts "Queued #{total_queued} resources for conversion"
+  end
+
   desc 'Converts the source images to pyramidal TIFFs for resources by the specified MIME type'
   task convert_images_by_type: :environment do
     # Parse the arguments
