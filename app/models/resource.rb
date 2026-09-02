@@ -112,6 +112,7 @@ class Resource < ApplicationRecord
   # @return [String, nil] The base URL for the page, or nil if not found
   def content_converted_pages_base_url(page_number)
     return nil unless content_converted_pages.attached?
+    page_number = page_number.to_i
     return nil if page_number < 1 || page_number > content_converted_pages.count
 
     page = content_converted_pages.to_a[page_number - 1]
