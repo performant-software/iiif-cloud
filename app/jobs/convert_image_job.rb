@@ -105,7 +105,7 @@ class ConvertImageJob < ApplicationJob
                 io: converted_file,
                 content_type: CONTENT_TYPE_TIFF,
                 filename: page_filename,
-                metadata: { original_page_number: page_number + 1 },
+                metadata: { original_page_number: page_number + 1, storage_key: resource.storage_key },
               )
               converted_blobs << converted_blob
             end
