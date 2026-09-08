@@ -44,6 +44,7 @@ class ConvertImageJob < ApplicationJob
             io: converted_file,
             content_type: CONTENT_TYPE_TIFF,
             filename:,
+            metadata: { storage_key: resource.storage_key },
           )
 
           begin
