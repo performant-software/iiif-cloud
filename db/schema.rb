@@ -10,9 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_14_185244) do
-  create_schema "heroku_ext"
-
+ActiveRecord::Schema[8.0].define(version: 2026_09_07_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_stat_statements"
@@ -104,6 +102,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_14_185244) do
     t.jsonb "user_defined", default: {}
     t.jsonb "metadata", default: {}
     t.string "storage_key"
+    t.integer "pages_count"
+    t.string "conversion_status", default: "pending", null: false
+    t.text "conversion_error"
+    t.datetime "conversion_failed_at"
+    t.index ["pages_count"], name: "index_resources_on_pages_count"
     t.index ["project_id"], name: "index_resources_on_project_id"
     t.index ["user_defined"], name: "index_resources_on_user_defined", using: :gin
   end

@@ -39,12 +39,25 @@ class ConvertImageJob < ApplicationJob
         filepath = Images::Convert.to_tiff(file)
         filename = Images::Convert.filename content.filename.to_s, FILE_EXTENSION_TIFF
 
-        # Upload the converted content to content_converted (single file attachment)
-        resource.content_converted.attach(
-          io: File.open(filepath),
-          content_type: CONTENT_TYPE_TIFF,
-          filename:,
-        )
+        File.open(filepath) do |converted_file|
+          converted_blob = create_and_upload_converted_blob!(
+            io: converted_file,
+            content_type: CONTENT_TYPE_TIFF,
+            filename:,
+            metadata: { storage_key: resource.storage_key },
+          )
+
+          begin
+            resource.content_converted.attach(converted_blob)
+
+            unless ActiveStorage::Attachment.exists?(record: resource, name: 'content_converted', blob: converted_blob)
+              raise ActiveRecord::RecordNotSaved, 'Unable to attach converted content'
+            end
+          rescue StandardError
+            converted_blob.purge
+            raise
+          end
+        end
       rescue MiniMagick::Error => e
         # Content cannot be converted - log and continue (non-fatal)
         Rails.logger.error "Error converting image for resource #{resource.id}: #{e.message}"
@@ -61,8 +74,12 @@ class ConvertImageJob < ApplicationJob
   def convert_pdf(resource)
     content = resource.content
     temp_files = []
+    converted_blobs = []
+    published = false
 
     begin
+      resource.update!(conversion_status: 'processing', conversion_error: nil, conversion_failed_at: nil)
+
       content.open do |file|
         # Extract page count from PDF
         page_count = Images::ConvertPdf.page_count(file)
@@ -82,43 +99,84 @@ class ConvertImageJob < ApplicationJob
             base_filename = File.basename(content.filename.to_s, '.*')
             page_filename = "#{base_filename}_page_#{page_number + 1}.#{FILE_EXTENSION_TIFF}"
 
-            # Attach TIFF to content_converted_pages in order
-            resource.content_converted_pages.attach(
-              io: File.open(tiff_path),
-              content_type: CONTENT_TYPE_TIFF,
-              filename: page_filename,
-              metadata: { original_page_number: page_number + 1 },
-            )
+            File.open(tiff_path) do |converted_file|
+              converted_blob = create_and_upload_converted_blob!(
+                io: converted_file,
+                content_type: CONTENT_TYPE_TIFF,
+                filename: page_filename,
+                metadata: { original_page_number: page_number + 1, storage_key: resource.storage_key },
+              )
+              converted_blobs << converted_blob
+            end
 
             # Clean up intermediate files as we go
             Images::ConvertPdf.cleanup_temp_files([temp_image_path, tiff_path])
             temp_files -= [temp_image_path, tiff_path]
-
-          rescue Exceptions::PDFExtractionError => e
-            Rails.logger.error "Failed to extract page #{page_number} from PDF for resource #{resource.id}: #{e.message}"
-            # Continue with next page rather than failing entire job
-          rescue Exceptions::PDFPageConversionError => e
-            Rails.logger.error "Failed to convert page #{page_number} to TIFF for resource #{resource.id}: #{e.message}"
-            # Continue with next page rather than failing entire job
+            rescue Exceptions::PDFExtractionError, Exceptions::PDFPageConversionError => e
+               Rails.logger.error "Failed on page #{page_number + 1} of PDF for resource #{resource.id}: #{e.message}"
+               raise
           end
         end
 
-        # Store page count on resource for tracking
-        resource.update(pages_count: page_count)
+        resource.with_lock do
+          resource.content_converted_pages = converted_blobs
+          resource.pages_count = page_count
+          resource.conversion_status = 'succeeded'
+          resource.conversion_error = nil
+          resource.conversion_failed_at = nil
+          resource.save!
+        end
 
-        # Regenerate manifest with converted pages
+        published = true
+
+        # Regenerate manifest only after the complete page set is published.
         CreateManifestJob.perform_later(resource.id)
 
         Rails.logger.info "Successfully converted PDF resource #{resource.id} with #{page_count} pages"
-
       end
-    rescue Exceptions::EmptyPDFError => e
-      Rails.logger.error "PDF resource #{resource.id} is empty: #{e.message}"
-    rescue Exceptions::PDFExtractionError => e
-      Rails.logger.error "Failed to extract pages from PDF resource #{resource.id}: #{e.message}"
+    rescue StandardError => e
+      unless published
+        purge_blobs(converted_blobs)
+        record_pdf_conversion_failure(resource, e)
+      end
+      Rails.logger.error "Failed to convert PDF resource #{resource.id}: #{e.message}"
+      raise
     ensure
       # Ensure all temporary files are cleaned up
       Images::ConvertPdf.cleanup_temp_files(temp_files)
     end
+  end
+
+  def create_and_upload_converted_blob!(io:, content_type:, filename:, metadata: nil)
+    converted_blob = ActiveStorage::Blob.create_after_unfurling!(
+      io:,
+      content_type:,
+      filename:,
+      metadata:
+    )
+    converted_blob.upload_without_unfurling(io)
+    converted_blob
+  rescue StandardError
+    converted_blob&.purge
+    raise
+  end
+
+  def purge_blobs(blobs)
+    blobs.each do |blob|
+      blob.purge
+    rescue StandardError => e
+      Rails.logger.error "Unable to purge staged blob #{blob.id}: #{e.message}"
+    end
+  end
+
+  def record_pdf_conversion_failure(resource, error)
+    resource.reload
+    resource.update!(
+      conversion_status: 'failed',
+      conversion_error: error.message,
+      conversion_failed_at: Time.current
+    )
+  rescue StandardError => update_error
+    Rails.logger.error "Unable to record PDF conversion failure for resource #{resource.id}: #{update_error.message}"
   end
 end
