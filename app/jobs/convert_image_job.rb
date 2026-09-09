@@ -112,6 +112,9 @@ class ConvertImageJob < ApplicationJob
             # Clean up intermediate files as we go
             Images::ConvertPdf.cleanup_temp_files([temp_image_path, tiff_path])
             temp_files -= [temp_image_path, tiff_path]
+            rescue Exceptions::PDFExtractionError, Exceptions::PDFPageConversionError => e
+               Rails.logger.error "Failed on page #{page_number + 1} of PDF for resource #{resource.id}: #{e.message}"
+               raise
           end
         end
 
