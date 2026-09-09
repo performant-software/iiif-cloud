@@ -55,9 +55,7 @@ class ConvertImageJobTest < ActiveJob::TestCase
     resource.define_singleton_method(:save) { false }
 
     assert_raises ActiveRecord::RecordNotSaved do
-      Resource.stub(:find, resource) do
-        ConvertImageJob.perform_now(resource.id)
-      end
+      ConvertImageJob.new.send(:convert_image, resource)
     end
 
     resource.reload
@@ -137,9 +135,7 @@ class ConvertImageJobTest < ActiveJob::TestCase
     end
 
     assert_raises ActiveRecord::RecordNotSaved do
-      Resource.stub(:find, resource) do
-        ConvertImageJob.perform_now(resource.id)
-      end
+      ConvertImageJob.new.send(:convert_pdf, resource)
     end
 
     resource.reload
@@ -253,18 +249,20 @@ class ConvertImageJobTest < ActiveJob::TestCase
       content_type: "image/jpeg"
     )
 
-    # Mock content_uploaded? to return false first, then true
-    call_count = 0
-    original_method = resource.method(:content_uploaded?)
-    resource.define_singleton_method(:content_uploaded?) do
-      call_count += 1
-      call_count > 1  # Return false first time, true second time
+    resource.define_singleton_method(:content_uploaded?) { false }
+    original_find = Resource.method(:find)
+    Resource.define_singleton_method(:find) do |id|
+      id == resource.id ? resource : original_find.call(id)
     end
 
     # The job should raise FileNotUploadedError which will be retried
     # For this test, we'll just verify the error is raised
-    assert_raises Exceptions::FileNotUploadedError do
-      ConvertImageJob.perform_now(resource.id)
+    begin
+      assert_raises Exceptions::FileNotUploadedError do
+        ConvertImageJob.new.send(:perform, resource.id)
+      end
+    ensure
+      Resource.define_singleton_method(:find, original_find)
     end
   end
 

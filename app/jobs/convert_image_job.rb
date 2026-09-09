@@ -75,7 +75,6 @@ class ConvertImageJob < ApplicationJob
     content = resource.content
     temp_files = []
     converted_blobs = []
-    replaced_blobs = []
     published = false
 
     begin
@@ -117,7 +116,6 @@ class ConvertImageJob < ApplicationJob
         end
 
         resource.with_lock do
-          replaced_blobs = resource.content_converted_pages.blobs.to_a
           resource.content_converted_pages = converted_blobs
           resource.pages_count = page_count
           resource.conversion_status = 'succeeded'
@@ -127,7 +125,6 @@ class ConvertImageJob < ApplicationJob
         end
 
         published = true
-        purge_blobs_later(replaced_blobs)
 
         # Regenerate manifest only after the complete page set is published.
         CreateManifestJob.perform_later(resource.id)
@@ -169,15 +166,8 @@ class ConvertImageJob < ApplicationJob
     end
   end
 
-  def purge_blobs_later(blobs)
-    blobs.each do |blob|
-      blob.purge_later
-    rescue StandardError => e
-      Rails.logger.error "Unable to schedule purge for replaced blob #{blob.id}: #{e.message}"
-    end
-  end
-
   def record_pdf_conversion_failure(resource, error)
+    resource.reload
     resource.update!(
       conversion_status: 'failed',
       conversion_error: error.message,
