@@ -8,9 +8,7 @@ module Images
       begin
         # Use ImageMagick to identify PDF structure
         # We need to count the actual pages available
-        identify = MiniMagick::Tool::Identify.new
-        identify << file.path
-        output = identify.call
+        output = MiniMagick.identify { |b| b << file.path }
 
         # Parse output to extract page count
         # ImageMagick identify on a PDF returns one line per page, e.g. "file.pdf[3] PDF ..."
@@ -49,6 +47,8 @@ module Images
         convert << "#{file.path}[#{page_number}]"  # Specify page index (0-indexed)
         convert << '-quality'
         convert << '90'  # Good quality for intermediate conversion
+        convert << '-define'
+        convert << 'png:color-type=2'
         convert << output_path
         convert.call
 
