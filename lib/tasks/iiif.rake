@@ -1,5 +1,39 @@
 namespace :iiif do
 
+  # Splits a resource query by the source content's MIME type, without loading every Resource.
+  def conversion_content_type_breakdown(query, source_attachment_name: 'content')
+    content_types = query
+      .joins("INNER JOIN active_storage_attachments source_attachments ON source_attachments.record_id = resources.id AND source_attachments.record_type = 'Resource' AND source_attachments.name = '#{source_attachment_name}'")
+      .joins('INNER JOIN active_storage_blobs source_blobs ON source_blobs.id = source_attachments.blob_id')
+      .pluck('source_blobs.content_type')
+
+    image_count = content_types.count { |content_type| content_type.to_s.start_with?('image/') }
+    pdf_count = content_types.count { |content_type| content_type == 'application/pdf' }
+
+    { total: content_types.size, images: image_count, pdfs: pdf_count, other: content_types.size - image_count - pdf_count }
+  end
+
+  def print_conversion_breakdown(breakdown, verb:)
+    puts "#{verb} #{breakdown[:total]} resources for conversion:"
+    puts "  images: #{breakdown[:images]}"
+    puts "  pdfs: #{breakdown[:pdfs]}"
+    puts "  other: #{breakdown[:other]}"
+  end
+
+  # Reports the resources a query would queue and asks for confirmation before enqueuing jobs.
+  # Set CONFIRM=true to skip the prompt for non-interactive runs (e.g. CI, scheduled tasks).
+  def confirm_conversion_queue(query, source_attachment_name: 'content')
+    breakdown = conversion_content_type_breakdown(query, source_attachment_name: source_attachment_name)
+    print_conversion_breakdown(breakdown, verb: 'Found')
+
+    return false if breakdown[:total].zero?
+    return true if ENV['CONFIRM'] == 'true'
+
+    print 'Continue and queue these jobs for conversion? [y/N] '
+    $stdout.flush
+    %w[y yes].include?($stdin.gets.to_s.strip.downcase)
+  end
+
   desc 'Converts the source images to pyramidal TIFFs for all resources'
   task convert_images: :environment do
     query = Resource.with_attachment('content') do |subquery|
@@ -8,6 +42,8 @@ namespace :iiif do
         .where('active_storage_blobs.byte_size > ?', 0)
         .where('active_storage_blobs.content_type ILIKE \'%image%\'')
     end
+
+    next puts('Aborted.') unless confirm_conversion_queue(query)
 
     query.in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
@@ -18,14 +54,19 @@ namespace :iiif do
 
   desc 'Converts the source images to pyramidal TIFFs for resources with no converted content'
   task convert_images_empty: :environment do
+    # Images convert into content_converted; PDFs convert into content_converted_pages, so
+    # a resource only counts as "unconverted" if neither is present.
     query = Resource
               .without_attachment('content_converted')
+              .without_attachment('content_converted_pages')
               .with_attachment('content') do |subquery|
                 subquery
                   .joins(:blob)
                   .where('active_storage_blobs.byte_size > ?', 0)
-                  .where('active_storage_blobs.content_type ILIKE \'%image%\'')
+                  .where('active_storage_blobs.content_type ILIKE \'%image%\' OR active_storage_blobs.content_type = \'application/pdf\'')
               end
+
+    next puts('Aborted.') unless confirm_conversion_queue(query)
 
     query.in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
@@ -54,6 +95,8 @@ namespace :iiif do
 
     query = Resource.where("(exif::json)->>'colorspace' = ?", options[:colorspace])
 
+    next puts('Aborted.') unless confirm_conversion_queue(query)
+
     query.in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
         ConvertImageJob.perform_later(resource_id)
@@ -80,16 +123,20 @@ namespace :iiif do
       exit 0
     end
 
-    query = Resource.with_attachment('content_converted') do |subquery|
+    # Filter on the source content's blob so both images and PDFs are matched by creation date.
+    query = Resource.with_attachment('content') do |subquery|
       subquery = subquery
         .joins(:blob)
         .where('active_storage_blobs.byte_size > ?', 0)
-      
+        .where('active_storage_blobs.content_type ILIKE \'%image%\' OR active_storage_blobs.content_type = \'application/pdf\'')
+
       subquery = subquery.where('active_storage_blobs.created_at > ?', options[:after]) if options[:after].present?
       subquery = subquery.where('active_storage_blobs.created_at < ?', options[:before]) if options[:before].present?
-      
+
       subquery
     end
+
+    next puts('Aborted.') unless confirm_conversion_queue(query)
 
     total_queued = 0
     query.in_batches do |resources|
@@ -126,6 +173,8 @@ namespace :iiif do
         .where('active_storage_blobs.byte_size > ?', 0)
         .where('active_storage_blobs.content_type = ?', options[:type])
     end
+
+    next puts('Aborted.') unless confirm_conversion_queue(query)
 
     query.in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
