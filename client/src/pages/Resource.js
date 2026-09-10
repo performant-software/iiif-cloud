@@ -6,6 +6,7 @@ import type { EditContainerProps } from '@performant-software/shared-components/
 import { UserDefinedFieldsForm, UserDefinedFields } from '@performant-software/user-defined-fields';
 import React, {
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useState,
@@ -22,7 +23,6 @@ import {
   Segment
 } from 'semantic-ui-react';
 import AttachmentDetails from '../components/AttachmentDetails';
-import AuthenticationService from '../services/Authentication';
 import ProjectsService from '../services/Projects';
 import ReadOnlyField from '../components/ReadOnlyField';
 import type { Resource as ResourceType } from '../types/Resource';
@@ -32,6 +32,7 @@ import SimpleEditPage from '../components/SimpleEditPage';
 import StatusIcon from '../components/StatusIcon';
 import styles from './Resource.module.css';
 import withEditPage from '../hooks/EditPage';
+import { AuthenticationContext } from '../contexts/AuthenticationContext';
 
 type Props = EditContainerProps & {
   item: ResourceType
@@ -47,11 +48,14 @@ const ResourceForm = (props: Props) => {
   const [converted, setConverted] = useState(false);
   const [errors, setErrors] = useState([]);
   const [info, setInfo] = useState(false);
+  const [manifestRebuilt, setManifestRebuilt] = useState(false);
   const [project, setProject] = useState();
   const [tab, setTab] = useState(Tabs.content);
 
   const { projectId } = useParams();
   const { t } = useTranslation();
+
+  const { user } = useContext(AuthenticationContext);
 
   /**
    * Memo-izes the current attachment info.
@@ -103,6 +107,18 @@ const ResourceForm = (props: Props) => {
     ResourcesService
       .convert(props.item.id)
       .then(() => setConverted(true))
+      .catch(({ response: { data } }) => setErrors(data.errors))
+  ), [props.item.id]);
+
+  /**
+   * Calls the `/api/resources/:id/create_manifest API endpoint and sets any errors on the state.
+   *
+   * @type {function(): Promise<*>}
+   */
+  const onCreateManifest = useCallback(() => (
+    ResourcesService
+      .createManifest(props.item.id)
+      .then(() => setManifestRebuilt(true))
       .catch(({ response: { data } }) => setErrors(data.errors))
   ), [props.item.id]);
 
@@ -181,6 +197,40 @@ const ResourceForm = (props: Props) => {
           onClearValidationError={props.onClearValidationError}
           tableName='Resource'
         />
+        <Form.Field>
+          <Button
+            basic
+            content={t('Resource.buttons.rebuildManifest')}
+            icon='refresh'
+            onClick={onCreateManifest}
+            type='button'
+          />
+          { props.item.manifest && (
+            <Button
+              as='a'
+              basic
+              content={t('Resource.buttons.viewManifest')}
+              href={props.item.manifest_url}
+              icon='file code outline'
+              rel='noopener noreferrer'
+              target='_blank'
+              type='button'
+            />
+          )}
+        </Form.Field>
+        { manifestRebuilt && (
+          <Toaster
+            onDismiss={() => setManifestRebuilt(false)}
+            type={Toaster.MessageTypes.info}
+          >
+            <Message.Header
+              content={t('Resource.messages.manifest.header')}
+            />
+            <Message.Content
+              content={t('Resource.messages.manifest.content')}
+            />
+          </Toaster>
+        )}
         { info && exif && (
           <ResourceExifModal
             exif={exif}
@@ -221,7 +271,7 @@ const ResourceForm = (props: Props) => {
                 status={props.item.content_converted_info ? 'positive' : 'negative'}
               />
             </Menu.Item>
-            { AuthenticationService.isAdmin() && (
+            { user.admin && (
               <Menu.Menu
                 position='right'
               >
@@ -237,7 +287,7 @@ const ResourceForm = (props: Props) => {
           <AttachmentDetails
             attachment={attachment}
           />
-          { AuthenticationService.isAdmin() && attachment && (
+          { user.admin && attachment && (
             <div
               className={styles.actions}
             >
@@ -277,6 +327,29 @@ const ResourceForm = (props: Props) => {
           )}
         </Segment>
       </SimpleEditPage.Tab>
+      { props.item.metadata && props.item.metadata.length > 0 && (
+        <SimpleEditPage.Tab
+          key='external'
+          name={t('Resource.labels.externalMetadata')}
+        >
+          <Message
+            content={t('Resource.messages.externalMetadata.content')}
+            info
+          />
+          { props.item.metadata
+            .filter((entry) => entry
+              && entry.value !== null
+              && entry.value !== undefined
+              && entry.value !== '')
+            .map((entry, index) => (
+              <ReadOnlyField
+                key={index}
+                label={typeof entry.label === 'string' ? entry.label : JSON.stringify(entry.label)}
+                value={String(entry.value)}
+              />
+            ))}
+        </SimpleEditPage.Tab>
+      )}
     </SimpleEditPage>
   );
 };

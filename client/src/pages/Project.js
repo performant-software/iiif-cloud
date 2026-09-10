@@ -2,25 +2,26 @@
 
 import { AssociatedDropdown, FileInputButton, LazyImage } from '@performant-software/semantic-components';
 import { UserDefinedFields, UserDefinedFieldsEmbeddedList } from '@performant-software/user-defined-fields';
-import React, { type ComponentType, useEffect } from 'react';
+import React, { type ComponentType, useContext, useEffect } from 'react';
 import { withTranslation } from 'react-i18next';
 import { Button, Form } from 'semantic-ui-react';
 import _ from 'underscore';
-import AuthenticationService from '../services/Authentication';
 import Organization from '../transforms/Organization';
 import OrganizationsService from '../services/Organizations';
 import ProjectsService from '../services/Projects';
 import ReadOnlyField from '../components/ReadOnlyField';
 import SimpleEditPage from '../components/SimpleEditPage';
 import withEditPage from '../hooks/EditPage';
+import { AuthenticationContext } from '../contexts/AuthenticationContext';
 
 const ProjectForm = withTranslation()((props) => {
+  const { user } = useContext(AuthenticationContext);
+
   /**
    * Pre-populate the organization dropdown if the user is only a member of one organization.
    */
   useEffect(() => {
     if (!props.item.id) {
-      const user = AuthenticationService.getCurrentUser();
       if (user.user_organizations && user.user_organizations.length === 1) {
         const { organization } = _.first(user.user_organizations);
         props.onSetState({ organization_id: organization.id, organization });

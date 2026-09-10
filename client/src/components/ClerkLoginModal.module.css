@@ -1,0 +1,26 @@
+.clerkModalContainer {
+  height: 100vh;
+  width: 100vw;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.clerkModal {
+  background-color: white;
+  border-radius: 8px;
+  padding: 48px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.clerkModalHeader {
+  margin-bottom: 28px;
+  font-size: 26px;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+}

@@ -1,0 +1,3 @@
+# test/fixtures/organizations.yml
+one:
+  name: Test Organization

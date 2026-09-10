@@ -21,103 +21,112 @@ import Resource from './pages/Resource';
 import Resources from './pages/Resources';
 import User from './pages/User';
 import Users from './pages/Users';
+import { ClerkProvider } from '@clerk/react';
+import { AuthenticationContextProvider } from './contexts/AuthenticationContext';
 
 const App: ComponentType<any> = () => (
-  <DndProvider
-    backend={HTML5Backend}
+  <ClerkProvider
+    publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}
+    signInUrl={import.meta.env.VITE_CLERK_SIGN_IN_URL}
   >
-    <Router>
-      <Routes>
-        <Route
-          element={<Login />}
-          exact
-          path='/'
-        />
-        <Route
-          element={(
-            <AuthenticatedRoute>
-              <Layout />
-            </AuthenticatedRoute>
-          )}
-          path='/'
-        >
-          <Route
-            element={<Dashboard />}
-            path='/dashboard'
-          />
-          <Route
-            element={<Organizations />}
-            path='/organizations'
-          />
-          <Route
-            element={<Organization />}
-            path='/organizations/new'
-          />
-          <Route
-            element={<Organization />}
-            path='/organizations/:organizationId'
-          />
-          <Route
-            path='/projects'
-          >
+    <AuthenticationContextProvider>
+      <DndProvider
+        backend={HTML5Backend}
+      >
+        <Router>
+          <Routes>
             <Route
-              element={<Projects />}
-              index
+              element={<Login />}
+              exact
+              path='/'
             />
             <Route
-              element={<Project />}
-              path='new'
-            />
-            <Route
-              path=':projectId'
+              element={(
+                <AuthenticatedRoute>
+                  <Layout />
+                </AuthenticatedRoute>
+              )}
+              path='/'
             >
               <Route
-                element={<Project />}
-                index
+                element={<Dashboard />}
+                path='/dashboard'
               />
               <Route
-                path='resources'
+                element={<Organizations />}
+                path='/organizations'
+              />
+              <Route
+                element={<Organization />}
+                path='/organizations/new'
+              />
+              <Route
+                element={<Organization />}
+                path='/organizations/:organizationId'
+              />
+              <Route
+                path='/projects'
               >
                 <Route
-                  element={<Resources />}
+                  element={<Projects />}
                   index
                 />
                 <Route
-                  element={<Resource />}
+                  element={<Project />}
                   path='new'
                 />
                 <Route
-                  element={<Resource />}
-                  path=':resourceId'
-                />
+                  path=':projectId'
+                >
+                  <Route
+                    element={<Project />}
+                    index
+                  />
+                  <Route
+                    path='resources'
+                  >
+                    <Route
+                      element={<Resources />}
+                      index
+                    />
+                    <Route
+                      element={<Resource />}
+                      path='new'
+                    />
+                    <Route
+                      element={<Resource />}
+                      path=':resourceId'
+                    />
+                  </Route>
+                </Route>
               </Route>
+              <Route
+                element={<Users />}
+                path='/users'
+              />
+              <Route
+                element={<User />}
+                path='/users/new'
+              />
+              <Route
+                element={<User />}
+                path='/users/:userId'
+              />
             </Route>
-          </Route>
-          <Route
-            element={<Users />}
-            path='/users'
-          />
-          <Route
-            element={<User />}
-            path='/users/new'
-          />
-          <Route
-            element={<User />}
-            path='/users/:userId'
-          />
-        </Route>
-        <Route
-          element={(
-            <Navigate
-              replace
-              to='/'
+            <Route
+              element={(
+                <Navigate
+                  replace
+                  to='/'
+                />
+              )}
+              path='*'
             />
-          )}
-          path='*'
-        />
-      </Routes>
-    </Router>
-  </DndProvider>
+          </Routes>
+        </Router>
+      </DndProvider>
+    </AuthenticationContextProvider>
+  </ClerkProvider>
 );
 
 export default App;

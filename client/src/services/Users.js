@@ -2,6 +2,7 @@
 
 import { BaseService } from '@performant-software/shared-components';
 import User from '../transforms/User';
+import type { User as UserType } from '../types/User';
 
 /**
  * Class responsible for handling all users API requests.
@@ -23,6 +24,10 @@ class Users extends BaseService {
    */
   getTransform(): any {
     return User;
+  }
+
+  getMe(): UserType {
+    return this.getAxios().get(`${this.getBaseUrl()}/me`)
   }
 }
 

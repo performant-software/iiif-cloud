@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_23_194140) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_07_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_stat_statements"
@@ -78,6 +78,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_23_194140) do
     t.string "location"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "sso_id"
   end
 
   create_table "projects", force: :cascade do |t|
@@ -101,6 +102,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_23_194140) do
     t.jsonb "user_defined", default: {}
     t.jsonb "metadata", default: {}
     t.string "storage_key"
+    t.integer "pages_count"
+    t.string "conversion_status", default: "pending", null: false
+    t.text "conversion_error"
+    t.datetime "conversion_failed_at"
+    t.index ["pages_count"], name: "index_resources_on_pages_count"
     t.index ["project_id"], name: "index_resources_on_project_id"
     t.index ["user_defined"], name: "index_resources_on_user_defined", using: :gin
   end
@@ -134,11 +140,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_23_194140) do
   create_table "users", force: :cascade do |t|
     t.string "name"
     t.string "email"
-    t.string "password_digest"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "admin", default: false
     t.string "api_key"
+    t.string "sso_id"
+    t.string "avatar_url"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"

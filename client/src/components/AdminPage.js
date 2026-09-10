@@ -1,11 +1,13 @@
 // @flow
 
-import React, { type ComponentType } from 'react';
+import React, { type ComponentType, useContext } from 'react';
 import { Navigate } from 'react-router';
-import AuthenticationService from '../services/Authentication';
+import { AuthenticationContext } from '../contexts/AuthenticationContext';
 
 const AdminPage: ComponentType<any> = (props) => {
-  if (!AuthenticationService.isAdmin()) {
+  const { user } = useContext(AuthenticationContext);
+
+  if (!user.admin) {
     return <Navigate to='/' />;
   }
 

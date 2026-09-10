@@ -14,13 +14,7 @@ const Users: ComponentType<any> = withTranslation()(() => {
       actions={[{
         name: 'edit',
         onClick: (item) => navigate(`/users/${item.id}`)
-      }, {
-        name: 'delete'
       }]}
-      addButton={{
-        location: 'top',
-        onClick: () => navigate('/users/new')
-      }}
       collectionName='users'
       defaultSort='name'
       onLoad={(params) => UsersService.fetchAll(params)}
@@ -29,7 +23,7 @@ const Users: ComponentType<any> = withTranslation()(() => {
       renderImage={(user) => (
         <LazyImage
           dimmable={false}
-          src={user.avatar_thumbnail_url}
+          src={user.avatar_url}
         />
       )}
       renderMeta={(user) => user.email}
