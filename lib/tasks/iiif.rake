@@ -40,7 +40,7 @@ namespace :iiif do
       subquery
         .joins(:blob)
         .where('active_storage_blobs.byte_size > ?', 0)
-        .where('active_storage_blobs.content_type ILIKE \'%image%\'')
+        .where('active_storage_blobs.content_type ILIKE \'%image%\' OR active_storage_blobs.content_type = \'application/pdf\'')
     end
 
     next puts('Aborted.') unless confirm_conversion_queue(query)
