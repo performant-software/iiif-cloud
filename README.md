@@ -4,9 +4,13 @@
 
 1. Run `bundle install` to install the Rails dependencies.
 2. `cd` into `client` and run `yarn` to install the client dependencies.
+3. Additionally, FairImage requires the following packages to be installed on your server or dev machine:
+   - `ffmpeg`
+   - `imagemagick`
+   - `ghostscript`
 
 To start FairImage, run `bundle exec rake start`.
-
+ 
 ## Local Development with Clerk
 
 To run FairImage locally, you'll need to set up Clerk. Follow these steps:

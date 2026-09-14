@@ -9,6 +9,19 @@ class CreateManifestJob < ApplicationJob
 
     raise Exceptions::FileNotUploadedError unless resource.content_uploaded?
 
+    analyze_content(resource) if resource.audio? || resource.video?
+
     resource.update(manifest: Iiif::Manifest.create_for_resource(resource))
+  end
+
+  private
+
+  def analyze_content(resource)
+    blob = resource.content.blob
+    return if blob.metadata[:duration].present?
+
+    blob.analyze
+  rescue StandardError => e
+    Rails.logger.error "Unable to analyze content for resource #{resource.id}: #{e.message}"
   end
 end

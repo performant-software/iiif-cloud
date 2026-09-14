@@ -17,6 +17,7 @@ class Resource < ApplicationRecord
   before_save :parse_metadata
   after_create_commit :after_create
   after_update_commit :after_update
+  after_destroy_commit :after_destroy
 
   # ActiveStorage
   has_one_attached :content
@@ -192,6 +193,10 @@ class Resource < ApplicationRecord
     pages_count
   end
 
+  def hls?
+    video? && conversion_status == 'succeeded'
+  end
+
   def iiif?
     image? || video? || audio? || pdf?
   end
@@ -229,6 +234,9 @@ class Resource < ApplicationRecord
     # Convert the image to a TIFF
     ConvertImageJob.perform_later(self.id)
 
+    # Process the video
+    ProcessVideoJob.perform_later(self.id)
+
     # Create the manifest
     CreateManifestJob.perform_later(self.id)
 
@@ -248,7 +256,15 @@ class Resource < ApplicationRecord
     # Convert the image to a TIFF
     ConvertImageJob.perform_later(self.id)
 
+    # Process the video
+    ProcessVideoJob.perform_later(self.id)
+
     # Extract EXIF data
     ExtractExifJob.perform_later(self.id)
+  end
+
+  def after_destroy
+    # HLS files are uploaded outside of ActiveStorage, so they aren't purged with the content attachment
+    DeleteHlsJob.perform_later(ProcessVideoJob.hls_prefix(self)) if video?
   end
 end

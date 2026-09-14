@@ -28,6 +28,10 @@ code {
   object-fit: cover;
 }
 
+.ui.items > .file-upload.item .ui.progress.upload-progress {
+  margin: 1em 0 0;
+}
+
 .file-upload-modal > .toaster.ui.message {
   width: 60%;
 }
