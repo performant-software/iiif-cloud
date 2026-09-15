@@ -122,6 +122,11 @@ class ConvertImageJob < ApplicationJob
           # Detach (not destroy) the old pages so their blobs aren't auto-purged here; a stale
           # manifest may still reference them until CreateManifestJob regenerates it. They're
           # reclaimed later by the iiif:purge_unattached_blobs sweep.
+          # Tag page blobs with resource IDs, so iiif:purge_unattached_blobs can
+          # tell whether a stale manifest still uses them after they're detached
+          resource.content_converted_pages.blobs.each do |blob|
+            blob.update_column(:metadata, blob.metadata.merge(resource_id: resource.id))
+          end
           resource.content_converted_pages.detach
           resource.content_converted_pages = converted_blobs
           resource.pages_count = page_count
