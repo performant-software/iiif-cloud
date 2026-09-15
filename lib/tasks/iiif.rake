@@ -311,6 +311,11 @@ namespace :iiif do
     # A safety margin so we never race a conversion that's mid-staging (blobs are briefly unattached before publish).
     cutoff = options[:older_than_hours].hours.ago
     query = ActiveStorage::Blob.unattached.where('active_storage_blobs.created_at < ?', cutoff)
+    stale = Resource
+      .joins(:content_converted_pages_attachments)
+      .where('resources.manifest_generated_at IS NULL OR resources.manifest_generated_at < active_storage_attachments.created_at')
+      .where("resources.storage_key = active_storage_blobs.metadata::jsonb ->> 'storage_key'")
+    query = query.where.not(stale.arel.exists)
     total = query.count
 
     puts "Found #{total} unattached blobs created before #{cutoff.utc.iso8601}"
