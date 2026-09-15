@@ -296,4 +296,39 @@ namespace :iiif do
     end
   end
 
+  desc 'Purges Active Storage blobs no longer attached to any record (e.g. left behind by a delayed-purge conversion)'
+  task purge_unattached_blobs: :environment do
+    options = { older_than_hours: 24 }
+
+    opt_parser = OptionParser.new do |opts|
+      opts.banner = 'Usage: rake iiif:purge_unattached_blobs [options]'
+      opts.on('--older-than HOURS', 'Only purge blobs unattached for at least this many hours (default: 24)') { |hours| options[:older_than_hours] = hours.to_i }
+    end
+
+    args = opt_parser.order!(ARGV) {}
+    opt_parser.parse!(args)
+
+    # A safety margin so we never race a conversion that's mid-staging (blobs are briefly unattached before publish).
+    cutoff = options[:older_than_hours].hours.ago
+    query = ActiveStorage::Blob.unattached.where('active_storage_blobs.created_at < ?', cutoff)
+    total = query.count
+
+    puts "Found #{total} unattached blobs created before #{cutoff.utc.iso8601}"
+    next if total.zero?
+
+    unless ENV['CONFIRM'] == 'true'
+      print 'Purge these blobs? [y/N] '
+      $stdout.flush
+      next puts('Aborted.') unless %w[y yes].include?($stdin.gets.to_s.strip.downcase)
+    end
+
+    scheduled = 0
+    query.find_each do |blob|
+      blob.purge_later
+      scheduled += 1
+    end
+
+    puts "Scheduled #{scheduled} blobs for purge"
+  end
+
 end

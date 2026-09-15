@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_07_120000) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_15_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_stat_statements"
@@ -106,6 +106,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_07_120000) do
     t.string "conversion_status", default: "pending", null: false
     t.text "conversion_error"
     t.datetime "conversion_failed_at"
+    t.datetime "manifest_generated_at"
     t.index ["pages_count"], name: "index_resources_on_pages_count"
     t.index ["project_id"], name: "index_resources_on_project_id"
     t.index ["user_defined"], name: "index_resources_on_user_defined", using: :gin

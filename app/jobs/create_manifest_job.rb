@@ -9,6 +9,6 @@ class CreateManifestJob < ApplicationJob
 
     raise Exceptions::FileNotUploadedError unless resource.content_uploaded?
 
-    resource.update(manifest: Iiif::Manifest.create_for_resource(resource))
+    resource.update(manifest: Iiif::Manifest.create_for_resource(resource), manifest_generated_at: Time.current)
   end
 end
