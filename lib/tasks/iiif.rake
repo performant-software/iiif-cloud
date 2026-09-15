@@ -296,4 +296,55 @@ namespace :iiif do
     end
   end
 
+  desc 'Purges Active Storage blobs no longer attached to any record (e.g. left behind by a delayed-purge conversion)'
+  task purge_unattached_blobs: :environment do
+    minimum_older_than_hours = 24
+    options = { older_than_hours: minimum_older_than_hours }
+
+    opt_parser = OptionParser.new do |opts|
+      opts.banner = 'Usage: rake iiif:purge_unattached_blobs [options]'
+      opts.on('--older-than HOURS', Integer, "Only purge blobs unattached for at least this many hours (minimum and default: #{minimum_older_than_hours})") { |hours| options[:older_than_hours] = hours }
+    end
+
+    args = opt_parser.order!(ARGV) {}
+    begin
+      opt_parser.parse!(args)
+    rescue OptionParser::ParseError => e
+      puts "Ignoring invalid --older-than value (#{e.message}); using the minimum of #{minimum_older_than_hours} hours."
+      options[:older_than_hours] = minimum_older_than_hours
+    end
+
+    if options[:older_than_hours] < minimum_older_than_hours
+      puts "--older-than must be at least #{minimum_older_than_hours} hours; using #{minimum_older_than_hours} instead of #{options[:older_than_hours]}."
+      options[:older_than_hours] = minimum_older_than_hours
+    end
+
+    # A safety margin so we never race a conversion that's mid-staging (blobs are briefly unattached before publish).
+    cutoff = options[:older_than_hours].hours.ago
+    query = ActiveStorage::Blob.unattached.where('active_storage_blobs.created_at < ?', cutoff)
+    stale = Resource
+      .joins(:content_converted_pages_attachments)
+      .where('resources.manifest_generated_at IS NULL OR resources.manifest_generated_at < active_storage_attachments.created_at')
+      .where("resources.id = (active_storage_blobs.metadata::jsonb ->> 'resource_id')::bigint")
+    query = query.where.not(stale.arel.exists)
+    total = query.count
+
+    puts "Found #{total} unattached blobs created before #{cutoff.utc.iso8601}"
+    next if total.zero?
+
+    unless ENV['CONFIRM'] == 'true'
+      print 'Purge these blobs? [y/N] '
+      $stdout.flush
+      next puts('Aborted.') unless %w[y yes].include?($stdin.gets.to_s.strip.downcase)
+    end
+
+    scheduled = 0
+    query.find_each do |blob|
+      blob.purge_later
+      scheduled += 1
+    end
+
+    puts "Scheduled #{scheduled} blobs for purge"
+  end
+
 end
