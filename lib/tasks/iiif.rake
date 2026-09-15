@@ -325,7 +325,7 @@ namespace :iiif do
     stale = Resource
       .joins(:content_converted_pages_attachments)
       .where('resources.manifest_generated_at IS NULL OR resources.manifest_generated_at < active_storage_attachments.created_at')
-      .where("resources.storage_key = active_storage_blobs.metadata::jsonb ->> 'storage_key'")
+      .where("resources.id = (active_storage_blobs.metadata::jsonb ->> 'resource_id')::bigint")
     query = query.where.not(stale.arel.exists)
     total = query.count
 
