@@ -1,0 +1,4 @@
+# test/fixtures/projects.yml
+one:
+  name: Test Project
+  organization: one

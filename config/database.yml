@@ -30,3 +30,7 @@ development:
 production:
   <<: *default
   database: <%= ENV['DATABASE_NAME'] %>
+
+test:
+  <<: *default
+  database: <%= ENV.fetch('TEST_DATABASE_NAME') { 'iiif_cloud_test' } %>

@@ -13,7 +13,7 @@ class Api::ResourcesController < Api::BaseController
   # Actions
   before_action :set_defineable_params, only: :index
   before_action :validate_new_resource, unless: -> { current_user.admin? }, only: :create
-  before_action :validate_resource, unless: -> { current_user.admin? }, only: [:update, :destroy]
+  before_action :validate_resource, unless: -> { current_user.admin? }, only: [:update, :destroy, :create_manifest]
   before_action :validate_resources, unless: -> { current_user.admin? }, only: :index
 
   def clear_cache
@@ -37,6 +37,13 @@ class Api::ResourcesController < Api::BaseController
 
     resource = Resource.find(params[:id])
     ConvertImageJob.perform_later(resource.id)
+
+    render json: {}, status: :ok
+  end
+
+  def create_manifest
+    resource = Resource.find(params[:id])
+    CreateManifestJob.perform_later(resource.id)
 
     render json: {}, status: :ok
   end

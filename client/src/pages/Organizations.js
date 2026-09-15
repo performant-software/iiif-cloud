@@ -4,14 +4,29 @@ import React, { type ComponentType } from 'react';
 import { useTranslation } from 'react-i18next';
 import AdminPage from '../components/AdminPage';
 import OrganizationsService from '../services/Organizations';
-import SimpleList from '../components/SimpleList';
+import { ListTable } from '@performant-software/semantic-components';
+import { Button } from 'semantic-ui-react';
+import { Link } from 'react-router';
 
 const Organizations: ComponentType<any> = () => {
   const { t } = useTranslation();
 
   return (
     <AdminPage>
-      <SimpleList
+      <ListTable
+        actions={[{
+          name: 'edit',
+          render: (item) => (
+            <Button
+              as={Link}
+              basic
+              compact
+              icon='edit'
+              key={item.id}
+              to={item.id.toString()}
+            />
+          )
+        }]}
         collectionName='organizations'
         columns={[{
           name: 'name',
@@ -22,7 +37,7 @@ const Organizations: ComponentType<any> = () => {
           label: t('Organizations.columns.location'),
           sortable: true
         }]}
-        onDelete={(organization) => OrganizationsService.delete(organization)}
+        perPageOptions={[10, 25, 50, 100]}
         onLoad={(params) => OrganizationsService.fetchAll(params)}
         onSave={(organization) => OrganizationsService.save(organization)}
       />

@@ -1,14 +1,14 @@
 // @flow
 
 import cx from 'classnames';
-import React, { useCallback, type ComponentType } from 'react';
+import React, { useCallback, type ComponentType, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Icon, Menu, Popup } from 'semantic-ui-react';
-import AuthenticationService from '../services/Authentication';
 import MenuLink from './MenuLink';
 import styles from './Sidebar.module.css';
 import type { Translateable } from '../types/Translateable';
+import { AuthenticationContext } from '../contexts/AuthenticationContext';
 
 type Props = Translateable & {
   context: {
@@ -20,13 +20,14 @@ const Sidebar: ComponentType<any> = (props: Props) => {
   const navigate = useNavigate();
   const params = useParams();
   const { t } = useTranslation();
+  const { signOut, user } = useContext(AuthenticationContext);
 
   /**
    * Logs the user out and navigates to the index page.
    *
    * @type {function(): Promise<R>|Promise<R|unknown>|Promise<*>|*}
    */
-  const onLogout = useCallback(() => AuthenticationService.logout().then(() => navigate('/login')), []);
+  const onLogout = useCallback(() => signOut().then(() => navigate('/login')), []);
 
   return (
     <div
@@ -50,7 +51,7 @@ const Sidebar: ComponentType<any> = (props: Props) => {
             }}
           />
         </Menu.Item>
-        { AuthenticationService.isAdmin() && (
+        { user.admin && (
           <Popup
             content={t('Sidebar.labels.dashboard')}
             mouseEnterDelay={1000}
@@ -68,7 +69,7 @@ const Sidebar: ComponentType<any> = (props: Props) => {
             )}
           />
         )}
-        { AuthenticationService.isAdmin() && (
+        { user.admin && (
           <Popup
             content={t('Sidebar.labels.organizations')}
             mouseEnterDelay={1000}

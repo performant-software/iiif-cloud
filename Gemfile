@@ -27,12 +27,6 @@ gem 'resource_api', git: 'https://github.com/performant-software/resource-api.gi
 # Use Json Web Token (JWT) for token based authentication
 gem 'jwt', '~> 3.1.2'
 
-# JWT authentication
-gem 'jwt_auth', git: 'https://github.com/performant-software/jwt-auth.git', tag: 'v0.1.3'
-
-# Use ActiveModel has_secure_password
-gem 'bcrypt', '~> 3.1.20'
-
 # Active storage service
 gem 'aws-sdk-s3', '~> 1.193'
 
@@ -50,6 +44,9 @@ gem 'data_migrate', '~> 11.3'
 
 # Background jobs
 gem 'sidekiq', '~> 8.0.5', group: :production
+
+# Clerk
+gem 'clerk-sdk-ruby', '>= 7.0'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

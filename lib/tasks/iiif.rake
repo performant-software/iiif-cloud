@@ -1,13 +1,49 @@
 namespace :iiif do
 
+  # Splits a resource query by the source content's MIME type, without loading every Resource.
+  def conversion_content_type_breakdown(query, source_attachment_name: 'content')
+    content_types = query
+      .joins("INNER JOIN active_storage_attachments source_attachments ON source_attachments.record_id = resources.id AND source_attachments.record_type = 'Resource' AND source_attachments.name = '#{source_attachment_name}'")
+      .joins('INNER JOIN active_storage_blobs source_blobs ON source_blobs.id = source_attachments.blob_id')
+      .pluck('source_blobs.content_type')
+
+    image_count = content_types.count { |content_type| content_type.to_s.start_with?('image/') }
+    pdf_count = content_types.count { |content_type| content_type == 'application/pdf' }
+
+    { total: content_types.size, images: image_count, pdfs: pdf_count, other: content_types.size - image_count - pdf_count }
+  end
+
+  def print_conversion_breakdown(breakdown, verb:)
+    puts "#{verb} #{breakdown[:total]} resources for conversion:"
+    puts "  images: #{breakdown[:images]}"
+    puts "  pdfs: #{breakdown[:pdfs]}"
+    puts "  other: #{breakdown[:other]}"
+  end
+
+  # Reports the resources a query would queue and asks for confirmation before enqueuing jobs.
+  # Set CONFIRM=true to skip the prompt for non-interactive runs (e.g. CI, scheduled tasks).
+  def confirm_conversion_queue(query, source_attachment_name: 'content')
+    breakdown = conversion_content_type_breakdown(query, source_attachment_name: source_attachment_name)
+    print_conversion_breakdown(breakdown, verb: 'Found')
+
+    return false if breakdown[:total].zero?
+    return true if ENV['CONFIRM'] == 'true'
+
+    print 'Continue and queue these jobs for conversion? [y/N] '
+    $stdout.flush
+    %w[y yes].include?($stdin.gets.to_s.strip.downcase)
+  end
+
   desc 'Converts the source images to pyramidal TIFFs for all resources'
   task convert_images: :environment do
     query = Resource.with_attachment('content') do |subquery|
       subquery
         .joins(:blob)
         .where('active_storage_blobs.byte_size > ?', 0)
-        .where('active_storage_blobs.content_type ILIKE \'%image%\'')
+        .where('active_storage_blobs.content_type ILIKE \'%image%\' OR active_storage_blobs.content_type = \'application/pdf\'')
     end
+
+    next puts('Aborted.') unless confirm_conversion_queue(query)
 
     query.in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
@@ -18,14 +54,19 @@ namespace :iiif do
 
   desc 'Converts the source images to pyramidal TIFFs for resources with no converted content'
   task convert_images_empty: :environment do
+    # Images convert into content_converted; PDFs convert into content_converted_pages, so
+    # a resource only counts as "unconverted" if neither is present.
     query = Resource
               .without_attachment('content_converted')
+              .without_attachment('content_converted_pages')
               .with_attachment('content') do |subquery|
                 subquery
                   .joins(:blob)
                   .where('active_storage_blobs.byte_size > ?', 0)
-                  .where('active_storage_blobs.content_type ILIKE \'%image%\'')
+                  .where('active_storage_blobs.content_type ILIKE \'%image%\' OR active_storage_blobs.content_type = \'application/pdf\'')
               end
+
+    next puts('Aborted.') unless confirm_conversion_queue(query)
 
     query.in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
@@ -54,11 +95,58 @@ namespace :iiif do
 
     query = Resource.where("(exif::json)->>'colorspace' = ?", options[:colorspace])
 
+    next puts('Aborted.') unless confirm_conversion_queue(query)
+
     query.in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
         ConvertImageJob.perform_later(resource_id)
       end
     end
+  end
+
+  desc 'Converts the source images to pyramidal TIFFs for resources created in a given date range'
+  task convert_images_by_date_range: :environment do
+    # Parse the arguments
+    options = {}
+
+    opt_parser = OptionParser.new do |opts|
+      opts.banner = 'Usage: rake iiif:convert_images_by_date_range [options]'
+      opts.on('--after after_date', 'After this date') { |after| options[:after] = after }
+      opts.on('--before before_date', 'Before this date') { |before| options[:before] = before }
+    end
+
+    args = opt_parser.order!(ARGV) {}
+    opt_parser.parse!(args)
+
+    if options[:after].blank? && options[:before].blank?
+      puts 'Please specify at least one date (--after and/or --before)...'
+      exit 0
+    end
+
+    # Filter on the source content's blob so both images and PDFs are matched by creation date.
+    query = Resource.with_attachment('content') do |subquery|
+      subquery = subquery
+        .joins(:blob)
+        .where('active_storage_blobs.byte_size > ?', 0)
+        .where('active_storage_blobs.content_type ILIKE \'%image%\' OR active_storage_blobs.content_type = \'application/pdf\'')
+
+      subquery = subquery.where('active_storage_blobs.created_at > ?', options[:after]) if options[:after].present?
+      subquery = subquery.where('active_storage_blobs.created_at < ?', options[:before]) if options[:before].present?
+
+      subquery
+    end
+
+    next puts('Aborted.') unless confirm_conversion_queue(query)
+
+    total_queued = 0
+    query.in_batches do |resources|
+      resources.pluck(:id).each do |resource_id|
+        ConvertImageJob.perform_later(resource_id)
+        total_queued += 1
+      end
+    end
+
+    puts "Queued #{total_queued} resources for conversion"
   end
 
   desc 'Converts the source images to pyramidal TIFFs for resources by the specified MIME type'
@@ -85,6 +173,8 @@ namespace :iiif do
         .where('active_storage_blobs.byte_size > ?', 0)
         .where('active_storage_blobs.content_type = ?', options[:type])
     end
+
+    next puts('Aborted.') unless confirm_conversion_queue(query)
 
     query.in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
@@ -204,6 +294,57 @@ namespace :iiif do
       # Update the service name on the blob
       blob.update_columns(service_name: destination_service.name) if update_service_name
     end
+  end
+
+  desc 'Purges Active Storage blobs no longer attached to any record (e.g. left behind by a delayed-purge conversion)'
+  task purge_unattached_blobs: :environment do
+    minimum_older_than_hours = 24
+    options = { older_than_hours: minimum_older_than_hours }
+
+    opt_parser = OptionParser.new do |opts|
+      opts.banner = 'Usage: rake iiif:purge_unattached_blobs [options]'
+      opts.on('--older-than HOURS', Integer, "Only purge blobs unattached for at least this many hours (minimum and default: #{minimum_older_than_hours})") { |hours| options[:older_than_hours] = hours }
+    end
+
+    args = opt_parser.order!(ARGV) {}
+    begin
+      opt_parser.parse!(args)
+    rescue OptionParser::ParseError => e
+      puts "Ignoring invalid --older-than value (#{e.message}); using the minimum of #{minimum_older_than_hours} hours."
+      options[:older_than_hours] = minimum_older_than_hours
+    end
+
+    if options[:older_than_hours] < minimum_older_than_hours
+      puts "--older-than must be at least #{minimum_older_than_hours} hours; using #{minimum_older_than_hours} instead of #{options[:older_than_hours]}."
+      options[:older_than_hours] = minimum_older_than_hours
+    end
+
+    # A safety margin so we never race a conversion that's mid-staging (blobs are briefly unattached before publish).
+    cutoff = options[:older_than_hours].hours.ago
+    query = ActiveStorage::Blob.unattached.where('active_storage_blobs.created_at < ?', cutoff)
+    stale = Resource
+      .joins(:content_converted_pages_attachments)
+      .where('resources.manifest_generated_at IS NULL OR resources.manifest_generated_at < active_storage_attachments.created_at')
+      .where("resources.id = (active_storage_blobs.metadata::jsonb ->> 'resource_id')::bigint")
+    query = query.where.not(stale.arel.exists)
+    total = query.count
+
+    puts "Found #{total} unattached blobs created before #{cutoff.utc.iso8601}"
+    next if total.zero?
+
+    unless ENV['CONFIRM'] == 'true'
+      print 'Purge these blobs? [y/N] '
+      $stdout.flush
+      next puts('Aborted.') unless %w[y yes].include?($stdin.gets.to_s.strip.downcase)
+    end
+
+    scheduled = 0
+    query.find_each do |blob|
+      blob.purge_later
+      scheduled += 1
+    end
+
+    puts "Scheduled #{scheduled} blobs for purge"
   end
 
 end
