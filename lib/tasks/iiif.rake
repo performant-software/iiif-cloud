@@ -298,15 +298,26 @@ namespace :iiif do
 
   desc 'Purges Active Storage blobs no longer attached to any record (e.g. left behind by a delayed-purge conversion)'
   task purge_unattached_blobs: :environment do
-    options = { older_than_hours: 24 }
+    minimum_older_than_hours = 24
+    options = { older_than_hours: minimum_older_than_hours }
 
     opt_parser = OptionParser.new do |opts|
       opts.banner = 'Usage: rake iiif:purge_unattached_blobs [options]'
-      opts.on('--older-than HOURS', 'Only purge blobs unattached for at least this many hours (default: 24)') { |hours| options[:older_than_hours] = hours.to_i }
+      opts.on('--older-than HOURS', Integer, "Only purge blobs unattached for at least this many hours (minimum and default: #{minimum_older_than_hours})") { |hours| options[:older_than_hours] = hours }
     end
 
     args = opt_parser.order!(ARGV) {}
-    opt_parser.parse!(args)
+    begin
+      opt_parser.parse!(args)
+    rescue OptionParser::ParseError => e
+      puts "Ignoring invalid --older-than value (#{e.message}); using the minimum of #{minimum_older_than_hours} hours."
+      options[:older_than_hours] = minimum_older_than_hours
+    end
+
+    if options[:older_than_hours] < minimum_older_than_hours
+      puts "--older-than must be at least #{minimum_older_than_hours} hours; using #{minimum_older_than_hours} instead of #{options[:older_than_hours]}."
+      options[:older_than_hours] = minimum_older_than_hours
+    end
 
     # A safety margin so we never race a conversion that's mid-staging (blobs are briefly unattached before publish).
     cutoff = options[:older_than_hours].hours.ago
