@@ -38,6 +38,7 @@ Rails.application.routes.draw do
       member do
         get :content
         get :download
+        get 'hls/*path', action: :hls, as: :hls, format: false
         get :iiif
         get :info
         get :inline

@@ -67,6 +67,8 @@ module Iiif
         id = "#{base_url(resource)};#{page_number}/iiif"
       elsif resource.pdf?
         id = resource.content_converted_pages_iiif_url(page_number)
+      elsif resource.hls?
+        id = "#{base_url(resource)}/hls/#{Videos::Hls::MASTER_PLAYLIST}"
       else
         id = resource.content_url
       end
@@ -90,7 +92,7 @@ module Iiif
 
       annotation['body']['id'] = id
       annotation['body']['type'] = type
-      annotation['body']['format'] = resource.content_type
+      annotation['body']['format'] = resource.hls? ? Videos::Hls::CONTENT_TYPE_PLAYLIST : resource.content_type
 
       if resource.image? || resource.pdf?
         annotation['body']['service'] = [{

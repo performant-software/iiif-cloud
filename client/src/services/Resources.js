@@ -43,6 +43,21 @@ class Resources extends BaseService {
   }
 
   /**
+   * Calls the `POST /api/resources` API endpoint, calling the passed callback as the request body is uploaded.
+   *
+   * @param item
+   * @param onUploadProgress
+   *
+   * @returns {*}
+   */
+  createWithProgress(item: ResourceType, onUploadProgress: (event: any) => void): Promise<any> {
+    const transform = this.getTransform();
+    const config = { ...this.getConfig(), onUploadProgress };
+
+    return this.getAxios().post(this.getBaseUrl(), transform.toPayload(item), config);
+  }
+
+  /**
    * Returns the resources base URL.
    *
    * @returns {string}
