@@ -32,7 +32,11 @@ class ProcessVideoJob < ApplicationJob
     output_dir = Dir.mktmpdir('hls')
 
     begin
+      previously_hls = resource.hls?
+
       resource.update!(conversion_status: 'processing', conversion_error: nil, conversion_failed_at: nil)
+
+      CreateManifestJob.perform_later(resource.id) if previously_hls
 
       resource.content.open do |file|
         streams = Videos::Hls.probe(file.path)['streams'] || []

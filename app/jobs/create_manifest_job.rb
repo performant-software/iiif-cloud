@@ -21,6 +21,7 @@ class CreateManifestJob < ApplicationJob
     return if blob.metadata[:duration].present?
 
     blob.analyze
+    blob.reload
   rescue StandardError => e
     Rails.logger.error "Unable to analyze content for resource #{resource.id}: #{e.message}"
   end
