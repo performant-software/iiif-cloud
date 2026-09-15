@@ -194,7 +194,8 @@ class Resource < ApplicationRecord
   end
 
   def hls?
-    video? && conversion_status == 'succeeded'
+    # The HLS files must have been transcoded from the current content, not content that has since been replaced
+    video? && conversion_status == 'succeeded' && hls_identifier.present? && hls_identifier == content.key
   end
 
   def iiif?
@@ -253,6 +254,8 @@ class Resource < ApplicationRecord
     # Only perform the image updates if the content attachment has been updated
     return if !(content.attached? && content.blob.saved_changes?)
 
+    reset_conversion
+
     # Convert the image to a TIFF
     ConvertImageJob.perform_later(self.id)
 
@@ -265,6 +268,21 @@ class Resource < ApplicationRecord
 
   def after_destroy
     # HLS files are uploaded outside of ActiveStorage, so they aren't purged with the content attachment
-    DeleteHlsJob.perform_later(ProcessVideoJob.hls_prefix(self)) if video?
+    DeleteHlsJob.perform_later(ProcessVideoJob.hls_directory(self)) if video?
+  end
+
+  def reset_conversion
+    previous_hls_identifier = nil
+
+    Resource.transaction do
+      previous_hls_identifier = Resource.lock.where(id: id).pick(:hls_identifier)
+      update_columns(conversion_status: 'pending', conversion_error: nil, conversion_failed_at: nil, hls_identifier: nil)
+    end
+
+    return if previous_hls_identifier.blank?
+
+    DeleteHlsJob.perform_later(ProcessVideoJob.hls_prefix(self, previous_hls_identifier))
+
+    CreateManifestJob.perform_later(id)
   end
 end

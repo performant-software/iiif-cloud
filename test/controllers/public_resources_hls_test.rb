@@ -4,7 +4,7 @@ class PublicResourcesHlsTest < ActionDispatch::IntegrationTest
   setup do
     @resource = Resource.create!(project: projects(:one), name: "Test Video", storage_key: SecureRandom.uuid)
     @resource.content.attach(io: StringIO.new("video"), filename: "video.mp4", content_type: "video/mp4")
-    @resource.update_columns(conversion_status: "succeeded")
+    @resource.update_columns(conversion_status: "succeeded", hls_identifier: @resource.content.key)
 
     @prefix = ProcessVideoJob.hls_prefix(@resource)
     service = ActiveStorage::Blob.service
@@ -45,6 +45,14 @@ class PublicResourcesHlsTest < ActionDispatch::IntegrationTest
 
   test "returns not found until transcoding succeeds" do
     @resource.update_columns(conversion_status: "processing")
+
+    get "/public/resources/#{@resource.uuid}/hls/master.m3u8"
+
+    assert_response :not_found
+  end
+
+  test "returns not found once the content is replaced" do
+    Resource.find(@resource.id).content.attach(io: StringIO.new("new video"), filename: "new.mp4", content_type: "video/mp4")
 
     get "/public/resources/#{@resource.uuid}/hls/master.m3u8"
 
