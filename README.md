@@ -10,7 +10,7 @@
    - `ghostscript` (PDF uploads)
 
 To start FairImage, run `bundle exec rake start`.
- 
+
 ## Local Development with Clerk
 
 To run FairImage locally, you'll need to set up Clerk. Follow these steps:
