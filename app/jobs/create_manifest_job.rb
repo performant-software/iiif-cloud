@@ -4,6 +4,7 @@ class CreateManifestJob < ApplicationJob
   retry_on Exceptions::FileNotUploadedError, wait: 10.seconds
 
   def perform(resource_id)
+    manifest_generated_time = Time.current
     resource = Resource.find(resource_id)
     return unless resource.iiif?
 
@@ -11,7 +12,7 @@ class CreateManifestJob < ApplicationJob
 
     analyze_content(resource) if resource.audio? || resource.video?
 
-    resource.update(manifest: Iiif::Manifest.create_for_resource(resource))
+    resource.update(manifest: Iiif::Manifest.create_for_resource(resource), manifest_generated_at: manifest_generated_time)
   end
 
   private
