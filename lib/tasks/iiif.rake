@@ -201,6 +201,34 @@ namespace :iiif do
     end
   end
 
+  desc 'Generates static, IIIF level 0 compliant assets for a resource'
+  task create_static_assets: :environment do
+    options = { local: false }
+
+    opt_parser = OptionParser.new do |opts|
+      opts.banner = 'Usage: rake iiif:create_static_assets [options]'
+      opts.on('-r', '--resource-id ARG', 'Resource ID') { |resource_id| options[:resource_id] = resource_id }
+      opts.on('-u', '--base-url ARG', 'Public base URL for the generated assets') { |base_url| options[:base_url] = base_url }
+      opts.on('-d', '--destination ARG', 'R2 key prefix, or local output folder when --local is set') { |destination| options[:destination] = destination }
+      opts.on('-l', '--local', 'Write assets to disk instead of uploading to R2') { options[:local] = true }
+    end
+
+    args = opt_parser.order!(ARGV) {}
+    opt_parser.parse!(args)
+
+    if options[:resource_id].blank? || options[:base_url].blank? || options[:destination].blank?
+      puts 'Please specify --resource-id, --base-url, and --destination...'
+      exit 0
+    end
+
+    # Run inline rather than perform_later: this task targets a single resource on demand, and
+    # the default async queue adapter's thread pool would be killed when the rake process exits
+    # before the job runs.
+    CreateStaticAssetsJob.perform_now(options[:resource_id], options[:base_url], options[:destination], local: options[:local])
+
+    puts "Generated static assets for resource #{options[:resource_id]}"
+  end
+
   desc 'Extracts the EXIF data from all resources'
   task extract_exif: :environment do
     query = Resource
