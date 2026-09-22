@@ -1,20 +1,23 @@
 [Unit]
 Description=Cantaloupe IIIF Image Server Service
+# Stop retrying after 5 failed starts within 60s instead of looping forever on
+# a bad config.
+StartLimitIntervalSec=60
+StartLimitBurst=5
 
 [Service]
 User=root
 
-# The configuration file application.properties should be here:
-
 # Change this to your workspace
 WorkingDirectory=/root
 
-# Path to executable. Executable is a bash script which calls jar file
-ExecStart=/bin/bash -c "/root/start.sh"
+# start.sh execs the JVM, so systemd's MainPID is the JVM itself.
+ExecStart=/root/start.sh
+SyslogIdentifier=cantaloupe
 
 # Restart the service on failure
 Restart=always
-RestartSec=3
+RestartSec=5
 
 [Install]
 WantedBy=multi-user.target

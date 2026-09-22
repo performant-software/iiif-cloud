@@ -1,0 +1,5 @@
+{
+  "name": "IIIFCloud",
+  "stack": "heroku-26",
+  "buildpacks": [{ "url": "heroku/nodejs" }, { "url": "heroku/ruby" }]
+}

@@ -32,6 +32,17 @@ class Resources extends BaseService {
   }
 
   /**
+   * Calls the `/api/resources/:id/create_manifest` API endpoint.
+   *
+   * @param id
+   *
+   * @returns {*}
+   */
+  createManifest(id: number): Promise<any> {
+    return this.getAxios().post(`${this.getBaseUrl()}/${id}/create_manifest`, {}, this.getConfig());
+  }
+
+  /**
    * Returns the resources base URL.
    *
    * @returns {string}
