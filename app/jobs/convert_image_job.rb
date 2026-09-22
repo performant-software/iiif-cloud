@@ -161,7 +161,7 @@ class ConvertImageJob < ApplicationJob
       io:,
       content_type:,
       filename:,
-      metadata:
+      metadata: (metadata || {}).merge(analyzed: true)
     )
     converted_blob.upload_without_unfurling(io)
     converted_blob
