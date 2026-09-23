@@ -4,6 +4,10 @@
 
 1. Run `bundle install` to install the Rails dependencies.
 2. `cd` into `client` and run `yarn` to install the client dependencies.
+3. Additionally, FairImage requires the following packages to be installed on your server or dev machine if you plan to run the test suite or to use the features in parentheses:
+   - `ffmpeg` (video uploads)
+   - `imagemagick` (image and PDF uploads)
+   - `ghostscript` (PDF uploads)
 
 To start FairImage, run `bundle exec rake start`.
 

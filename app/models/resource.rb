@@ -17,6 +17,7 @@ class Resource < ApplicationRecord
   before_save :parse_metadata
   after_create_commit :after_create
   after_update_commit :after_update
+  after_destroy_commit :after_destroy
 
   # ActiveStorage
   has_one_attached :content
@@ -192,6 +193,11 @@ class Resource < ApplicationRecord
     pages_count
   end
 
+  def hls?
+    # The HLS files must have been transcoded from the current content, not content that has since been replaced
+    video? && conversion_status == 'succeeded' && hls_identifier.present? && hls_identifier == content.key
+  end
+
   def iiif?
     image? || video? || audio? || pdf?
   end
@@ -229,6 +235,9 @@ class Resource < ApplicationRecord
     # Convert the image to a TIFF
     ConvertImageJob.perform_later(self.id)
 
+    # Process the video
+    ProcessVideoJob.perform_later(self.id)
+
     # Create the manifest
     CreateManifestJob.perform_later(self.id)
 
@@ -245,10 +254,35 @@ class Resource < ApplicationRecord
     # Only perform the image updates if the content attachment has been updated
     return if !(content.attached? && content.blob.saved_changes?)
 
+    reset_conversion
+
     # Convert the image to a TIFF
     ConvertImageJob.perform_later(self.id)
 
+    # Process the video
+    ProcessVideoJob.perform_later(self.id)
+
     # Extract EXIF data
     ExtractExifJob.perform_later(self.id)
+  end
+
+  def after_destroy
+    # HLS files are uploaded outside of ActiveStorage, so they aren't purged with the content attachment
+    DeleteHlsJob.perform_later(ProcessVideoJob.hls_directory(self)) if video?
+  end
+
+  def reset_conversion
+    previous_hls_identifier = nil
+
+    Resource.transaction do
+      previous_hls_identifier = Resource.lock.where(id: id).pick(:hls_identifier)
+      update_columns(conversion_status: 'pending', conversion_error: nil, conversion_failed_at: nil, hls_identifier: nil)
+    end
+
+    return if previous_hls_identifier.blank?
+
+    DeleteHlsJob.perform_later(ProcessVideoJob.hls_prefix(self, previous_hls_identifier))
+
+    CreateManifestJob.perform_later(id)
   end
 end
