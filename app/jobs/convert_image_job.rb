@@ -87,12 +87,8 @@ class ConvertImageJob < ApplicationJob
         # Process each page
         page_count.times do |page_number|
           begin
-            # Extract page as intermediate image
-            temp_image_path = Images::ConvertPdf.extract_page(file, page_number)
-            temp_files << temp_image_path
-
-            # Convert extracted page to TIFF
-            tiff_path = Images::ConvertPdf.page_to_tiff(File.new(temp_image_path))
+            # Convert the page to a pyramidal TIFF
+            tiff_path = Images::ConvertPdf.page_to_tiff(file, page_number)
             temp_files << tiff_path
 
             # Generate filename for this page (e.g., "document_page_001.tif")
@@ -110,8 +106,8 @@ class ConvertImageJob < ApplicationJob
             end
 
             # Clean up intermediate files as we go
-            Images::ConvertPdf.cleanup_temp_files([temp_image_path, tiff_path])
-            temp_files -= [temp_image_path, tiff_path]
+            Images::ConvertPdf.cleanup_temp_files([tiff_path])
+            temp_files -= [tiff_path]
             rescue Exceptions::PDFExtractionError, Exceptions::PDFPageConversionError => e
                Rails.logger.error "Failed on page #{page_number + 1} of PDF for resource #{resource.id}: #{e.message}"
                raise

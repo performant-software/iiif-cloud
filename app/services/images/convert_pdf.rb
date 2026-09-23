@@ -27,52 +27,22 @@ module Images
       end
     end
 
-    # Extract a single page from PDF as an intermediate image file
+    # Convert a single PDF page to a pyramidal TIFF
+    #
     # @param file [File] The PDF file
     # @param page_number [Integer] The page number (0-indexed)
-    # @param output_format [String] Output image format (default: 'png')
-    # @return [String] Path to the extracted image file
-    # @raise [Exceptions::PDFExtractionError] If page extraction fails
-    def self.extract_page(file, page_number, output_format = 'png')
+    # @return [String] Path to the converted TIFF file
+    # @raise [Exceptions::PDFPageConversionError] If the page cannot be converted
+    def self.page_to_tiff(file, page_number)
       begin
-        # Generate output filename with page number
         base_filename = File.basename(file.path, '.*')
-        output_filename = "#{base_filename}_page_#{page_number + 1}.#{output_format}"
+        output_filename = "#{base_filename}_page_#{page_number + 1}.tif"
         output_path = File.join(File.dirname(file.path), output_filename)
 
-        # Use ImageMagick to extract the specific PDF page
         convert = MiniMagick.convert
         convert << '-density'
         convert << '300'  # High DPI for better quality
         convert << "#{file.path}[#{page_number}]"  # Specify page index (0-indexed)
-        convert << '-quality'
-        convert << '90'  # Good quality for intermediate conversion
-        convert << '-define'
-        convert << 'png:color-type=2'
-        convert << output_path
-        convert.call
-
-        raise Exceptions::PDFExtractionError, "Output file not created" unless File.exist?(output_path)
-
-        output_path
-      rescue MiniMagick::Error => e
-        raise Exceptions::PDFExtractionError, "Failed to extract page #{page_number} from PDF: #{e.message}"
-      end
-    end
-
-    # Convert an extracted PDF page (as image) to TIFF format
-    # @param image_file [File] The intermediate image file (result of extract_page)
-    # @return [String] Path to the converted TIFF file
-    # @raise [Exceptions::PDFPageConversionError] If conversion fails
-    def self.page_to_tiff(image_file)
-      begin
-        output_file = "#{File.basename(image_file.path, '.*')}.tif"
-        output_path = File.join(File.dirname(image_file.path), output_file)
-
-        convert = MiniMagick.convert
-        convert << image_file.path
-        convert << '-density'
-        convert << '300'
         convert << '-define'
         convert << 'tiff:tile-geometry=1024x1024'
         convert << '-define'
@@ -91,9 +61,11 @@ module Images
         convert << "ptif:#{output_path}"
         convert.call
 
+        raise Exceptions::PDFPageConversionError, 'Output file not created' unless File.exist?(output_path)
+
         output_path
       rescue MiniMagick::Error => e
-        raise Exceptions::PDFPageConversionError, "Failed to convert page to TIFF: #{e.message}"
+        raise Exceptions::PDFPageConversionError, "Failed to convert page #{page_number} to TIFF: #{e.message}"
       end
     end
 
