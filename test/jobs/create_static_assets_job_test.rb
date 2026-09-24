@@ -79,6 +79,49 @@ class CreateStaticAssetsJobTest < ActiveJob::TestCase
       httparty_singleton.define_method(:get, original_get)
   end
 
+  test 'reuses full/max bytes for a "sizes" entry matching the full image, instead of re-fetching' do
+    source_info = {
+      'id' => 'https://cantaloupe.example/iiif/3/source',
+      'width' => 100,
+      'height' => 80,
+      'sizes' => [{ 'width' => 50, 'height' => 40 }, { 'width' => 100, 'height' => 80 }]
+    }
+    requested_urls = []
+    response_class = Struct.new(:body, :code, :message) do
+      def success?
+        true
+      end
+    end
+
+    httparty_singleton = HTTParty.singleton_class
+    original_get = httparty_singleton.instance_method(:get)
+    httparty_singleton.define_method(:get) do |url|
+      requested_urls << url
+      response_class.new(
+        url.end_with?('info.json') ? JSON.generate(source_info) : "bytes for #{url}",
+        200,
+        'OK'
+      )
+    end
+
+    Dir.mktmpdir do |output_folder|
+      CreateStaticAssetsJob.perform_now(@resource.id, 'https://static.example/images', output_folder, local: true)
+
+      resource_folder = File.join(output_folder, @resource.id.to_s)
+      max_bytes = File.read(File.join(resource_folder, 'full', 'max', '0', 'default.jpg'))
+
+      # Both paths for the full-size "sizes" entry exist, and contain the same bytes as full/max
+      assert_equal max_bytes, File.read(File.join(resource_folder, 'full', '100,80', '0', 'default.jpg'))
+      assert_equal max_bytes, File.read(File.join(resource_folder, 'full', '100,', '0', 'default.jpg'))
+
+      # Only the true downscaled size and full/max were actually fetched from the source
+      assert requested_urls.none? { |url| url.include?('/full/100,80/') }
+      assert requested_urls.any? { |url| url.include?('/full/50,40/') }
+    end
+  ensure
+    httparty_singleton.define_method(:get, original_get)
+  end
+
   test 'generates per-page assets, a whole-document info.json, and a multi-canvas manifest for PDFs' do
     pdf_resource = Resource.create!(project: @project, name: 'Static PDF', pages_count: 2)
     pdf_resource.content.attach(
