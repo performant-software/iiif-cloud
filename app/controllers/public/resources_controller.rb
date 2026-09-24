@@ -86,6 +86,15 @@ class Public::ResourcesController < Api::ResourcesController
     render json: JSON.parse(resource.manifest)
   end
 
+  def create_static_assets
+    render json: { errors: [I18n.t('errors.resources_controller.create_static_assets_invalid')] }, status: :unprocessable_entity and return unless validate_static_assets?
+
+    resources = base_query.where(uuid: params[:resource_ids])
+    resources.each { |resource| CreateStaticAssetsJob.perform_later(resource.id, params[:base_url], params[:destination]) }
+
+    render json: {}, status: :ok
+  end
+
   def preview
     page_number = params[:page] || 1
 
@@ -124,6 +133,10 @@ class Public::ResourcesController < Api::ResourcesController
     render status: :not_found and return if redirect.nil?
 
     redirect_to redirect, allow_other_host: true
+  end
+
+  def validate_static_assets?
+    %i(resource_ids base_url destination).all? { |key| params[key].present? }
   end
 
   def set_page

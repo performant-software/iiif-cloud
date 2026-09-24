@@ -11,6 +11,7 @@ module Public
 
         begin
           @current_user = User.find_by_api_key(api_key)
+          render_unauthorized I18n.t('errors.unauthenticated') and return unless @current_user
         rescue ActiveRecord::RecordNotFound => e
           render_unauthorized e.message
         end

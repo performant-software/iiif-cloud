@@ -45,6 +45,7 @@ en:
     resources_controller:
       clear_cache: "You do not have permissions to clear resource cache."
       convert: "You do not have permissions to convert resources."
+      create_static_assets_invalid: "Invalid parameters for generating static assets."
 
     unauthenticated: "You must be authenticate to access."
     unauthorized: "You do not have access to this record."

@@ -45,34 +45,35 @@ class CreateStaticAssetsJobTest < ActiveJob::TestCase
       Dir.mktmpdir do |output_folder|
         CreateStaticAssetsJob.perform_now(@resource.id, 'https://static.example/images', output_folder, local: true)
 
-        resource_folder = File.join(output_folder, @resource.id.to_s)
-        assert File.exist?(File.join(resource_folder, 'info.json'))
-        assert File.exist?(File.join(resource_folder, 'manifest.json'))
-        assert File.exist?(File.join(resource_folder, 'full', 'max', '0', 'default.jpg'))
+        image_folder = File.join(output_folder, 'iiif', 'image', 'v3', @resource.uuid)
+        assert File.exist?(File.join(image_folder, 'info.json'))
+        assert File.exist?(File.join(output_folder, 'iiif', 'presentation', 'v3', @resource.uuid, 'manifest.json'))
+        assert File.exist?(File.join(image_folder, 'full', 'max', '0', 'default.jpg'))
 
         # Both the "w,h" and width-only "w," forms must exist for every generated size
-        assert File.exist?(File.join(resource_folder, 'full', '50,40', '0', 'default.jpg'))
-        assert File.exist?(File.join(resource_folder, 'full', '50,', '0', 'default.jpg'))
-        assert File.exist?(File.join(resource_folder, '0,0,64,64', '64,64', '0', 'default.jpg'))
-        assert File.exist?(File.join(resource_folder, '0,0,64,64', '64,', '0', 'default.jpg'))
-        assert File.exist?(File.join(resource_folder, '64,64,36,16', '36,16', '0', 'default.jpg'))
-        assert File.exist?(File.join(resource_folder, '64,64,36,16', '36,', '0', 'default.jpg'))
+        assert File.exist?(File.join(image_folder, 'full', '50,40', '0', 'default.jpg'))
+        assert File.exist?(File.join(image_folder, 'full', '50,', '0', 'default.jpg'))
+        assert File.exist?(File.join(image_folder, '0,0,64,64', '64,64', '0', 'default.jpg'))
+        assert File.exist?(File.join(image_folder, '0,0,64,64', '64,', '0', 'default.jpg'))
+        assert File.exist?(File.join(image_folder, '64,64,36,16', '36,16', '0', 'default.jpg'))
+        assert File.exist?(File.join(image_folder, '64,64,36,16', '36,', '0', 'default.jpg'))
 
         # The width-only variant is copied locally rather than re-fetched from the source
         assert_equal 1, requested_urls.count { |url| url.end_with?('/info.json') }
         assert requested_urls.any? { |url| url.include?('/0,0,64,64/64,64/0/default.jpg') }
         assert requested_urls.none? { |url| url.include?('/0,0,64,64/64,/0/default.jpg') }
 
-        info = JSON.parse(File.read(File.join(resource_folder, 'info.json')))
-        assert_equal 'https://static.example/images/' + @resource.id.to_s, info['id']
+        info = JSON.parse(File.read(File.join(image_folder, 'info.json')))
+        assert_equal "https://static.example/images/iiif/image/v3/#{@resource.uuid}", info['id']
         assert_equal 'level0', info['profile']
         assert_nil info['extraQualities']
         assert_nil info['extraFormats']
         assert_equal ['sizeByW'], info['extraFeatures']
 
-        manifest = JSON.parse(File.read(File.join(resource_folder, 'manifest.json')))
+        manifest = JSON.parse(File.read(File.join(output_folder, 'iiif', 'presentation', 'v3', @resource.uuid, 'manifest.json')))
+        assert_equal "https://static.example/images/iiif/presentation/v3/#{@resource.uuid}/manifest.json", manifest['id']
         body = manifest.dig('items', 0, 'items', 0, 'items', 0, 'body')
-        assert_equal 'https://static.example/images/' + @resource.id.to_s, body.dig('service', 0, 'id')
+        assert_equal "https://static.example/images/iiif/image/v3/#{@resource.uuid}", body.dig('service', 0, 'id')
         assert_equal 'image/jpg', body['format']
       end
     ensure
@@ -107,12 +108,12 @@ class CreateStaticAssetsJobTest < ActiveJob::TestCase
     Dir.mktmpdir do |output_folder|
       CreateStaticAssetsJob.perform_now(@resource.id, 'https://static.example/images', output_folder, local: true)
 
-      resource_folder = File.join(output_folder, @resource.id.to_s)
-      max_bytes = File.read(File.join(resource_folder, 'full', 'max', '0', 'default.jpg'))
+      image_folder = File.join(output_folder, 'iiif', 'image', 'v3', @resource.uuid)
+      max_bytes = File.read(File.join(image_folder, 'full', 'max', '0', 'default.jpg'))
 
       # Both paths for the full-size "sizes" entry exist, and contain the same bytes as full/max
-      assert_equal max_bytes, File.read(File.join(resource_folder, 'full', '100,80', '0', 'default.jpg'))
-      assert_equal max_bytes, File.read(File.join(resource_folder, 'full', '100,', '0', 'default.jpg'))
+      assert_equal max_bytes, File.read(File.join(image_folder, 'full', '100,80', '0', 'default.jpg'))
+      assert_equal max_bytes, File.read(File.join(image_folder, 'full', '100,', '0', 'default.jpg'))
 
       # Only the true downscaled size and full/max were actually fetched from the source
       assert requested_urls.none? { |url| url.include?('/full/100,80/') }
@@ -170,30 +171,32 @@ class CreateStaticAssetsJobTest < ActiveJob::TestCase
     Dir.mktmpdir do |output_folder|
       CreateStaticAssetsJob.perform_now(pdf_resource.id, 'https://static.example/images', output_folder, local: true)
 
-      resource_folder = File.join(output_folder, pdf_resource.id.to_s)
-      assert File.exist?(File.join(resource_folder, 'page', '1', 'info.json'))
-      assert File.exist?(File.join(resource_folder, 'page', '1', 'full', 'max', '0', 'default.jpg'))
-      assert File.exist?(File.join(resource_folder, 'page', '2', 'info.json'))
-      assert File.exist?(File.join(resource_folder, 'page', '2', 'full', 'max', '0', 'default.jpg'))
-      assert File.exist?(File.join(resource_folder, 'info.json'))
-      assert File.exist?(File.join(resource_folder, 'manifest.json'))
+      image_folder = File.join(output_folder, 'iiif', 'image', 'v3', pdf_resource.uuid)
+      assert File.exist?(File.join(image_folder, 'page', '1', 'info.json'))
+      assert File.exist?(File.join(image_folder, 'page', '1', 'full', 'max', '0', 'default.jpg'))
+      assert File.exist?(File.join(image_folder, 'page', '2', 'info.json'))
+      assert File.exist?(File.join(image_folder, 'page', '2', 'full', 'max', '0', 'default.jpg'))
+      assert File.exist?(File.join(image_folder, 'info.json'))
 
-      whole_info = JSON.parse(File.read(File.join(resource_folder, 'info.json')))
-      assert_equal 'https://static.example/images/' + pdf_resource.id.to_s, whole_info['id']
+      manifest_path = File.join(output_folder, 'iiif', 'presentation', 'v3', pdf_resource.uuid, 'manifest.json')
+      assert File.exist?(manifest_path)
+
+      whole_info = JSON.parse(File.read(File.join(image_folder, 'info.json')))
+      assert_equal "https://static.example/images/iiif/image/v3/#{pdf_resource.uuid}", whole_info['id']
       assert_equal 2, whole_info['page_count']
 
-      page_1_info = JSON.parse(File.read(File.join(resource_folder, 'page', '1', 'info.json')))
-      assert_equal 'https://static.example/images/' + pdf_resource.id.to_s + '/page/1', page_1_info['id']
+      page_1_info = JSON.parse(File.read(File.join(image_folder, 'page', '1', 'info.json')))
+      assert_equal "https://static.example/images/iiif/image/v3/#{pdf_resource.uuid}/page/1", page_1_info['id']
       assert_equal 'level0', page_1_info['profile']
 
-      manifest = JSON.parse(File.read(File.join(resource_folder, 'manifest.json')))
+      manifest = JSON.parse(File.read(manifest_path))
       assert_equal 2, manifest['items'].size
       first_canvas = manifest['items'][0]
       assert_equal 100, first_canvas['width']
       second_canvas = manifest['items'][1]
       assert_equal 60, second_canvas['width']
       assert_equal(
-        'https://static.example/images/' + pdf_resource.id.to_s + '/page/2',
+        "https://static.example/images/iiif/image/v3/#{pdf_resource.uuid}/page/2",
         second_canvas.dig('items', 0, 'items', 0, 'body', 'service', 0, 'id')
       )
     end
@@ -238,25 +241,49 @@ class CreateStaticAssetsJobTest < ActiveJob::TestCase
     Dir.mktmpdir do |output_folder|
       CreateStaticAssetsJob.perform_now(pdf_resource.id, 'https://static.example/images', output_folder, local: true)
 
-      resource_folder = File.join(output_folder, pdf_resource.id.to_s)
-      assert_not File.exist?(File.join(resource_folder, 'page', '1', 'info.json'))
-      assert File.exist?(File.join(resource_folder, 'page', '2', 'info.json'))
+      image_folder = File.join(output_folder, 'iiif', 'image', 'v3', pdf_resource.uuid)
+      assert_not File.exist?(File.join(image_folder, 'page', '1', 'info.json'))
+      assert File.exist?(File.join(image_folder, 'page', '2', 'info.json'))
 
-      manifest = JSON.parse(File.read(File.join(resource_folder, 'manifest.json')))
+      manifest = JSON.parse(File.read(File.join(output_folder, 'iiif', 'presentation', 'v3', pdf_resource.uuid, 'manifest.json')))
       assert_equal 1, manifest['items'].size
-      assert_equal 'https://static.example/images/' + pdf_resource.id.to_s + '/page/2/canvas/2', manifest['items'][0]['id']
+      assert_equal "https://static.example/images/iiif/image/v3/#{pdf_resource.uuid}/page/2/canvas/2", manifest['items'][0]['id']
     end
   ensure
     httparty_singleton.define_method(:get, original_get)
   end
 
   test 'defaults to an R2Writer when local is not specified' do
-    writer = CreateStaticAssetsJob.new.send(:writer_for, 'static-assets', @resource.id, local: false)
+    writer = CreateStaticAssetsJob.new.send(:writer_for, 'static-assets', local: false)
     assert_instance_of Iiif::StaticAssets::Writers::R2Writer, writer
   end
 
   test 'uses a DiskWriter when local: true is passed' do
-    writer = CreateStaticAssetsJob.new.send(:writer_for, '/tmp/static-assets', @resource.id, local: true)
+    writer = CreateStaticAssetsJob.new.send(:writer_for, '/tmp/static-assets', local: true)
     assert_instance_of Iiif::StaticAssets::Writers::DiskWriter, writer
+  end
+
+  test 'uses an explicit identifier instead of the resource uuid when provided' do
+    source_info = { 'id' => 'https://cantaloupe.example/iiif/3/source', 'width' => 10, 'height' => 10 }
+    response_class = Struct.new(:body, :code, :message) do
+      def success?
+        true
+      end
+    end
+
+    httparty_singleton = HTTParty.singleton_class
+    original_get = httparty_singleton.instance_method(:get)
+    httparty_singleton.define_method(:get) do |url|
+      response_class.new(url.end_with?('info.json') ? JSON.generate(source_info) : 'bytes', 200, 'OK')
+    end
+
+    Dir.mktmpdir do |output_folder|
+      CreateStaticAssetsJob.perform_now(@resource.id, 'https://static.example/images', output_folder, identifier: 'custom-id', local: true)
+
+      assert File.exist?(File.join(output_folder, 'iiif', 'image', 'v3', 'custom-id', 'info.json'))
+      assert File.exist?(File.join(output_folder, 'iiif', 'presentation', 'v3', 'custom-id', 'manifest.json'))
+    end
+  ensure
+    httparty_singleton.define_method(:get, original_get)
   end
 end
