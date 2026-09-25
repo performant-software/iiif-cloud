@@ -135,10 +135,10 @@ module Iiif
 
       def copy_full_size_asset(max_key, width, height, key_prefix)
         canonical_key = asset_key('full', "#{width},#{height}", key_prefix)
-        writer.copy(max_key, canonical_key) unless writer.exists?(canonical_key)
+        writer.copy(max_key, canonical_key)
 
         width_only_key = asset_key('full', "#{width},", key_prefix)
-        writer.copy(max_key, width_only_key) unless writer.exists?(width_only_key)
+        writer.copy(max_key, width_only_key)
       end
 
       def each_tile(source_info)
@@ -241,12 +241,11 @@ module Iiif
         canonical_key = write_iiif_asset(source_base_url, region, "#{width},#{height}", key_prefix)
 
         width_only_key = asset_key(region, "#{width},", key_prefix)
-        writer.copy(canonical_key, width_only_key) unless writer.exists?(width_only_key)
+        writer.copy(canonical_key, width_only_key)
       end
 
       def write_iiif_asset(source_base_url, region, size, key_prefix)
         key = asset_key(region, size, key_prefix)
-        return key if writer.exists?(key)
 
         source_url = "#{source_base_url}/#{region}/#{size}/#{ROTATION}/#{QUALITY}.#{IMAGE_FORMAT}"
         writer.write(key, fetch(source_url).body)
