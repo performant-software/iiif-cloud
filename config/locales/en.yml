@@ -47,5 +47,8 @@ en:
       convert: "You do not have permissions to convert resources."
       create_static_assets_invalid: "Invalid parameters for generating static assets."
 
+    static_manifests_controller:
+      create_invalid: "destination, path, and manifest are required."
+
     unauthenticated: "You must be authenticate to access."
     unauthorized: "You do not have access to this record."

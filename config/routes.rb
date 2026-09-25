@@ -49,6 +49,8 @@ Rails.application.routes.draw do
       post :create_static_assets, on: :collection
     end
 
+    resources :static_manifests, only: :create
+
     get 'resources/:id/:region/:size/:rotation/:quality', to: 'resources#image_api', defaults: { format: 'jpg' }
   end
 
