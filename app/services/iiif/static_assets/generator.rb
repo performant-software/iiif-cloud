@@ -64,7 +64,7 @@ module Iiif
       end
 
       def call_pdf
-        page_results = parallel_map((1..resource.page_count).to_a) do |page_number|
+        page_base_urls = (1..resource.page_count).filter_map do |page_number|
           page_base_url = resource.content_converted_pages_base_url(page_number)
 
           if page_base_url.blank?
@@ -72,10 +72,14 @@ module Iiif
             next
           end
 
+          [page_number, page_base_url]
+        end
+
+        page_results = parallel_map(page_base_urls) do |page_number, page_base_url|
           page_service_url = "#{image_service_url}/page/#{page_number}"
           static_info = write_page_assets(page_base_url, page_service_url, "#{image_root}/page/#{page_number}/")
           [page_number, static_info]
-        end.compact
+        end
 
         raise "No converted pages available for #{resource.class}##{resource.id}" if page_results.empty?
 
