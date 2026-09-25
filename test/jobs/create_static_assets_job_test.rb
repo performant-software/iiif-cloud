@@ -74,7 +74,7 @@ class CreateStaticAssetsJobTest < ActiveJob::TestCase
         assert_equal "https://static.example/images/iiif/presentation/v3/#{@resource.uuid}/manifest.json", manifest['id']
         body = manifest.dig('items', 0, 'items', 0, 'items', 0, 'body')
         assert_equal "https://static.example/images/iiif/image/v3/#{@resource.uuid}", body.dig('service', 0, 'id')
-        assert_equal 'image/jpg', body['format']
+        assert_equal 'image/jpeg', body['format']
       end
     ensure
       httparty_singleton.define_method(:get, original_get)
@@ -176,14 +176,13 @@ class CreateStaticAssetsJobTest < ActiveJob::TestCase
       assert File.exist?(File.join(image_folder, 'page', '1', 'full', 'max', '0', 'default.jpg'))
       assert File.exist?(File.join(image_folder, 'page', '2', 'info.json'))
       assert File.exist?(File.join(image_folder, 'page', '2', 'full', 'max', '0', 'default.jpg'))
-      assert File.exist?(File.join(image_folder, 'info.json'))
 
       manifest_path = File.join(output_folder, 'iiif', 'presentation', 'v3', pdf_resource.uuid, 'manifest.json')
       assert File.exist?(manifest_path)
 
-      whole_info = JSON.parse(File.read(File.join(image_folder, 'info.json')))
-      assert_equal "https://static.example/images/iiif/image/v3/#{pdf_resource.uuid}", whole_info['id']
-      assert_equal 2, whole_info['page_count']
+      # A multi-page PDF has no single IIIF Image API representation, so there's no
+      # whole-document info.json - only per-page info.json and the presentation manifest.
+      assert_not File.exist?(File.join(image_folder, 'info.json'))
 
       page_1_info = JSON.parse(File.read(File.join(image_folder, 'page', '1', 'info.json')))
       assert_equal "https://static.example/images/iiif/image/v3/#{pdf_resource.uuid}/page/1", page_1_info['id']

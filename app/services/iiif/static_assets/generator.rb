@@ -8,11 +8,12 @@ module Iiif
     # (local disk, cloud storage, an in-memory zip, etc).
     #
     # Images generate a single set of assets/info.json at iiif/image/v3/{identifier}. Multi-page
-    # PDFs generate assets/info.json per page (under ".../page/<n>/"), plus a whole-document
-    # info.json. Either way, the manifest is written to
-    # iiif/presentation/v3/{identifier}/manifest.json.
+    # PDFs generate assets/info.json per page (under ".../page/<n>/") - there's no whole-document
+    # info.json, since the IIIF Image API has no concept of a multi-page image. Either way, the
+    # manifest is written to iiif/presentation/v3/{identifier}/manifest.json.
     class Generator
       IMAGE_FORMAT = 'jpg'
+      IMAGE_MIME_TYPE = 'image/jpeg'
       ROTATION = '0'
       QUALITY = 'default'
       # Fetches (per page, and per size/tile within a page) are independent HTTP requests to
@@ -25,7 +26,6 @@ module Iiif
         @base_url = base_url
         @identifier = identifier
         @writer = writer
-        @writer_mutex = Mutex.new
       end
 
       def call
@@ -60,7 +60,7 @@ module Iiif
 
       def call_image
         static_info = write_page_assets(resource.content_base_url, image_service_url, "#{image_root}/")
-        writer_write(manifest_key, JSON.pretty_generate(build_manifest([build_canvas(1, image_service_url, static_info)])))
+        writer.write(manifest_key, JSON.pretty_generate(build_manifest([build_canvas(1, image_service_url, static_info)])))
       end
 
       def call_pdf
@@ -79,10 +79,8 @@ module Iiif
 
         raise "No converted pages available for #{resource.class}##{resource.id}" if page_results.empty?
 
-        writer_write("#{image_root}/info.json", JSON.pretty_generate(whole_pdf_info(page_results.first.last)))
-
         canvases = page_results.map { |page_number, info| build_canvas(page_number, "#{image_service_url}/page/#{page_number}", info) }
-        writer_write(manifest_key, JSON.pretty_generate(build_manifest(canvases)))
+        writer.write(manifest_key, JSON.pretty_generate(build_manifest(canvases)))
       end
 
       # Fetches the source info.json, writes its static assets under key_prefix, and writes a
@@ -112,7 +110,7 @@ module Iiif
         end
 
         static_info = level_zero_info(source_info, page_service_url)
-        writer_write("#{key_prefix}info.json", JSON.pretty_generate(static_info))
+        writer.write("#{key_prefix}info.json", JSON.pretty_generate(static_info))
         static_info
       end
 
@@ -133,10 +131,10 @@ module Iiif
 
       def copy_full_size_asset(max_key, width, height, key_prefix)
         canonical_key = asset_key('full', "#{width},#{height}", key_prefix)
-        writer_copy(max_key, canonical_key) unless writer_exists?(canonical_key)
+        writer.copy(max_key, canonical_key) unless writer.exists?(canonical_key)
 
         width_only_key = asset_key('full', "#{width},", key_prefix)
-        writer_copy(max_key, width_only_key) unless writer_exists?(width_only_key)
+        writer.copy(max_key, width_only_key) unless writer.exists?(width_only_key)
       end
 
       def each_tile(source_info)
@@ -185,16 +183,6 @@ module Iiif
         info
       end
 
-      # A multi-page PDF has no single IIIF Image API representation, so this is a lightweight
-      # summary (first page's dimensions plus the page count) rather than a fetched info.json.
-      def whole_pdf_info(first_page_info)
-        info = first_page_info.deep_dup
-        info['id'] = image_service_url if info.key?('id')
-        info['@id'] = image_service_url if info.key?('@id')
-        info['page_count'] = resource.page_count
-        info
-      end
-
       def build_manifest(canvases)
         {
           '@context' => [
@@ -227,7 +215,7 @@ module Iiif
               'body' => {
                 'id' => image_url,
                 'type' => 'Image',
-                'format' => "image/#{IMAGE_FORMAT}",
+                'format' => IMAGE_MIME_TYPE,
                 'width' => info['width'],
                 'height' => info['height'],
                 'service' => [{
@@ -249,32 +237,20 @@ module Iiif
         canonical_key = write_iiif_asset(source_base_url, region, "#{width},#{height}", key_prefix)
 
         width_only_key = asset_key(region, "#{width},", key_prefix)
-        writer_copy(canonical_key, width_only_key) unless writer_exists?(width_only_key)
+        writer.copy(canonical_key, width_only_key) unless writer.exists?(width_only_key)
       end
 
       def write_iiif_asset(source_base_url, region, size, key_prefix)
         key = asset_key(region, size, key_prefix)
-        return key if writer_exists?(key)
+        return key if writer.exists?(key)
 
         source_url = "#{source_base_url}/#{region}/#{size}/#{ROTATION}/#{QUALITY}.#{IMAGE_FORMAT}"
-        writer_write(key, fetch(source_url).body)
+        writer.write(key, fetch(source_url).body)
         key
       end
 
       def asset_key(region, size, key_prefix)
         File.join(*[key_prefix.presence, region, size, ROTATION, "#{QUALITY}.#{IMAGE_FORMAT}"].compact)
-      end
-
-      def writer_write(key, bytes)
-        @writer_mutex.synchronize { writer.write(key, bytes) }
-      end
-
-      def writer_exists?(key)
-        @writer_mutex.synchronize { writer.exists?(key) }
-      end
-
-      def writer_copy(from_key, to_key)
-        @writer_mutex.synchronize { writer.copy(from_key, to_key) }
       end
     end
   end

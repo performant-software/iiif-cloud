@@ -7,6 +7,14 @@ module Iiif
       class R2Writer
         def initialize(prefix)
           @prefix = prefix
+          @bucket = ENV.fetch('R2_BUCKET')
+          @client = Aws::S3::Client.new(
+            access_key_id: ENV.fetch('R2_ACCESS_KEY_ID'),
+            secret_access_key: ENV.fetch('R2_SECRET_ACCESS_KEY'),
+            endpoint: ENV.fetch('R2_ENDPOINT'),
+            region: 'auto',
+            force_path_style: true
+          )
         end
 
         def write(key, bytes)
@@ -31,6 +39,8 @@ module Iiif
 
         private
 
+        attr_reader :bucket, :client
+
         def full_key(key)
           File.join(@prefix, key)
         end
@@ -38,20 +48,6 @@ module Iiif
         def copy_source(key)
           escaped_key = full_key(key).split('/').map { |segment| CGI.escape(segment) }.join('/')
           "#{bucket}/#{escaped_key}"
-        end
-
-        def bucket
-          ENV.fetch('R2_BUCKET')
-        end
-
-        def client
-          @client ||= Aws::S3::Client.new(
-            access_key_id: ENV.fetch('R2_ACCESS_KEY_ID'),
-            secret_access_key: ENV.fetch('R2_SECRET_ACCESS_KEY'),
-            endpoint: ENV.fetch('R2_ENDPOINT'),
-            region: 'auto',
-            force_path_style: true
-          )
         end
       end
     end
