@@ -4,6 +4,7 @@ class Public::StaticManifestsController < ActionController::API
 
   # Actions
   before_action :authenticate_request
+  before_action :require_admin
 
   # Persists an already-built IIIF manifest/collection JSON document to storage, at an arbitrary
   # caller-provided path under destination. This deliberately has no knowledge of how the JSON
@@ -18,6 +19,9 @@ class Public::StaticManifestsController < ActionController::API
 
     render json: {}, status: :ok
   rescue StandardError => e
+    Rails.logger.error e.message
+    Rails.logger.error e.backtrace.join("\n")
+
     render json: { errors: [e.message] }, status: :unprocessable_entity
   end
 

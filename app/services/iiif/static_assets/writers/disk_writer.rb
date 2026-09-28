@@ -13,10 +13,6 @@ module Iiif
           File.binwrite(path, bytes)
         end
 
-        def exists?(key)
-          File.exist?(full_path(key))
-        end
-
         def copy(from_key, to_key)
           to_path = full_path(to_key)
           FileUtils.mkdir_p(File.dirname(to_path))

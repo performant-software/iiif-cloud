@@ -8,6 +8,7 @@ class Public::ResourcesController < Api::ResourcesController
   prepend_before_action :set_resource_id, only: [:show, :destroy, :update]
   prepend_before_action :set_resource_project_id, only: [:create, :update]
   skip_before_action :authenticate_request, only: [:content, :download, :iiif, :image_api, :info, :inline, :manifest, :preview, :thumbnail]
+  before_action :require_admin, only: :create_static_assets
 
   def content
     redirect_resource do |resource|

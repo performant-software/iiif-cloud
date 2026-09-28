@@ -21,7 +21,7 @@ class Public::StaticManifestsControllerTest < ActionDispatch::IntegrationTest
     ENV['R2_SECRET_ACCESS_KEY'] = 'secret'
     ENV['R2_ENDPOINT'] = 'https://example.r2.cloudflarestorage.com'
 
-    @user = User.create!(name: 'API User', email: 'api-user@example.com', api_key: 'valid-api-key')
+    @user = User.create!(name: 'API User', email: 'api-user@example.com', api_key: 'valid-api-key', admin: true)
 
     @fake_client = FakeS3Client.new
     fake_client = @fake_client
@@ -73,5 +73,21 @@ class Public::StaticManifestsControllerTest < ActionDispatch::IntegrationTest
     body = JSON.parse(call.args[:body])
     assert_equal 'https://static.example/manifest.json', body['id']
     assert_equal 'Manifest', body['type']
+  end
+
+  test 'rejects a non-admin API key' do
+    non_admin = User.create!(name: 'Non-Admin API User', email: 'non-admin@example.com', api_key: 'non-admin-key')
+
+    post public_static_manifests_path,
+      params: {
+        destination: 'static-manifests',
+        path: 'works/some-uuid/iiif/presentation/v3/manifest.json',
+        manifest: { id: 'https://static.example/manifest.json' }
+      },
+      headers: { 'X-API-KEY' => non_admin.api_key },
+      as: :json
+
+    assert_response :forbidden
+    assert_empty @fake_client.calls
   end
 end

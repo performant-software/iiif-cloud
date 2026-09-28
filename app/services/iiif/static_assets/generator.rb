@@ -16,10 +16,10 @@ module Iiif
       IMAGE_MIME_TYPE = 'image/jpeg'
       ROTATION = '0'
       QUALITY = 'default'
-      # Fetches (per page, and per size/tile within a page) are independent HTTP requests to
-      # Cantaloupe, so running a bounded number of them concurrently cuts wall-clock time
-      # substantially without changing what gets generated.
-      MAX_CONCURRENCY = 8
+      # Fetches (per size/tile within a page) are independent HTTP requests to Cantaloupe, so
+      # running a bounded number of them concurrently cuts wall-clock time substantially without
+      # changing what gets generated.
+      MAX_CONCURRENCY = (ENV['STATIC_GENERATOR_MAX_CONCURRENCY'] || 8).to_i
 
       def initialize(resource:, base_url:, identifier:, writer:)
         @resource = resource
@@ -75,7 +75,7 @@ module Iiif
           [page_number, page_base_url]
         end
 
-        page_results = parallel_map(page_base_urls) do |page_number, page_base_url|
+        page_results = page_base_urls.map do |page_number, page_base_url|
           page_service_url = "#{image_service_url}/page/#{page_number}"
           static_info = write_page_assets(page_base_url, page_service_url, "#{image_root}/page/#{page_number}/")
           [page_number, static_info]
@@ -123,13 +123,6 @@ module Iiif
       def parallel_each(items)
         items.each_slice(MAX_CONCURRENCY) do |batch|
           batch.map { |item| Thread.new { yield item } }.each(&:join)
-        end
-      end
-
-      # Like parallel_each, but collects and returns the block's results in the original order.
-      def parallel_map(items)
-        items.each_slice(MAX_CONCURRENCY).flat_map do |batch|
-          batch.map { |item| Thread.new { yield item } }.map(&:value)
         end
       end
 

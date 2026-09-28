@@ -11,7 +11,7 @@ class Public::ResourcesControllerTest < ActionDispatch::IntegrationTest
     @resource = Resource.create!(project: @project, name: 'Test Resource')
     @other_resource = Resource.create!(project: @other_project, name: 'Other Resource')
 
-    @user = User.create!(name: 'API User', email: 'api-user@example.com', api_key: 'valid-api-key')
+    @user = User.create!(name: 'API User', email: 'api-user@example.com', api_key: 'valid-api-key', admin: true)
     UserOrganization.create!(user: @user, organization: @organization)
   end
 
@@ -58,8 +58,8 @@ class Public::ResourcesControllerTest < ActionDispatch::IntegrationTest
     assert_response :ok
   end
 
-  test 'excludes resources outside the API key user\'s organizations' do
-    assert_no_enqueued_jobs only: CreateStaticAssetsJob do
+  test 'admins are not restricted to their own organizations\' resources' do
+    assert_enqueued_with(job: CreateStaticAssetsJob, args: [@other_resource.id, 'https://static.example/images', 'static-assets']) do
       post create_static_assets_public_resources_path,
         params: {
           resource_ids: [@other_resource.uuid],
@@ -71,5 +71,23 @@ class Public::ResourcesControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :ok
+  end
+
+  test 'rejects a non-admin API key' do
+    non_admin = User.create!(name: 'Non-Admin API User', email: 'non-admin@example.com', api_key: 'non-admin-key')
+    UserOrganization.create!(user: non_admin, organization: @organization)
+
+    assert_no_enqueued_jobs only: CreateStaticAssetsJob do
+      post create_static_assets_public_resources_path,
+        params: {
+          resource_ids: [@resource.uuid],
+          base_url: 'https://static.example/images',
+          destination: 'static-assets'
+        },
+        headers: { 'X-API-KEY' => non_admin.api_key },
+        as: :json
+    end
+
+    assert_response :forbidden
   end
 end

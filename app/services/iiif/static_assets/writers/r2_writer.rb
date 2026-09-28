@@ -21,13 +21,6 @@ module Iiif
           client.put_object(bucket: bucket, key: full_key(key), body: bytes)
         end
 
-        def exists?(key)
-          client.head_object(bucket: bucket, key: full_key(key))
-          true
-        rescue Aws::S3::Errors::NotFound
-          false
-        end
-
         # Uses a server-side copy so the bytes aren't re-uploaded from this process.
         def copy(from_key, to_key)
           client.copy_object(
