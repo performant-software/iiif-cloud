@@ -253,8 +253,16 @@ class CreateStaticAssetsJobTest < ActiveJob::TestCase
   end
 
   test 'defaults to an R2Writer when local is not specified' do
+    original_r2_env = %w[R2_BUCKET R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_ENDPOINT].index_with { |key| ENV[key] }
+    ENV['R2_BUCKET'] = 'test-bucket'
+    ENV['R2_ACCESS_KEY_ID'] = 'id'
+    ENV['R2_SECRET_ACCESS_KEY'] = 'secret'
+    ENV['R2_ENDPOINT'] = 'https://example.r2.cloudflarestorage.com'
+
     writer = CreateStaticAssetsJob.new.send(:writer_for, 'static-assets', local: false)
     assert_instance_of Iiif::StaticAssets::Writers::R2Writer, writer
+  ensure
+    original_r2_env.each { |key, value| ENV[key] = value }
   end
 
   test 'uses a DiskWriter when local: true is passed' do

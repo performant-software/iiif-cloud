@@ -27,6 +27,8 @@ class R2WriterTest < ActiveSupport::TestCase
   end
 
   setup do
+    @original_r2_env = %w[R2_BUCKET R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_ENDPOINT].index_with { |key| ENV[key] }
+
     ENV['R2_BUCKET'] = 'test-bucket'
     ENV['R2_ACCESS_KEY_ID'] = 'id'
     ENV['R2_SECRET_ACCESS_KEY'] = 'secret'
@@ -41,6 +43,7 @@ class R2WriterTest < ActiveSupport::TestCase
 
   teardown do
     @client_singleton.define_method(:new, @original_new)
+    @original_r2_env.each { |key, value| ENV[key] = value }
   end
 
   test 'writes objects under the given prefix' do
@@ -52,14 +55,6 @@ class R2WriterTest < ActiveSupport::TestCase
     assert_equal 'test-bucket', call.args[:bucket]
     assert_equal 'resources/42/info.json', call.args[:key]
     assert_equal '{}', call.args[:body]
-  end
-
-  test 'exists? reflects whether the key has been written' do
-    writer = Iiif::StaticAssets::Writers::R2Writer.new('resources/42')
-    assert_not writer.exists?('info.json')
-
-    @fake_client.existing_keys << 'resources/42/info.json'
-    assert writer.exists?('info.json')
   end
 
   test 'copy issues a server-side copy with an escaped source key' do

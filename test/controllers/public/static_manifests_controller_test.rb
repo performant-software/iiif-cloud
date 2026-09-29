@@ -16,6 +16,8 @@ class Public::StaticManifestsControllerTest < ActionDispatch::IntegrationTest
   end
 
   setup do
+    @original_r2_env = %w[R2_BUCKET R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_ENDPOINT].index_with { |key| ENV[key] }
+
     ENV['R2_BUCKET'] = 'test-bucket'
     ENV['R2_ACCESS_KEY_ID'] = 'id'
     ENV['R2_SECRET_ACCESS_KEY'] = 'secret'
@@ -32,6 +34,7 @@ class Public::StaticManifestsControllerTest < ActionDispatch::IntegrationTest
 
   teardown do
     @client_singleton.define_method(:new, @original_new)
+    @original_r2_env.each { |key, value| ENV[key] = value }
   end
 
   test 'requires a valid API key' do
