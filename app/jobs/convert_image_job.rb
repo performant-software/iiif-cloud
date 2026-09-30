@@ -83,12 +83,16 @@ class ConvertImageJob < ApplicationJob
       content.open do |file|
         # Extract page count from PDF
         page_count = Images::ConvertPdf.page_count(file)
-        
+
+        # Render each page at its source resolution rather than a flat 300 DPI
+        densities = Images::ConvertPdf.page_densities(file, page_count)
+        log_reduced_densities(resource, densities)
+
         # Process each page
         page_count.times do |page_number|
           begin
             # Convert the page to a pyramidal TIFF
-            tiff_path = Images::ConvertPdf.page_to_tiff(file, page_number)
+            tiff_path = Images::ConvertPdf.page_to_tiff(file, page_number, densities[page_number])
             temp_files << tiff_path
 
             # Generate filename for this page (e.g., "document_page_001.tif")
@@ -164,6 +168,14 @@ class ConvertImageJob < ApplicationJob
   rescue StandardError
     converted_blob&.purge
     raise
+  end
+
+  def log_reduced_densities(resource, densities)
+    reduced = densities.reject { |density| density == Images::ConvertPdf::MAX_DENSITY }
+    return if reduced.empty?
+
+    Rails.logger.info "Resource #{resource.id}: rendering #{reduced.size} of #{densities.size} pages below " \
+                      "#{Images::ConvertPdf::MAX_DENSITY} DPI (min #{reduced.min}) to match their source resolution"
   end
 
   # True when the converted page set is the one attached to the resource
