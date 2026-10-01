@@ -54,10 +54,11 @@ class Resource < ApplicationRecord
     where.not(subquery.arel.exists)
   end
 
+  # For a PDF with converted pages, the content URLs below point at converted page TIFFs
   def content_base_url
-    # For multi-page PDFs, this should return the info for the whole PDF (including page count)
-    if content_converted_pages.attached?
-      return "#{ENV['IIIF_HOST_DOCKER'] || ENV['IIIF_HOST']}/iiif/3/#{CGI.escape(content.key)}"
+    if converted_pages?
+      page_base_url = content_converted_pages_base_url(1)
+      return page_base_url if page_base_url
     end
 
     return attachable_content_base_url unless content_converted.attached?
@@ -66,30 +67,38 @@ class Resource < ApplicationRecord
   end
 
   def content_iiif_url(page_number = 1)
+    return content_converted_pages_iiif_url(page_number || 1) if converted_pages?
     return attachable_content_iiif_url(page_number) if iiif?
 
     nil
   end
 
   def content_info_url(page_number = 1)
+    return content_converted_pages_info_url(page_number || 1) if converted_pages?
     return attachable_content_info_url(page_number) if iiif?
 
     nil
   end
 
   def content_image_api_url(page_number, region, size, rotation, quality, format)
+    if converted_pages?
+      return content_converted_pages_image_api_url(page_number || 1, region, size, rotation, quality, format)
+    end
+
     return attachable_content_image_api_url(page_number, region, size, rotation, quality, format) if iiif?
 
     nil
   end
 
   def content_preview_url
+    return content_converted_pages_preview_url if converted_pages?
     return attachable_content_preview_url if iiif?
 
     nil
   end
 
   def content_thumbnail_url
+    return content_converted_pages_thumbnail_url if converted_pages?
     return attachable_content_thumbnail_url if iiif?
 
     nil
@@ -111,17 +120,24 @@ class Resource < ApplicationRecord
   # @param page_number [Integer] 1-indexed page number
   # @return [String, nil] The base URL for the page, or nil if not found
   def content_converted_pages_base_url(page_number)
+    page = converted_page_attachment(page_number)
+    return nil unless page
+
+    "#{ENV['IIIF_HOST_DOCKER'] || ENV['IIIF_HOST']}/iiif/3/#{CGI.escape(page.key)}"
+  end
+
+  # Get the attachment for a specific page in a multi-page PDF
+  # @param page_number [Integer] 1-indexed page number
+  # @return [ActiveStorage::Attachment, nil] The page's attachment, or nil if not found
+  def converted_page_attachment(page_number)
     return nil unless content_converted_pages.attached?
     page_number = page_number.to_i
     return nil unless pages_count
     return nil if page_number < 1 || page_number > pages_count
 
-    page = content_converted_pages.to_a.find do |attachment|
+    content_converted_pages.to_a.find do |attachment|
       attachment.blob.metadata['original_page_number'].to_i == page_number
     end
-    return nil unless page
-
-    "#{ENV['IIIF_HOST_DOCKER'] || ENV['IIIF_HOST']}/iiif/3/#{CGI.escape(page.key)}"
   end
 
   # Get the full IIIF Image API URL for a specific page in a multi-page PDF

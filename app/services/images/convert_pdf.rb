@@ -76,6 +76,21 @@ module Images
       end
     end
 
+    # Pixel dimensions of a converted page, read from TIFF header
+    # @param path [String] Path to the converted TIFF
+    # @return [Hash] { width:, height: }, empty when the dimensions can't be read
+    def self.dimensions(path)
+      # -ping reads only the header instead of decoding the full-resolution frame
+      output = MiniMagick.identify { |b| b.ping; b.format('%w %h'); b << "#{path}[0]" }
+      width, height = output.split.map(&:to_i)
+      return {} unless width&.positive? && height&.positive?
+
+      { width:, height: }
+    rescue StandardError => e
+      Rails.logger.warn("Unable to read dimensions for #{path}: #{e.message}")
+      {}
+    end
+
     # Clean up temporary intermediate image files
     # @param file_paths [Array<String>] Paths to temporary files to delete
     def self.cleanup_temp_files(file_paths)

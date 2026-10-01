@@ -99,12 +99,16 @@ class ConvertImageJob < ApplicationJob
             base_filename = File.basename(content.filename.to_s, '.*')
             page_filename = "#{base_filename}_page_#{page_number + 1}.#{FILE_EXTENSION_TIFF}"
 
+            # Record the page's dimensions so manifests don't have to ask the IIIF server for them
+            page_metadata = { original_page_number: page_number + 1, storage_key: resource.storage_key }
+              .merge(Images::ConvertPdf.dimensions(tiff_path))
+
             File.open(tiff_path) do |converted_file|
               converted_blob = create_and_upload_converted_blob!(
                 io: converted_file,
                 content_type: CONTENT_TYPE_TIFF,
                 filename: page_filename,
-                metadata: { original_page_number: page_number + 1, storage_key: resource.storage_key },
+                metadata: page_metadata,
               )
               converted_blobs << converted_blob
             end
