@@ -8,6 +8,10 @@ class CreateManifestJob < ApplicationJob
     resource = Resource.find(resource_id)
     return unless resource.iiif?
 
+    # A PDF has no canvases until its pages are converted; ConvertImageJob queues this job again
+    # once they're published.
+    return if resource.pdf? && !resource.converted_pages?
+
     raise Exceptions::FileNotUploadedError unless resource.content_uploaded?
 
     resource.update(manifest: Iiif::Manifest.create_for_resource(resource), manifest_generated_at: manifest_generated_time)
