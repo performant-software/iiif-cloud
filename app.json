@@ -1,5 +1,9 @@
 {
   "name": "IIIFCloud",
   "stack": "heroku-26",
-  "buildpacks": [{ "url": "heroku/nodejs" }, { "url": "heroku/ruby" }]
+  "buildpacks": [
+    { "url": "https://github.com/heroku/heroku-buildpack-activestorage-preview" },
+    { "url": "heroku/nodejs" },
+    { "url": "heroku/ruby" }
+  ]
 }

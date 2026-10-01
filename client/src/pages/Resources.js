@@ -4,11 +4,13 @@ import { FileUploadModal, ItemList, LazyMedia } from '@performant-software/seman
 import React, { type ComponentType, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate, useParams } from 'react-router';
+import { v4 as uuid } from 'uuid';
 import FileUpload from '../components/FileUpload';
 import ResourcesService from '../services/Resources';
 
 const Resources: ComponentType<any> = () => {
   const [modal, setModal] = useState(false);
+  const [progress, setProgress] = useState({});
   const location = useLocation();
   const navigate = useNavigate();
   const { projectId } = useParams();
@@ -68,19 +70,24 @@ const Resources: ComponentType<any> = () => {
         <FileUploadModal
           closeOnComplete={false}
           itemComponent={FileUpload}
+          itemComponentProps={{ progress }}
           onAddFile={(file) => ({
+            uid: uuid(),
             name: file.name,
             project_id: projectId,
             content: file,
             content_url: URL.createObjectURL(file),
             content_type: file.type
           })}
-          onSave={(item) => ResourcesService.save(item)}
+          onSave={(item) => ResourcesService.createWithProgress(item, (event) => (
+            setProgress((prevProgress) => ({ ...prevProgress, [item.uid]: event.progress }))
+          ))}
           required={{
             name: t('FileUpload.labels.name')
           }}
           onClose={() => {
             setModal(false);
+            setProgress({});
             navigate(location.pathname, { state: { saved: true } });
           }}
           showPageLoader={false}
