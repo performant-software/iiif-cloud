@@ -10,8 +10,8 @@ class Public::StaticManifestsControllerTest < ActionDispatch::IntegrationTest
       @calls = []
     end
 
-    def put_object(bucket:, key:, body:)
-      @calls << Call.new(:put_object, { bucket: bucket, key: key, body: body })
+    def put_object(bucket:, key:, body:, content_type:)
+      @calls << Call.new(:put_object, { bucket: bucket, key: key, body: body, content_type: content_type })
     end
   end
 
@@ -40,7 +40,7 @@ class Public::StaticManifestsControllerTest < ActionDispatch::IntegrationTest
   test 'requires a valid API key' do
     post public_static_manifests_path, params: {
       destination: 'static-manifests',
-      path: 'works/some-uuid/iiif/presentation/v3/manifest.json',
+      path: 'works/some-uuid/iiif/3/presentation/manifest.json',
       manifest: { id: 'https://static.example/manifest.json' }
     }, as: :json
 
@@ -60,7 +60,7 @@ class Public::StaticManifestsControllerTest < ActionDispatch::IntegrationTest
     post public_static_manifests_path,
       params: {
         destination: 'static-manifests',
-        path: 'works/some-uuid/iiif/presentation/v3/manifest.json',
+        path: 'works/some-uuid/iiif/3/presentation/manifest.json',
         manifest: { id: 'https://static.example/manifest.json', type: 'Manifest' }
       },
       headers: { 'X-API-KEY' => @user.api_key },
@@ -71,7 +71,7 @@ class Public::StaticManifestsControllerTest < ActionDispatch::IntegrationTest
     call = @fake_client.calls.first
     assert_equal :put_object, call.method
     assert_equal 'test-bucket', call.args[:bucket]
-    assert_equal 'static-manifests/works/some-uuid/iiif/presentation/v3/manifest.json', call.args[:key]
+    assert_equal 'static-manifests/works/some-uuid/iiif/3/presentation/manifest.json', call.args[:key]
 
     body = JSON.parse(call.args[:body])
     assert_equal 'https://static.example/manifest.json', body['id']
@@ -84,7 +84,7 @@ class Public::StaticManifestsControllerTest < ActionDispatch::IntegrationTest
     post public_static_manifests_path,
       params: {
         destination: 'static-manifests',
-        path: 'works/some-uuid/iiif/presentation/v3/manifest.json',
+        path: 'works/some-uuid/iiif/3/presentation/manifest.json',
         manifest: { id: 'https://static.example/manifest.json' }
       },
       headers: { 'X-API-KEY' => non_admin.api_key },

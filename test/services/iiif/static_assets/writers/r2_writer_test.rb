@@ -12,8 +12,8 @@ class R2WriterTest < ActiveSupport::TestCase
       @existing_keys = []
     end
 
-    def put_object(bucket:, key:, body:)
-      @calls << Call.new(:put_object, { bucket: bucket, key: key, body: body })
+    def put_object(bucket:, key:, body:, content_type:)
+      @calls << Call.new(:put_object, { bucket: bucket, key: key, body: body, content_type: content_type })
     end
 
     def head_object(bucket:, key:)
@@ -55,6 +55,15 @@ class R2WriterTest < ActiveSupport::TestCase
     assert_equal 'test-bucket', call.args[:bucket]
     assert_equal 'resources/42/info.json', call.args[:key]
     assert_equal '{}', call.args[:body]
+    assert_equal 'application/json', call.args[:content_type]
+  end
+
+  test 'sets an image/jpeg content type for jpg assets' do
+    writer = Iiif::StaticAssets::Writers::R2Writer.new('resources/42')
+    writer.write('full/max/0/default.jpg', 'bytes')
+
+    call = @fake_client.calls.first
+    assert_equal 'image/jpeg', call.args[:content_type]
   end
 
   test 'copy issues a server-side copy with an escaped source key' do

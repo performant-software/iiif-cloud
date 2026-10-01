@@ -16,7 +16,7 @@ class CreateStaticAssetsJob < ApplicationJob
 
   # Assets are uploaded to R2 by default; pass local: true (e.g. for local development) to
   # write them to disk instead. `destination` is the shared root both writers write under; the
-  # Generator itself lays out the iiif/image/v3 and iiif/presentation/v3 paths beneath it.
+  # Generator itself lays out the iiif/3/image and iiif/3/presentation paths beneath it.
   def writer_for(destination, local:)
     return Iiif::StaticAssets::Writers::DiskWriter.new(destination) if local
 

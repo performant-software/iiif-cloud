@@ -45,9 +45,9 @@ class CreateStaticAssetsJobTest < ActiveJob::TestCase
       Dir.mktmpdir do |output_folder|
         CreateStaticAssetsJob.perform_now(@resource.id, 'https://static.example/images', output_folder, local: true)
 
-        image_folder = File.join(output_folder, 'iiif', 'image', 'v3', @resource.uuid)
+        image_folder = File.join(output_folder, 'iiif', '3', 'image', @resource.uuid)
         assert File.exist?(File.join(image_folder, 'info.json'))
-        assert File.exist?(File.join(output_folder, 'iiif', 'presentation', 'v3', @resource.uuid, 'manifest.json'))
+        assert File.exist?(File.join(output_folder, 'iiif', '3', 'presentation', @resource.uuid, 'manifest.json'))
         assert File.exist?(File.join(image_folder, 'full', 'max', '0', 'default.jpg'))
 
         # Both the "w,h" and width-only "w," forms must exist for every generated size
@@ -64,16 +64,16 @@ class CreateStaticAssetsJobTest < ActiveJob::TestCase
         assert requested_urls.none? { |url| url.include?('/0,0,64,64/64,/0/default.jpg') }
 
         info = JSON.parse(File.read(File.join(image_folder, 'info.json')))
-        assert_equal "https://static.example/images/iiif/image/v3/#{@resource.uuid}", info['id']
+        assert_equal "https://static.example/images/iiif/3/image/#{@resource.uuid}", info['id']
         assert_equal 'level0', info['profile']
         assert_nil info['extraQualities']
         assert_nil info['extraFormats']
         assert_equal ['sizeByW'], info['extraFeatures']
 
-        manifest = JSON.parse(File.read(File.join(output_folder, 'iiif', 'presentation', 'v3', @resource.uuid, 'manifest.json')))
-        assert_equal "https://static.example/images/iiif/presentation/v3/#{@resource.uuid}/manifest.json", manifest['id']
+        manifest = JSON.parse(File.read(File.join(output_folder, 'iiif', '3', 'presentation', @resource.uuid, 'manifest.json')))
+        assert_equal "https://static.example/images/iiif/3/presentation/#{@resource.uuid}/manifest.json", manifest['id']
         body = manifest.dig('items', 0, 'items', 0, 'items', 0, 'body')
-        assert_equal "https://static.example/images/iiif/image/v3/#{@resource.uuid}", body.dig('service', 0, 'id')
+        assert_equal "https://static.example/images/iiif/3/image/#{@resource.uuid}", body.dig('service', 0, 'id')
         assert_equal 'image/jpeg', body['format']
       end
     ensure
@@ -108,7 +108,7 @@ class CreateStaticAssetsJobTest < ActiveJob::TestCase
     Dir.mktmpdir do |output_folder|
       CreateStaticAssetsJob.perform_now(@resource.id, 'https://static.example/images', output_folder, local: true)
 
-      image_folder = File.join(output_folder, 'iiif', 'image', 'v3', @resource.uuid)
+      image_folder = File.join(output_folder, 'iiif', '3', 'image', @resource.uuid)
       max_bytes = File.read(File.join(image_folder, 'full', 'max', '0', 'default.jpg'))
 
       # Both paths for the full-size "sizes" entry exist, and contain the same bytes as full/max
@@ -171,13 +171,13 @@ class CreateStaticAssetsJobTest < ActiveJob::TestCase
     Dir.mktmpdir do |output_folder|
       CreateStaticAssetsJob.perform_now(pdf_resource.id, 'https://static.example/images', output_folder, local: true)
 
-      image_folder = File.join(output_folder, 'iiif', 'image', 'v3', pdf_resource.uuid)
+      image_folder = File.join(output_folder, 'iiif', '3', 'image', pdf_resource.uuid)
       assert File.exist?(File.join(image_folder, 'page', '1', 'info.json'))
       assert File.exist?(File.join(image_folder, 'page', '1', 'full', 'max', '0', 'default.jpg'))
       assert File.exist?(File.join(image_folder, 'page', '2', 'info.json'))
       assert File.exist?(File.join(image_folder, 'page', '2', 'full', 'max', '0', 'default.jpg'))
 
-      manifest_path = File.join(output_folder, 'iiif', 'presentation', 'v3', pdf_resource.uuid, 'manifest.json')
+      manifest_path = File.join(output_folder, 'iiif', '3', 'presentation', pdf_resource.uuid, 'manifest.json')
       assert File.exist?(manifest_path)
 
       # A multi-page PDF has no single IIIF Image API representation, so there's no
@@ -185,7 +185,7 @@ class CreateStaticAssetsJobTest < ActiveJob::TestCase
       assert_not File.exist?(File.join(image_folder, 'info.json'))
 
       page_1_info = JSON.parse(File.read(File.join(image_folder, 'page', '1', 'info.json')))
-      assert_equal "https://static.example/images/iiif/image/v3/#{pdf_resource.uuid}/page/1", page_1_info['id']
+      assert_equal "https://static.example/images/iiif/3/image/#{pdf_resource.uuid}/page/1", page_1_info['id']
       assert_equal 'level0', page_1_info['profile']
 
       manifest = JSON.parse(File.read(manifest_path))
@@ -195,7 +195,7 @@ class CreateStaticAssetsJobTest < ActiveJob::TestCase
       second_canvas = manifest['items'][1]
       assert_equal 60, second_canvas['width']
       assert_equal(
-        "https://static.example/images/iiif/image/v3/#{pdf_resource.uuid}/page/2",
+        "https://static.example/images/iiif/3/image/#{pdf_resource.uuid}/page/2",
         second_canvas.dig('items', 0, 'items', 0, 'body', 'service', 0, 'id')
       )
     end
@@ -240,13 +240,13 @@ class CreateStaticAssetsJobTest < ActiveJob::TestCase
     Dir.mktmpdir do |output_folder|
       CreateStaticAssetsJob.perform_now(pdf_resource.id, 'https://static.example/images', output_folder, local: true)
 
-      image_folder = File.join(output_folder, 'iiif', 'image', 'v3', pdf_resource.uuid)
+      image_folder = File.join(output_folder, 'iiif', '3', 'image', pdf_resource.uuid)
       assert_not File.exist?(File.join(image_folder, 'page', '1', 'info.json'))
       assert File.exist?(File.join(image_folder, 'page', '2', 'info.json'))
 
-      manifest = JSON.parse(File.read(File.join(output_folder, 'iiif', 'presentation', 'v3', pdf_resource.uuid, 'manifest.json')))
+      manifest = JSON.parse(File.read(File.join(output_folder, 'iiif', '3', 'presentation', pdf_resource.uuid, 'manifest.json')))
       assert_equal 1, manifest['items'].size
-      assert_equal "https://static.example/images/iiif/image/v3/#{pdf_resource.uuid}/page/2/canvas/2", manifest['items'][0]['id']
+      assert_equal "https://static.example/images/iiif/3/image/#{pdf_resource.uuid}/page/2/canvas/2", manifest['items'][0]['id']
     end
   ensure
     httparty_singleton.define_method(:get, original_get)
@@ -287,8 +287,8 @@ class CreateStaticAssetsJobTest < ActiveJob::TestCase
     Dir.mktmpdir do |output_folder|
       CreateStaticAssetsJob.perform_now(@resource.id, 'https://static.example/images', output_folder, identifier: 'custom-id', local: true)
 
-      assert File.exist?(File.join(output_folder, 'iiif', 'image', 'v3', 'custom-id', 'info.json'))
-      assert File.exist?(File.join(output_folder, 'iiif', 'presentation', 'v3', 'custom-id', 'manifest.json'))
+      assert File.exist?(File.join(output_folder, 'iiif', '3', 'image', 'custom-id', 'info.json'))
+      assert File.exist?(File.join(output_folder, 'iiif', '3', 'presentation', 'custom-id', 'manifest.json'))
     end
   ensure
     httparty_singleton.define_method(:get, original_get)

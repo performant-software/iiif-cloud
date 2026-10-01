@@ -18,7 +18,7 @@ module Iiif
         end
 
         def write(key, bytes)
-          client.put_object(bucket: bucket, key: full_key(key), body: bytes)
+          client.put_object(bucket: bucket, key: full_key(key), body: bytes, content_type: content_type_for(key))
         end
 
         # Uses a server-side copy so the bytes aren't re-uploaded from this process.
@@ -41,6 +41,16 @@ module Iiif
         def copy_source(key)
           escaped_key = full_key(key).split('/').map { |segment| CGI.escape(segment) }.join('/')
           "#{bucket}/#{escaped_key}"
+        end
+
+        # Without this, R2 stores uploads as application/octet-stream, which makes browsers
+        # download the file instead of rendering it (e.g. a manifest.json link).
+        def content_type_for(key)
+          case File.extname(key)
+          when '.json' then 'application/json'
+          when '.jpg', '.jpeg' then 'image/jpeg'
+          else 'application/octet-stream'
+          end
         end
       end
     end

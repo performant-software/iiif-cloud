@@ -7,10 +7,10 @@ module Iiif
     # copy(from_key, to_key). This keeps the generation logic independent of the destination
     # (local disk, cloud storage, an in-memory zip, etc).
     #
-    # Images generate a single set of assets/info.json at iiif/image/v3/{identifier}. Multi-page
+    # Images generate a single set of assets/info.json at iiif/3/image/{identifier}. Multi-page
     # PDFs generate assets/info.json per page (under ".../page/<n>/") - there's no whole-document
     # info.json, since the IIIF Image API has no concept of a multi-page image. Either way, the
-    # manifest is written to iiif/presentation/v3/{identifier}/manifest.json.
+    # manifest is written to iiif/3/presentation/{identifier}/manifest.json.
     class Generator
       IMAGE_FORMAT = 'jpg'
       IMAGE_MIME_TYPE = 'image/jpeg'
@@ -43,7 +43,7 @@ module Iiif
       attr_reader :resource, :base_url, :identifier, :writer
 
       def image_root
-        @image_root ||= "iiif/image/v3/#{identifier}"
+        @image_root ||= "iiif/3/image/#{identifier}"
       end
 
       def image_service_url
@@ -51,7 +51,7 @@ module Iiif
       end
 
       def manifest_key
-        @manifest_key ||= "iiif/presentation/v3/#{identifier}/manifest.json"
+        @manifest_key ||= "iiif/3/presentation/#{identifier}/manifest.json"
       end
 
       def manifest_url
