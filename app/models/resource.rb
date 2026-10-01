@@ -67,24 +67,21 @@ class Resource < ApplicationRecord
   end
 
   def content_iiif_url(page_number = 1)
-    return content_converted_pages_iiif_url(page_number || 1) if converted_pages?
+    return content_converted_pages_iiif_url(page_number) if converted_pages?
     return attachable_content_iiif_url(page_number) if iiif?
 
     nil
   end
 
   def content_info_url(page_number = 1)
-    return content_converted_pages_info_url(page_number || 1) if converted_pages?
+    return content_converted_pages_info_url(page_number) if converted_pages?
     return attachable_content_info_url(page_number) if iiif?
 
     nil
   end
 
   def content_image_api_url(page_number, region, size, rotation, quality, format)
-    if converted_pages?
-      return content_converted_pages_image_api_url(page_number || 1, region, size, rotation, quality, format)
-    end
-
+    return content_converted_pages_image_api_url(page_number, region, size, rotation, quality, format) if converted_pages?
     return attachable_content_image_api_url(page_number, region, size, rotation, quality, format) if iiif?
 
     nil
