@@ -8,7 +8,7 @@ class Api::BaseController < Api::ResourceController
   attr_reader :current_user
 
   def authenticate_request
-    token = request.cookies["__session"]
+    token = clerk_token
     return deny_access unless token.present?
 
     clerk_session = clerk_client.verify_token(token)
@@ -26,6 +26,21 @@ class Api::BaseController < Api::ResourceController
     return deny_access unless @current_user
 
     @current_user
+  end
+
+  # The Clerk-issued JWT to verify: the __session cookie set by a browser,
+  # or a Bearer token from a non-browser client (the pstudio CLI's OAuth
+  # login). Both are Clerk JWTs, verified the same way; sub is the Clerk
+  # user id in either case.
+  def clerk_token
+    request.cookies["__session"].presence || bearer_token
+  end
+
+  def bearer_token
+    header = request.headers["Authorization"]
+    return nil unless header&.start_with?("Bearer ")
+
+    header.split(" ", 2).last
   end
 
   def clerk_client
