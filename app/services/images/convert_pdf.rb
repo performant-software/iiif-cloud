@@ -5,26 +5,11 @@ module Images
     # @return [Integer] The number of pages in the PDF
     # @raise [Exceptions::PDFExtractionError] If PDF cannot be read or is corrupted
     def self.page_count(file)
-      begin
-        # Use ImageMagick to identify PDF structure
-        # We need to count the actual pages available
-        output = MiniMagick.identify { |b| b << file.path }
+      pages = pdfinfo_page_count(file) || identify_page_count(file)
 
-        # Parse output to extract page count
-        # ImageMagick identify on a PDF returns one line per page, e.g. "file.pdf[3] PDF ..."
-        pages = output.scan(/\[(\d+)\]/).flatten.uniq.count
-        
-        if pages.zero?
-          # Fallback: try to use pdftoppm or count with strings
-          pages = count_pdf_pages_alternative(file)
-        end
+      raise Exceptions::EmptyPDFError, "PDF has no extractable pages" if pages.zero?
 
-        raise Exceptions::EmptyPDFError, "PDF has no extractable pages" if pages.zero?
-
-        pages
-      rescue MiniMagick::Error => e
-        raise Exceptions::PDFExtractionError, "Failed to extract page count from PDF: #{e.message}"
-      end
+      pages
     end
 
     # Max DPI or DPI for pages without a raster source (vector/text)
@@ -91,6 +76,21 @@ module Images
       end
     end
 
+    # Pixel dimensions of a converted page, read from TIFF header
+    # @param path [String] Path to the converted TIFF
+    # @return [Hash] { width:, height: }, empty when the dimensions can't be read
+    def self.dimensions(path)
+      # -ping reads only the header instead of decoding the full-resolution frame
+      output = MiniMagick.identify { |b| b.ping; b.format('%w %h'); b << "#{path}[0]" }
+      width, height = output.split.map(&:to_i)
+      return {} unless width&.positive? && height&.positive?
+
+      { width:, height: }
+    rescue StandardError => e
+      Rails.logger.warn("Unable to read dimensions for #{path}: #{e.message}")
+      {}
+    end
+
     # Clean up temporary intermediate image files
     # @param file_paths [Array<String>] Paths to temporary files to delete
     def self.cleanup_temp_files(file_paths)
@@ -104,6 +104,35 @@ module Images
     end
 
     private
+
+    # Page count from pdfinfo, which reads the PDF's page tree.
+    # @param file [File] The PDF file
+    # @return [Integer, nil] nil when pdfinfo is unavailable or cannot read the file
+    def self.pdfinfo_page_count(file)
+      output = `pdfinfo #{Shellwords.escape(file.path)} 2>/dev/null`
+      return nil unless $?&.success?
+
+      output[/^Pages:\s+(\d+)/, 1]&.to_i
+    rescue StandardError => e
+      Rails.logger.warn("Unable to read page count with pdfinfo: #{e.message}")
+      nil
+    end
+
+    # Fallback for when pdfinfo isn't available. ImageMagick renders every page through
+    # Ghostscript to identify them, so this is slow on large PDFs, and it reports no page
+    # indices at all for single-page files.
+    # @param file [File] The PDF file
+    # @return [Integer] The number of pages in the PDF
+    # @raise [Exceptions::PDFExtractionError] If PDF cannot be read or is corrupted
+    def self.identify_page_count(file)
+      # ImageMagick identify on a PDF returns one line per page, e.g. "file.pdf[3] PDF ..."
+      output = MiniMagick.identify { |b| b << file.path }
+      pages = output.scan(/\[(\d+)\]/).flatten.uniq.count
+
+      pages.zero? ? count_pdf_pages_alternative(file) : pages
+    rescue MiniMagick::Error => e
+      raise Exceptions::PDFExtractionError, "Failed to extract page count from PDF: #{e.message}"
+    end
 
     # Native resolution of each page's largest embedded image, keyed by 0-indexed page
     # number. Pages with no embedded image (vector/text) are absent from the result.
