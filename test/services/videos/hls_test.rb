@@ -45,6 +45,27 @@ class Videos::HlsTest < ActiveSupport::TestCase
     assert_equal [240], Videos::Hls.renditions_for(nil).map { |rendition| rendition[:size] }
   end
 
+  test "ffmpeg threads are capped for both decoding and encoding" do
+    rendition = Videos::Hls::RENDITIONS.first
+
+    ENV.delete("FFMPEG_THREADS")
+    args = Videos::Hls.command("in.mp4", "out", rendition)
+    assert_equal 2, args.each_index.count { |i| args[i] == "-threads" && args[i + 1] == "2" }
+    assert_operator args.index("-threads"), :<, args.index("-i")
+
+    ENV["FFMPEG_THREADS"] = "0"
+    args = Videos::Hls.command("in.mp4", "out", rendition)
+    assert_equal 2, args.each_index.count { |i| args[i] == "-threads" && args[i + 1] == "0" }
+  ensure
+    ENV.delete("FFMPEG_THREADS")
+  end
+
+  test "x264 lookahead is capped" do
+    args = Videos::Hls.command("in.mp4", "out", Videos::Hls::RENDITIONS.first)
+
+    assert_equal "20", args[args.index("-rc-lookahead") + 1]
+  end
+
   test "transcoding a portrait video scales the short side" do
     skip "ffmpeg is not installed" unless system("which ffmpeg > /dev/null 2>&1")
 
