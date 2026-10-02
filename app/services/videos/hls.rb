@@ -6,7 +6,17 @@ module Videos
 
     PRESET = 'medium'
 
+    # x264 buffers this many frames ahead for rate control, which dominates memory at high resolutions. The medium
+    # preset's default is 40; halving it costs a little quality at the same bitrate.
+    RC_LOOKAHEAD = 20
+
+    # Each decoder and encoder thread buffers its own frames, so capping threads lowers peak memory at the cost of
+    # speed. Set FFMPEG_THREADS=0 to let ffmpeg pick based on the host's cores.
+    DEFAULT_THREADS = 2
+
     MASTER_PLAYLIST = 'master.m3u8'
+
+    VARIANT_MASTER_PLAYLIST = 'variant.m3u8'
 
     RENDITIONS = [
       { size: 240,  video_bitrate: '400k',   maxrate: '428k',   bufsize: '600k',   audio_bitrate: '64k' },
@@ -58,51 +68,52 @@ module Videos
       applicable.presence || RENDITIONS.first(1)
     end
 
+    # Encodes one rendition at a time so only a single x264 encoder is in memory, then combines each rendition's
+    # variant entry into the master playlist.
     def self.transcode(source_path, output_dir, renditions, audio: true)
-      renditions.each_index do |index|
-        FileUtils.mkdir_p(File.join(output_dir, "stream_#{index}"))
+      variants = renditions.each_with_index.map do |rendition, index|
+        stream_dir = File.join(output_dir, "stream_#{index}")
+        FileUtils.mkdir_p(stream_dir)
+
+        _stdout, stderr, status = Open3.capture3(*command(source_path, stream_dir, rendition, audio:))
+
+        raise Exceptions::VideoTranscodingError, "ffmpeg failed: #{stderr}" unless status.success?
+
+        variant_entry(stream_dir, "stream_#{index}")
       end
 
-      stdout, stderr, status = Open3.capture3(*command(source_path, output_dir, renditions, audio:))
-
-      raise Exceptions::VideoTranscodingError, "ffmpeg failed: #{stderr}" unless status.success?
-
       master_path = File.join(output_dir, MASTER_PLAYLIST)
-      raise Exceptions::VideoTranscodingError, 'Master playlist was not created' unless File.exist?(master_path)
+      File.write(master_path, "#EXTM3U\n#EXT-X-VERSION:6\n#{variants.join("\n")}")
 
       master_path
     rescue Errno::ENOENT
       raise Exceptions::VideoTranscodingError, 'ffmpeg is not installed'
     end
 
-    def self.command(source_path, output_dir, renditions, audio: true)
-      args = ['ffmpeg', '-y', '-i', source_path]
+    def self.command(source_path, stream_dir, rendition, audio: true)
+      args = ['ffmpeg', '-y']
 
-      splits = renditions.each_index.map { |index| "[v#{index}]" }.join
-      filters = ["[0:v]split=#{renditions.size}#{splits}"]
-      renditions.each_with_index do |rendition, index|
-        filters << "[v#{index}]#{scale_filter(rendition[:size])}[v#{index}out]"
-      end
-      args += ['-filter_complex', filters.join('; ')]
+      # Before -i so it limits the decoder
+      args += ['-threads', threads]
+      args += ['-i', source_path]
 
-      renditions.each_with_index do |rendition, index|
-        args += ['-map', "[v#{index}out]"]
-        args += ["-c:v:#{index}", 'libx264']
-        args += ["-b:v:#{index}", rendition[:video_bitrate]]
-        args += ["-maxrate:v:#{index}", rendition[:maxrate]]
-        args += ["-bufsize:v:#{index}", rendition[:bufsize]]
-      end
+      args += ['-map', '0:v:0']
+      args += ['-vf', scale_filter(rendition[:size])]
+      args += ['-c:v', 'libx264']
+      args += ['-b:v', rendition[:video_bitrate]]
+      args += ['-maxrate', rendition[:maxrate]]
+      args += ['-bufsize', rendition[:bufsize]]
 
       if audio
-        renditions.each_with_index do |rendition, index|
-          args += %w[-map a:0]
-          args += ["-c:a:#{index}", 'aac']
-          args += ["-b:a:#{index}", rendition[:audio_bitrate]]
-          args += ["-ac:a:#{index}", '2']
-        end
+        args += %w[-map 0:a:0]
+        args += ['-c:a', 'aac']
+        args += ['-b:a', rendition[:audio_bitrate]]
+        args += ['-ac', '2']
       end
 
       args += ['-preset', PRESET]
+      args += ['-rc-lookahead', RC_LOOKAHEAD.to_s]
+      args += ['-threads', threads]
       args += %w[-pix_fmt yuv420p]
 
       args += %w[-sc_threshold 0]
@@ -113,22 +124,37 @@ module Videos
       args += %w[-hls_playlist_type vod]
       args += %w[-hls_flags independent_segments]
       args += %w[-hls_segment_type mpegts]
-      args += ['-hls_segment_filename', File.join(output_dir, 'stream_%v', 'segment_%03d.ts')]
-      args += ['-master_pl_name', MASTER_PLAYLIST]
-      args += ['-var_stream_map', variant_map(renditions, audio:)]
-      args << File.join(output_dir, 'stream_%v', 'playlist.m3u8')
+      args += ['-hls_segment_filename', File.join(stream_dir, 'segment_%03d.ts')]
+      # ffmpeg measures each variant's bandwidth, resolution and codecs, so let it write a single-variant master that
+      # variant_entry merges into the real one
+      args += ['-master_pl_name', VARIANT_MASTER_PLAYLIST]
+      args << File.join(stream_dir, 'playlist.m3u8')
 
       args
     end
 
-    def self.scale_filter(size)
-      "scale=w='if(gte(iw,ih),-2,#{size})':h='if(gte(iw,ih),#{size},-2)'"
+    # Returns the stream info tag and URI from a rendition's single-variant master, with the URI made relative to the
+    # HLS root. Removes that master so it isn't uploaded.
+    def self.variant_entry(stream_dir, stream_name)
+      path = File.join(stream_dir, VARIANT_MASTER_PLAYLIST)
+      raise Exceptions::VideoTranscodingError, 'Variant playlist was not created' unless File.exist?(path)
+
+      lines = File.readlines(path, chomp: true)
+      File.delete(path)
+
+      index = lines.index { |line| line.start_with?('#EXT-X-STREAM-INF:') }
+      uri = index && lines[index + 1]
+      raise Exceptions::VideoTranscodingError, 'Variant playlist is missing stream info' if uri.blank?
+
+      "#{lines[index]}\n#{stream_name}/#{uri}\n"
     end
 
-    def self.variant_map(renditions, audio: true)
-      renditions.each_index.map do |index|
-        audio ? "v:#{index},a:#{index}" : "v:#{index}"
-      end.join(' ')
+    def self.threads
+      ENV.fetch('FFMPEG_THREADS', DEFAULT_THREADS).to_s
+    end
+
+    def self.scale_filter(size)
+      "scale=w='if(gte(iw,ih),-2,#{size})':h='if(gte(iw,ih),#{size},-2)'"
     end
 
     def self.content_type_for(path)
