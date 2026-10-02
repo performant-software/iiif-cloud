@@ -58,14 +58,31 @@ const ResourceForm = (props: Props) => {
   const { user } = useContext(AuthenticationContext);
 
   /**
+   * Memo-izes the converted attachment info (for both images and PDFs)
+   *
+   * @type {AttachmentInfo}
+   */
+  const convertedInfo = useMemo(() => (
+    props.item.content_converted_info || props.item.content_converted_pages_info
+  ), [props.item]);
+
+  /**
    * Memo-izes the current attachment info.
    *
    * @type {AttachmentInfo}
    */
   const attachment = useMemo(() => (tab === Tabs.content
     ? props.item.content_info
-    : props.item.content_converted_info
-  ), [tab, props.item]);
+    : convertedInfo
+  ), [tab, props.item, convertedInfo]);
+
+  /**
+   * The source file's content type. The viewer shows the source file, but a converted PDF's
+   * content_type will be TIFF, which would make the viewer try to open the PDF as an image.
+   *
+   * @type {string}
+   */
+  const sourceContentType = props.item.content_info?.content_type || props.item.content_type;
 
   /**
    * Converts the EXIF data to JSON.
@@ -158,7 +175,7 @@ const ResourceForm = (props: Props) => {
           label={t('Resource.labels.content')}
         >
           <LazyIIIF
-            contentType={props.item.content_type}
+            contentType={sourceContentType}
             downloadUrl={props.item.content_download_url}
             manifest={props.item.manifest_url}
             onUpload={(file) => props.onSetState({
@@ -268,7 +285,7 @@ const ResourceForm = (props: Props) => {
               { t('Resource.labels.convertedImage') }
               <StatusIcon
                 className={cx(styles.icon, styles.attachmentStatus)}
-                status={props.item.content_converted_info ? 'positive' : 'negative'}
+                status={convertedInfo ? 'positive' : 'negative'}
               />
             </Menu.Item>
             { user.admin && (
