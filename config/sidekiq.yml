@@ -2,5 +2,7 @@ development:
   :concurrency: <%= ENV.fetch("SIDEKIQ_CONCURRENCY") { 5 } %>
 production:
   :concurrency: <%= ENV.fetch("SIDEKIQ_CONCURRENCY") { 5 } %>
+# Queues are processed in the order listed, so "bulk" only runs when "default" is empty.
 :queues:
   - default
+  - bulk

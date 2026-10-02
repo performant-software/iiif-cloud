@@ -1,5 +1,7 @@
 namespace :iiif do
 
+  # Tasks that queue work for many resources should use the low-priority "bulk" queue.
+
   # Splits a resource query by the source content's MIME type, without loading every Resource.
   def conversion_content_type_breakdown(query, source_attachment_name: 'content')
     content_types = query
@@ -47,7 +49,7 @@ namespace :iiif do
 
     query.in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
-        ConvertImageJob.perform_later(resource_id)
+        ConvertImageJob.set(queue: :bulk).perform_later(resource_id)
       end
     end
   end
@@ -70,7 +72,7 @@ namespace :iiif do
 
     query.in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
-        ConvertImageJob.perform_later(resource_id)
+        ConvertImageJob.set(queue: :bulk).perform_later(resource_id)
       end
     end
   end
@@ -99,7 +101,7 @@ namespace :iiif do
 
     query.in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
-        ConvertImageJob.perform_later(resource_id)
+        ConvertImageJob.set(queue: :bulk).perform_later(resource_id)
       end
     end
   end
@@ -141,7 +143,7 @@ namespace :iiif do
     total_queued = 0
     query.in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
-        ConvertImageJob.perform_later(resource_id)
+        ConvertImageJob.set(queue: :bulk).perform_later(resource_id)
         total_queued += 1
       end
     end
@@ -178,7 +180,7 @@ namespace :iiif do
 
     query.in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
-        ConvertImageJob.perform_later(resource_id)
+        ConvertImageJob.set(queue: :bulk).perform_later(resource_id)
       end
     end
   end
@@ -187,7 +189,7 @@ namespace :iiif do
   task create_manifests: :environment do
     Resource.all.in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
-        CreateManifestJob.perform_later(resource_id)
+        CreateManifestJob.set(queue: :bulk).perform_later(resource_id)
       end
     end
   end
@@ -196,7 +198,7 @@ namespace :iiif do
   task create_manifests_empty: :environment do
     Resource.where(manifest: nil).in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
-        CreateManifestJob.perform_later(resource_id)
+        CreateManifestJob.set(queue: :bulk).perform_later(resource_id)
       end
     end
   end
@@ -213,7 +215,7 @@ namespace :iiif do
 
     query.in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
-        ExtractExifJob.perform_later(resource_id)
+        ExtractExifJob.set(queue: :bulk).perform_later(resource_id)
       end
     end
   end
@@ -231,7 +233,7 @@ namespace :iiif do
 
     query.in_batches do |resources|
       resources.pluck(:id).each do |resource_id|
-        ExtractExifJob.perform_later(resource_id)
+        ExtractExifJob.set(queue: :bulk).perform_later(resource_id)
       end
     end
   end
@@ -340,7 +342,7 @@ namespace :iiif do
 
     scheduled = 0
     query.find_each do |blob|
-      blob.purge_later
+      ActiveStorage::PurgeJob.set(queue: :bulk).perform_later(blob)
       scheduled += 1
     end
 
