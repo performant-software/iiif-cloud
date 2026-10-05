@@ -38,6 +38,9 @@ en:
     dashboard_controller:
       unauthorized: "You do not have access to the system dashboard."
 
+    jobs_controller:
+      not_found: "No job found for that identifier."
+
     presentation_controller:
       collection_invalid: "Invalid parameters for creating a IIIF collection."
       manifest_invalid: "Invalid parameters for creating a IIIF manifest."

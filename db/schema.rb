@@ -10,10 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_15_120000) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_04_160001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
-  enable_extension "pg_stat_statements"
   enable_extension "pgcrypto"
 
   create_table "active_storage_attachments", force: :cascade do |t|
@@ -71,6 +70,28 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_15_120000) do
   end
 
   create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
+  end
+
+  create_table "job_items", force: :cascade do |t|
+    t.bigint "job_id", null: false
+    t.bigint "resource_id", null: false
+    t.string "status", default: "pending", null: false
+    t.text "error"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["job_id", "resource_id"], name: "index_job_items_on_job_id_and_resource_id", unique: true
+    t.index ["job_id"], name: "index_job_items_on_job_id"
+  end
+
+  create_table "jobs", force: :cascade do |t|
+    t.string "uuid", null: false
+    t.string "status", default: "pending", null: false
+    t.integer "total_count", default: 0, null: false
+    t.integer "completed_count", default: 0, null: false
+    t.integer "failed_count", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["uuid"], name: "index_jobs_on_uuid", unique: true
   end
 
   create_table "organizations", force: :cascade do |t|
@@ -151,6 +172,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_15_120000) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "job_items", "jobs"
   add_foreign_key "projects", "organizations"
   add_foreign_key "resources", "projects"
   add_foreign_key "user_organizations", "organizations"

@@ -91,9 +91,20 @@ class Public::ResourcesController < Api::ResourcesController
     render json: { errors: [I18n.t('errors.resources_controller.create_static_assets_invalid')] }, status: :unprocessable_entity and return unless validate_static_assets?
 
     resources = base_query.where(uuid: params[:resource_ids])
-    resources.each { |resource| CreateStaticAssetsJob.perform_later(resource.id, params[:base_url], params[:destination]) }
 
-    render json: {}, status: :ok
+    # An optional caller-supplied job_uuid lets multiple batches (e.g. core-data-cloud's chunked
+    # calls for one logical export) accumulate under a single trackable Job; if omitted, a new one
+    # is generated so standalone callers still get a job_uuid back to poll.
+    job = Job.find_or_create_by!(uuid: params[:job_uuid].presence || SecureRandom.uuid) do |j|
+      j.status = Job::STATUS_PROCESSING
+    end
+    job.add_to_total!(resources.size)
+
+    resources.each do |resource|
+      CreateStaticAssetsJob.perform_later(resource.id, params[:base_url], params[:destination], job_uuid: job.uuid)
+    end
+
+    render json: { job_uuid: job.uuid }, status: :ok
   end
 
   def preview

@@ -34,6 +34,8 @@ Rails.application.routes.draw do
       post :manifest
     end
 
+    resources :jobs, only: :show
+
     resources :resources, only: [:index, :create, :show, :destroy, :update] do
       member do
         get :content
