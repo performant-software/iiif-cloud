@@ -120,7 +120,9 @@ journald holds only startup output and crashes:
 sudo journalctl -f -u cantaloupe
 ```
 
-GC logs are in `/root/gclogs/`. Heap dumps from an out-of-memory exit go to `/root/heapdumps/`; each is roughly the size of the heap, so delete them once analyzed.
+GC logs are in `/root/gclogs/`, capped at five 20 MB files.
+
+Heap dumps from an out-of-memory exit go to `/root/heapdumps/`; each is roughly the size of the heap. `start.sh` keeps the newest `HEAP_DUMPS_KEPT` (4) and deletes older ones each time it starts, which includes the automatic restart after an out-of-memory exit. Copy a dump elsewhere if you need to keep it longer.
 
 ## Troubleshooting a wedged server
 If Cantaloupe stops responding while the process stays up, take a thread dump:

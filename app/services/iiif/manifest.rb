@@ -33,10 +33,25 @@ module Iiif
 
     def self.add_resource(resource, canvas_metadata: false)
       items = []
+      metadata = canvas_metadata ? resource_metadata(resource) : nil
 
-      if resource.image? || resource.pdf?
+      if resource.pdf?
+        # PDF canvases come from converted pages
+        return items unless converted_pdf?(resource)
+
+        # handle varying dimensions among pages in a single PDF
+        resource.page_count.times do |index|
+          page_number = index + 1
+          info = converted_page_info(resource, page_number)
+          items << create_canvas(resource, info['width'], info['height'], page_number, metadata)
+        end
+
+        return items
+      end
+
+      if resource.image?
         info = resource_info(resource)
-        page_count = resource.pdf? ? resource.page_count : (info['page_count'] || 1)
+        page_count = info['page_count'] || 1
         height = info['height']
         width = info['width']
       else
@@ -44,8 +59,6 @@ module Iiif
         height = resource.content&.blob&.metadata[:height]
         width = resource.content&.blob&.metadata[:width]
       end
-      
-      metadata = canvas_metadata ? resource_metadata(resource) : nil
 
       page_count.times do |index|
         items << create_canvas(resource, width, height, index + 1, metadata)
@@ -67,6 +80,8 @@ module Iiif
         id = "#{base_url(resource)};#{page_number}/iiif"
       elsif resource.pdf?
         id = resource.content_converted_pages_iiif_url(page_number)
+      elsif resource.hls?
+        id = "#{base_url(resource)}/hls/#{Videos::Hls::MASTER_PLAYLIST}"
       else
         id = resource.content_url
       end
@@ -90,7 +105,7 @@ module Iiif
 
       annotation['body']['id'] = id
       annotation['body']['type'] = type
-      annotation['body']['format'] = resource.content_type
+      annotation['body']['format'] = resource.hls? ? Videos::Hls::CONTENT_TYPE_PLAYLIST : resource.content_type
 
       if resource.image? || resource.pdf?
         annotation['body']['service'] = [{
@@ -204,6 +219,30 @@ module Iiif
       begin
         response = HTTParty.get("#{resource.content_base_url}/info.json")
         info = JSON.parse(response.body)
+      rescue
+        info = {}
+      end
+
+      info
+    end
+
+    def self.converted_pdf?(resource)
+      resource.pdf? && resource.converted_pages? && resource.page_count.to_i.positive?
+    end
+
+    # dimensions for a single converted PDF page
+    def self.converted_page_info(resource, page_number)
+      metadata = resource.converted_page_attachment(page_number)&.blob&.metadata || {}
+      width = metadata['width']
+      height = metadata['height']
+
+      return { 'width' => width, 'height' => height } if width.present? && height.present?
+
+      url = resource.content_converted_pages_info_url(page_number)
+      return {} if url.blank?
+
+      begin
+        info = JSON.parse(HTTParty.get(url).body)
       rescue
         info = {}
       end

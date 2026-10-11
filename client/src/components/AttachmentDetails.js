@@ -11,7 +11,8 @@ type Props = {
   attachment?: {
     byte_size: number,
     content_type: string,
-    key: string,
+    key?: string,
+    pages?: number
   }
 };
 
@@ -33,20 +34,38 @@ const AttachmentDetails: ComponentType<any> = (props: Props) => {
           padded='very'
           relaxed='very'
         >
-          <List.Item
-            className={styles.item}
-            content={props.attachment?.key}
-            header={t('AttachmentDetails.labels.key')}
-            image={(
-              <Image>
-                <Icon
-                  circular
-                  name='aws'
-                  size='large'
-                />
-              </Image>
-            )}
-          />
+          { props.attachment?.key && (
+            <List.Item
+              className={styles.item}
+              content={props.attachment.key}
+              header={t('AttachmentDetails.labels.key')}
+              image={(
+                <Image>
+                  <Icon
+                    circular
+                    name='aws'
+                    size='large'
+                  />
+                </Image>
+              )}
+            />
+          )}
+          { props.attachment?.pages && (
+            <List.Item
+              className={styles.item}
+              content={props.attachment.pages}
+              header={t('AttachmentDetails.labels.pages')}
+              image={(
+                <Image>
+                  <Icon
+                    circular
+                    name='copy outline'
+                    size='large'
+                  />
+                </Image>
+              )}
+            />
+          )}
           <List.Item
             content={FileUtils.getFileSize(props.attachment?.byte_size)}
             header={t('AttachmentDetails.labels.fileSize')}

@@ -20,15 +20,21 @@ class Api::ResourcesController < Api::BaseController
     render json: { errors: [I18n.t('errors.resources_controller.clear_cache')] }, status: :unauthorized and return unless can_clear_cache?
 
     resource = Resource.find(params[:id])
-    key = resource.send(params[:attribute])&.key
+
+    # PDFs store pages separately/individually
+    keys = if params[:attribute] == 'content_converted' && resource.converted_pages?
+             resource.content_converted_pages_keys
+           else
+             [resource.send(params[:attribute])&.key]
+           end
 
     service = Iiif::Server.new
-    response = service.clear_cache(key)
+    failed = keys.map { |key| service.clear_cache(key) }.reject { |response| response[:success?] }
 
-    if response[:success?]
+    if failed.empty?
       render json: {}, status: :ok
     else
-      render json: { errors: [response[:errors]] }, status: :bad_request
+      render json: { errors: failed.map { |response| response[:errors] } }, status: :bad_request
     end
   end
 

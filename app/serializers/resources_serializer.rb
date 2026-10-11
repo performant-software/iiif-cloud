@@ -15,6 +15,7 @@ class ResourcesSerializer < BaseSerializer
 
   show_attributes(:content_info) { |resource| content_info(resource.content) }
   show_attributes(:content_converted_info) { |resource| content_info(resource.content_converted) }
+  show_attributes(:content_converted_pages_info) { |resource| content_pages_info(resource.content_converted_pages) }
 
   def self.manifest_url(resource)
     "#{ENV['HOSTNAME']}/public/resources/#{resource.uuid}/manifest"
@@ -27,6 +28,19 @@ class ResourcesSerializer < BaseSerializer
       key: attachment.key,
       byte_size: attachment.byte_size,
       content_type: attachment.content_type
+    }
+  end
+
+  # Summary of a PDF's converted pages, stored as one TIFF per page
+  def self.content_pages_info(attachments)
+    return unless attachments.attached?
+
+    blobs = attachments.blobs
+
+    {
+      pages: blobs.size,
+      byte_size: blobs.sum(&:byte_size),
+      content_type: blobs.first.content_type
     }
   end
 end

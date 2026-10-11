@@ -17,6 +17,7 @@ class Resource < ApplicationRecord
   before_save :parse_metadata
   after_create_commit :after_create
   after_update_commit :after_update
+  after_destroy_commit :after_destroy
 
   # ActiveStorage
   has_one_attached :content
@@ -54,10 +55,11 @@ class Resource < ApplicationRecord
     where.not(subquery.arel.exists)
   end
 
+  # For a PDF with converted pages, the content URLs below point at converted page TIFFs
   def content_base_url
-    # For multi-page PDFs, this should return the info for the whole PDF (including page count)
-    if content_converted_pages.attached?
-      return "#{ENV['IIIF_HOST_DOCKER'] || ENV['IIIF_HOST']}/iiif/3/#{CGI.escape(content.key)}"
+    if converted_pages?
+      page_base_url = content_converted_pages_base_url(1)
+      return page_base_url if page_base_url
     end
 
     return attachable_content_base_url unless content_converted.attached?
@@ -66,30 +68,35 @@ class Resource < ApplicationRecord
   end
 
   def content_iiif_url(page_number = 1)
+    return content_converted_pages_iiif_url(page_number) if converted_pages?
     return attachable_content_iiif_url(page_number) if iiif?
 
     nil
   end
 
   def content_info_url(page_number = 1)
+    return content_converted_pages_info_url(page_number) if converted_pages?
     return attachable_content_info_url(page_number) if iiif?
 
     nil
   end
 
   def content_image_api_url(page_number, region, size, rotation, quality, format)
+    return content_converted_pages_image_api_url(page_number, region, size, rotation, quality, format) if converted_pages?
     return attachable_content_image_api_url(page_number, region, size, rotation, quality, format) if iiif?
 
     nil
   end
 
   def content_preview_url
+    return content_converted_pages_preview_url if converted_pages?
     return attachable_content_preview_url if iiif?
 
     nil
   end
 
   def content_thumbnail_url
+    return content_converted_pages_thumbnail_url if converted_pages?
     return attachable_content_thumbnail_url if iiif?
 
     nil
@@ -111,17 +118,24 @@ class Resource < ApplicationRecord
   # @param page_number [Integer] 1-indexed page number
   # @return [String, nil] The base URL for the page, or nil if not found
   def content_converted_pages_base_url(page_number)
+    page = converted_page_attachment(page_number)
+    return nil unless page
+
+    "#{ENV['IIIF_HOST_DOCKER'] || ENV['IIIF_HOST']}/iiif/3/#{CGI.escape(page.key)}"
+  end
+
+  # Get the attachment for a specific page in a multi-page PDF
+  # @param page_number [Integer] 1-indexed page number
+  # @return [ActiveStorage::Attachment, nil] The page's attachment, or nil if not found
+  def converted_page_attachment(page_number)
     return nil unless content_converted_pages.attached?
     page_number = page_number.to_i
     return nil unless pages_count
     return nil if page_number < 1 || page_number > pages_count
 
-    page = content_converted_pages.to_a.find do |attachment|
+    content_converted_pages.to_a.find do |attachment|
       attachment.blob.metadata['original_page_number'].to_i == page_number
     end
-    return nil unless page
-
-    "#{ENV['IIIF_HOST_DOCKER'] || ENV['IIIF_HOST']}/iiif/3/#{CGI.escape(page.key)}"
   end
 
   # Get the full IIIF Image API URL for a specific page in a multi-page PDF
@@ -192,6 +206,11 @@ class Resource < ApplicationRecord
     pages_count
   end
 
+  def hls?
+    # The HLS files must have been transcoded from the current content, not content that has since been replaced
+    video? && conversion_status == 'succeeded' && hls_identifier.present? && hls_identifier == content.key
+  end
+
   def iiif?
     image? || video? || audio? || pdf?
   end
@@ -229,6 +248,9 @@ class Resource < ApplicationRecord
     # Convert the image to a TIFF
     ConvertImageJob.perform_later(self.id)
 
+    # Process the video
+    ProcessVideoJob.perform_later(self.id)
+
     # Create the manifest
     CreateManifestJob.perform_later(self.id)
 
@@ -245,10 +267,35 @@ class Resource < ApplicationRecord
     # Only perform the image updates if the content attachment has been updated
     return if !(content.attached? && content.blob.saved_changes?)
 
+    reset_conversion
+
     # Convert the image to a TIFF
     ConvertImageJob.perform_later(self.id)
 
+    # Process the video
+    ProcessVideoJob.perform_later(self.id)
+
     # Extract EXIF data
     ExtractExifJob.perform_later(self.id)
+  end
+
+  def after_destroy
+    # HLS files are uploaded outside of ActiveStorage, so they aren't purged with the content attachment
+    DeleteHlsJob.perform_later(ProcessVideoJob.hls_directory(self)) if video?
+  end
+
+  def reset_conversion
+    previous_hls_identifier = nil
+
+    Resource.transaction do
+      previous_hls_identifier = Resource.lock.where(id: id).pick(:hls_identifier)
+      update_columns(conversion_status: 'pending', conversion_error: nil, conversion_failed_at: nil, hls_identifier: nil)
+    end
+
+    return if previous_hls_identifier.blank?
+
+    DeleteHlsJob.perform_later(ProcessVideoJob.hls_prefix(self, previous_hls_identifier))
+
+    CreateManifestJob.perform_later(id)
   end
 end

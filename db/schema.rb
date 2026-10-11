@@ -10,7 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_10_04_160001) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_15_190912) do
+  create_schema "heroku_ext"
+
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -127,6 +129,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_04_160001) do
     t.string "conversion_status", default: "pending", null: false
     t.text "conversion_error"
     t.datetime "conversion_failed_at"
+    t.string "hls_identifier"
     t.datetime "manifest_generated_at"
     t.index ["pages_count"], name: "index_resources_on_pages_count"
     t.index ["project_id"], name: "index_resources_on_project_id"

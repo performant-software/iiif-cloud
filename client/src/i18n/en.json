@@ -12,6 +12,7 @@
     "labels": {
       "fileSize": "File size",
       "key": "Key",
+      "pages": "Pages",
       "type": "Type"
     },
     "messages": {
