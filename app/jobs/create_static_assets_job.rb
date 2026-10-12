@@ -4,7 +4,7 @@ class CreateStaticAssetsJob < ApplicationJob
   # or other callers that don't care about tracking); tracking is simply skipped when it's absent.
   def perform(resource_id, base_url, destination, identifier: nil, local: false, job_uuid: nil)
     resource = Resource.find(resource_id)
-    writer = writer_for(destination, local:)
+    writer = writer_for(destination, local:, job_uuid:)
 
     Iiif::StaticAssets::Generator.new(
       resource: resource,
@@ -27,10 +27,23 @@ class CreateStaticAssetsJob < ApplicationJob
   # Assets are uploaded to R2 by default; pass local: true (e.g. for local development) to
   # write them to disk instead. `destination` is the shared root both writers write under; the
   # Generator itself lays out the iiif/3/image and iiif/3/presentation paths beneath it.
-  def writer_for(destination, local:)
+  #
+  # If the job carries its own R2 credentials (stored once on the Job row by the controller - see
+  # Public::ResourcesController#create_static_assets), those are used instead of this process's
+  # own ENV-configured, blanket-access R2 credentials.
+  def writer_for(destination, local:, job_uuid: nil)
     return Iiif::StaticAssets::Writers::DiskWriter.new(destination) if local
 
-    Iiif::StaticAssets::Writers::R2Writer.new(destination)
+    Iiif::StaticAssets::Writers::R2Writer.new(destination, **r2_credentials(job_uuid))
+  end
+
+  def r2_credentials(job_uuid)
+    return {} if job_uuid.blank?
+
+    credentials = Job.find_by(uuid: job_uuid)&.extra&.[]('r2_credentials')
+    return {} if credentials.blank?
+
+    credentials.symbolize_keys.slice(:bucket, :access_key_id, :secret_access_key, :endpoint)
   end
 
   def record_outcome(job_uuid, resource_id, status, error: nil)

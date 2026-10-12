@@ -1,6 +1,8 @@
 require 'test_helper'
 
 class R2WriterTest < ActiveSupport::TestCase
+  attr_accessor :client_constructor_kwargs
+
   class FakeS3Client
     Call = Struct.new(:method, :args)
 
@@ -35,10 +37,12 @@ class R2WriterTest < ActiveSupport::TestCase
     ENV['R2_ENDPOINT'] = 'https://example.r2.cloudflarestorage.com'
 
     @fake_client = FakeS3Client.new
+    @client_constructor_kwargs = nil
     fake_client = @fake_client
     @client_singleton = Aws::S3::Client.singleton_class
     @original_new = @client_singleton.instance_method(:new)
-    @client_singleton.define_method(:new) { |*_args, **_kwargs| fake_client }
+    client_constructor_kwargs = method(:client_constructor_kwargs=)
+    @client_singleton.define_method(:new) { |*_args, **kwargs| client_constructor_kwargs.call(kwargs); fake_client }
   end
 
   teardown do
@@ -74,5 +78,30 @@ class R2WriterTest < ActiveSupport::TestCase
     assert_equal :copy_object, call.method
     assert_equal 'test-bucket/resources/42/full/64%2C64/0/default.jpg', call.args[:copy_source]
     assert_equal 'resources/42/full/64,/0/default.jpg', call.args[:key]
+  end
+
+  test 'falls back to ENV-configured credentials when none are given explicitly' do
+    Iiif::StaticAssets::Writers::R2Writer.new('resources/42')
+
+    assert_equal 'id', client_constructor_kwargs[:access_key_id]
+    assert_equal 'secret', client_constructor_kwargs[:secret_access_key]
+    assert_equal 'https://example.r2.cloudflarestorage.com', client_constructor_kwargs[:endpoint]
+  end
+
+  test 'uses explicitly-given credentials instead of ENV, including for the bucket on writes' do
+    writer = Iiif::StaticAssets::Writers::R2Writer.new(
+      'resources/42',
+      bucket: 'scoped-bucket',
+      access_key_id: 'scoped-id',
+      secret_access_key: 'scoped-secret',
+      endpoint: 'https://scoped.r2.cloudflarestorage.com'
+    )
+
+    assert_equal 'scoped-id', client_constructor_kwargs[:access_key_id]
+    assert_equal 'scoped-secret', client_constructor_kwargs[:secret_access_key]
+    assert_equal 'https://scoped.r2.cloudflarestorage.com', client_constructor_kwargs[:endpoint]
+
+    writer.write('info.json', '{}')
+    assert_equal 'scoped-bucket', @fake_client.calls.first.args[:bucket]
   end
 end

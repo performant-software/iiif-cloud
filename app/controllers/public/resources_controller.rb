@@ -120,6 +120,7 @@ class Public::ResourcesController < Api::ResourcesController
 
   def create_static_assets
     render json: { errors: [I18n.t('errors.resources_controller.create_static_assets_invalid')] }, status: :unprocessable_entity and return unless validate_static_assets?
+    render json: { errors: [I18n.t('errors.resources_controller.create_static_assets_r2_invalid')] }, status: :unprocessable_entity and return unless validate_r2_params?
 
     resources = base_query.where(uuid: params[:resource_ids])
 
@@ -130,6 +131,7 @@ class Public::ResourcesController < Api::ResourcesController
       j.status = Job::STATUS_PROCESSING
     end
     job.add_to_total!(resources.size)
+    store_r2_credentials(job)
 
     resources.each do |resource|
       CreateStaticAssetsJob.perform_later(resource.id, params[:base_url], params[:destination], job_uuid: job.uuid)
@@ -180,6 +182,26 @@ class Public::ResourcesController < Api::ResourcesController
 
   def validate_static_assets?
     %i(resource_ids base_url destination).all? { |key| params[key].present? }
+  end
+
+  # The r2 param is entirely optional (omitting it falls back to this process's own ENV-configured
+  # R2 credentials), but if present, all four sub-keys must be given - a partial credential would
+  # otherwise silently fall back to ENV for whichever keys are missing, which is confusing and
+  # defeats the purpose of supplying scoped-down credentials at all.
+  def validate_r2_params?
+    return true unless params[:r2].present?
+
+    %i(bucket access_key_id secret_access_key endpoint).all? { |key| params[:r2][key].present? }
+  end
+
+  # Persists the caller-supplied R2 credentials (if any) on the Job row, keyed by job_uuid, so
+  # that every CreateStaticAssetsJob run under this job_uuid can look them up without the
+  # credentials being duplicated across each job's own Sidekiq arguments.
+  def store_r2_credentials(job)
+    return unless params[:r2].present?
+
+    credentials = params[:r2].slice(:bucket, :access_key_id, :secret_access_key, :endpoint).to_unsafe_h
+    job.update!(extra: job.extra.merge('r2_credentials' => credentials))
   end
 
   def set_page

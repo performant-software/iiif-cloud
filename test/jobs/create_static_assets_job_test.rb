@@ -270,6 +270,107 @@ class CreateStaticAssetsJobTest < ActiveJob::TestCase
     assert_instance_of Iiif::StaticAssets::Writers::DiskWriter, writer
   end
 
+  test 'passes through r2_credentials stored on the job extra for the given job_uuid' do
+    job = Job.create!(uuid: SecureRandom.uuid, total_count: 1, extra: {
+      'r2_credentials' => {
+        'bucket' => 'scoped-bucket',
+        'access_key_id' => 'scoped-id',
+        'secret_access_key' => 'scoped-secret',
+        'endpoint' => 'https://scoped.r2.cloudflarestorage.com'
+      }
+    })
+
+    with_stubbed_s3_client do |constructor_kwargs|
+      CreateStaticAssetsJob.new.send(:writer_for, 'static-assets', local: false, job_uuid: job.uuid)
+
+      assert_equal 'scoped-id', constructor_kwargs.call[:access_key_id]
+      assert_equal 'scoped-secret', constructor_kwargs.call[:secret_access_key]
+      assert_equal 'https://scoped.r2.cloudflarestorage.com', constructor_kwargs.call[:endpoint]
+    end
+  end
+
+  test 'falls back to ENV credentials when the job has no r2_credentials' do
+    job = Job.create!(uuid: SecureRandom.uuid, total_count: 1)
+    original_r2_env = %w[R2_BUCKET R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_ENDPOINT].index_with { |key| ENV[key] }
+    ENV['R2_BUCKET'] = 'test-bucket'
+    ENV['R2_ACCESS_KEY_ID'] = 'env-id'
+    ENV['R2_SECRET_ACCESS_KEY'] = 'env-secret'
+    ENV['R2_ENDPOINT'] = 'https://example.r2.cloudflarestorage.com'
+
+    with_stubbed_s3_client do |constructor_kwargs|
+      CreateStaticAssetsJob.new.send(:writer_for, 'static-assets', local: false, job_uuid: job.uuid)
+
+      assert_equal 'env-id', constructor_kwargs.call[:access_key_id]
+    end
+  ensure
+    original_r2_env.each { |key, value| ENV[key] = value }
+  end
+
+  test 'falls back to ENV credentials when job_uuid matches no job' do
+    original_r2_env = %w[R2_BUCKET R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_ENDPOINT].index_with { |key| ENV[key] }
+    ENV['R2_BUCKET'] = 'test-bucket'
+    ENV['R2_ACCESS_KEY_ID'] = 'env-id'
+    ENV['R2_SECRET_ACCESS_KEY'] = 'env-secret'
+    ENV['R2_ENDPOINT'] = 'https://example.r2.cloudflarestorage.com'
+
+    with_stubbed_s3_client do |constructor_kwargs|
+      CreateStaticAssetsJob.new.send(:writer_for, 'static-assets', local: false, job_uuid: 'no-such-job')
+
+      assert_equal 'env-id', constructor_kwargs.call[:access_key_id]
+    end
+  ensure
+    original_r2_env.each { |key, value| ENV[key] = value }
+  end
+
+  test 'records a completed JobItem and updates the parent Job when job_uuid is given' do
+    job = Job.create!(uuid: SecureRandom.uuid, total_count: 1)
+
+    source_info = { 'id' => 'https://cantaloupe.example/iiif/3/source', 'width' => 10, 'height' => 10 }
+    response_class = Struct.new(:body, :code, :message) do
+      def success?
+        true
+      end
+    end
+
+    httparty_singleton = HTTParty.singleton_class
+    original_get = httparty_singleton.instance_method(:get)
+    httparty_singleton.define_method(:get) do |url|
+      response_class.new(url.end_with?('info.json') ? JSON.generate(source_info) : 'bytes', 200, 'OK')
+    end
+
+    Dir.mktmpdir do |output_folder|
+      CreateStaticAssetsJob.perform_now(@resource.id, 'https://static.example/images', output_folder, local: true, job_uuid: job.uuid)
+    end
+
+    job.reload
+    assert_equal 1, job.completed_count
+    assert_equal 0, job.failed_count
+    assert_equal Job::STATUS_COMPLETED, job.status
+
+    job_item = job.job_items.find_by(resource_id: @resource.id)
+    assert_equal JobItem::STATUS_COMPLETED, job_item.status
+  ensure
+    httparty_singleton.define_method(:get, original_get)
+  end
+
+  test 'records a failed JobItem and still re-raises when job_uuid is given' do
+    job = Job.create!(uuid: SecureRandom.uuid, total_count: 1)
+    nonexistent_resource_id = Resource.maximum(:id).to_i + 1
+
+    assert_raises(ActiveRecord::RecordNotFound) do
+      CreateStaticAssetsJob.perform_now(nonexistent_resource_id, 'https://static.example/images', 'static-assets', local: true, job_uuid: job.uuid)
+    end
+
+    job.reload
+    assert_equal 0, job.completed_count
+    assert_equal 1, job.failed_count
+    assert_equal Job::STATUS_FAILED, job.status
+
+    job_item = job.job_items.find_by(resource_id: nonexistent_resource_id)
+    assert_equal JobItem::STATUS_FAILED, job_item.status
+    assert_match(/Couldn't find Resource/, job_item.error)
+  end
+
   test 'uses an explicit identifier instead of the resource uuid when provided' do
     source_info = { 'id' => 'https://cantaloupe.example/iiif/3/source', 'width' => 10, 'height' => 10 }
     response_class = Struct.new(:body, :code, :message) do
@@ -292,5 +393,30 @@ class CreateStaticAssetsJobTest < ActiveJob::TestCase
     end
   ensure
     httparty_singleton.define_method(:get, original_get)
+  end
+
+  private
+
+  # Stubs Aws::S3::Client.new to avoid any real network call. Yields a callable that returns the
+  # kwargs the client was most recently constructed with (lazily, so it reflects the client
+  # construction the caller triggers inside the block, not whatever happened before the block ran).
+  def with_stubbed_s3_client
+    constructor_kwargs = nil
+    fake_client_class = Class.new do
+      def put_object(**); end
+      def copy_object(**); end
+    end
+    fake_client = fake_client_class.new
+
+    client_singleton = Aws::S3::Client.singleton_class
+    original_new = client_singleton.instance_method(:new)
+    client_singleton.define_method(:new) do |*_args, **kwargs|
+      constructor_kwargs = kwargs
+      fake_client
+    end
+
+    yield(-> { constructor_kwargs })
+  ensure
+    client_singleton.define_method(:new, original_new)
   end
 end
