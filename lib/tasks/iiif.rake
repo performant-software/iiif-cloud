@@ -211,8 +211,8 @@ namespace :iiif do
       opts.banner = 'Usage: rake iiif:create_static_assets [options]'
       opts.on('-r', '--resource-id ARG', 'Resource ID') { |resource_id| options[:resource_id] = resource_id }
       opts.on('-u', '--base-url ARG', 'Public base URL for the generated assets') { |base_url| options[:base_url] = base_url }
-      opts.on('-d', '--destination ARG', 'R2 key prefix, or local output folder when --local is set') { |destination| options[:destination] = destination }
-      opts.on('-l', '--local', 'Write assets to disk instead of uploading to R2') { options[:local] = true }
+      opts.on('-d', '--destination ARG', 'Static storage key prefix, or local output folder when --local is set') { |destination| options[:destination] = destination }
+      opts.on('-l', '--local', 'Write assets to disk instead of uploading to static storage') { options[:local] = true }
     end
 
     args = opt_parser.order!(ARGV) {}

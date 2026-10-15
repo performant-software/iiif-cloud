@@ -19,10 +19,6 @@ module Public
         end
       end
 
-      # For actions that write to storage (R2), an API key alone isn't enough - only admins may.
-      def require_admin
-        render_forbidden(I18n.t('errors.unauthorized')) unless current_user&.admin?
-      end
 
       private
 

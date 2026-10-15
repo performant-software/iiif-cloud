@@ -30,9 +30,13 @@ module Iiif
 
       def call
         if resource.pdf?
-          call_pdf if resource.converted_pages?
+          raise Exceptions::PDFNotConvertedError, "PDF #{resource.id} has no converted pages yet" unless resource.converted_pages?
+
+          call_pdf
         elsif resource.image?
           call_image
+        else
+          raise Exceptions::UnsupportedResourceTypeError, "Resource #{resource.id} has an unsupported content type for static asset generation"
         end
 
         writer.respond_to?(:finalize) ? writer.finalize : nil

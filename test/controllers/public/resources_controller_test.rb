@@ -48,7 +48,8 @@ class Public::ResourcesControllerTest < ActionDispatch::IntegrationTest
       params: {
         resource_ids: [@resource.uuid],
         base_url: 'https://static.example/images',
-        destination: 'static-assets'
+        destination: 'static-assets',
+        storage: valid_storage_params
       },
       headers: { 'X-API-KEY' => @user.api_key },
       as: :json
@@ -64,7 +65,8 @@ class Public::ResourcesControllerTest < ActionDispatch::IntegrationTest
       params: {
         resource_ids: [@other_resource.uuid],
         base_url: 'https://static.example/images',
-        destination: 'static-assets'
+        destination: 'static-assets',
+        storage: valid_storage_params
       },
       headers: { 'X-API-KEY' => @user.api_key },
       as: :json
@@ -75,35 +77,59 @@ class Public::ResourcesControllerTest < ActionDispatch::IntegrationTest
     assert_enqueued_with(job: CreateStaticAssetsJob, args: [@other_resource.id, 'https://static.example/images', 'static-assets', { job_uuid: job_uuid }])
   end
 
-  test 'rejects a non-admin API key' do
+  # There is no admin check on this action: a scoped storage credential (plus base_query, which
+  # already restricts non-admins to their own organization's resources below) is what gates access
+  # now, rather than requiring the caller to be an admin.
+  test 'allows a non-admin API key to process their own organization\'s resources' do
+    non_admin = User.create!(name: 'Non-Admin API User', email: 'non-admin@example.com', api_key: 'non-admin-key')
+    UserOrganization.create!(user: non_admin, organization: @organization)
+
+    post create_static_assets_public_resources_path,
+      params: {
+        resource_ids: [@resource.uuid],
+        base_url: 'https://static.example/images',
+        destination: 'static-assets',
+        storage: valid_storage_params
+      },
+      headers: { 'X-API-KEY' => non_admin.api_key },
+      as: :json
+
+    assert_response :ok
+
+    job_uuid = JSON.parse(response.body)['job_uuid']
+    assert_enqueued_with(job: CreateStaticAssetsJob, args: [@resource.id, 'https://static.example/images', 'static-assets', { job_uuid: job_uuid }])
+  end
+
+  test 'still restricts a non-admin API key from another organization\'s resources' do
     non_admin = User.create!(name: 'Non-Admin API User', email: 'non-admin@example.com', api_key: 'non-admin-key')
     UserOrganization.create!(user: non_admin, organization: @organization)
 
     assert_no_enqueued_jobs only: CreateStaticAssetsJob do
       post create_static_assets_public_resources_path,
         params: {
-          resource_ids: [@resource.uuid],
+          resource_ids: [@other_resource.uuid],
           base_url: 'https://static.example/images',
-          destination: 'static-assets'
+          destination: 'static-assets',
+          storage: valid_storage_params
         },
         headers: { 'X-API-KEY' => non_admin.api_key },
         as: :json
     end
 
-    assert_response :forbidden
+    assert_response :ok
   end
 
-  test 'stores fully-specified r2 credentials on the job' do
+  test 'stores fully-specified storage credentials on the job' do
     post create_static_assets_public_resources_path,
       params: {
         resource_ids: [@resource.uuid],
         base_url: 'https://static.example/images',
         destination: 'static-assets',
-        r2: {
+        storage: {
           bucket: 'scoped-bucket',
           access_key_id: 'scoped-id',
           secret_access_key: 'scoped-secret',
-          endpoint: 'https://scoped.r2.cloudflarestorage.com'
+          session_token: 'scoped-token'
         }
       },
       headers: { 'X-API-KEY' => @user.api_key },
@@ -117,20 +143,34 @@ class Public::ResourcesControllerTest < ActionDispatch::IntegrationTest
         'bucket' => 'scoped-bucket',
         'access_key_id' => 'scoped-id',
         'secret_access_key' => 'scoped-secret',
-        'endpoint' => 'https://scoped.r2.cloudflarestorage.com'
+        'session_token' => 'scoped-token'
       },
-      job.extra['r2_credentials']
+      job.extra['storage_credentials']
     )
   end
 
-  test 'rejects partially-specified r2 credentials' do
+  test 'session_token is optional on otherwise-complete storage credentials' do
+    post create_static_assets_public_resources_path,
+      params: {
+        resource_ids: [@resource.uuid],
+        base_url: 'https://static.example/images',
+        destination: 'static-assets',
+        storage: valid_storage_params
+      },
+      headers: { 'X-API-KEY' => @user.api_key },
+      as: :json
+
+    assert_response :ok
+  end
+
+  test 'rejects partially-specified storage credentials' do
     assert_no_enqueued_jobs only: CreateStaticAssetsJob do
       post create_static_assets_public_resources_path,
         params: {
           resource_ids: [@resource.uuid],
           base_url: 'https://static.example/images',
           destination: 'static-assets',
-          r2: { bucket: 'scoped-bucket' }
+          storage: { bucket: 'scoped-bucket' }
         },
         headers: { 'X-API-KEY' => @user.api_key },
         as: :json
@@ -139,19 +179,47 @@ class Public::ResourcesControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
   end
 
-  test 'omitting r2 entirely leaves the job to fall back on this process\'s own R2 credentials' do
-    post create_static_assets_public_resources_path,
-      params: {
-        resource_ids: [@resource.uuid],
-        base_url: 'https://static.example/images',
-        destination: 'static-assets'
-      },
-      headers: { 'X-API-KEY' => @user.api_key },
-      as: :json
+  test 'rejects a request that omits storage credentials entirely' do
+    assert_no_enqueued_jobs only: CreateStaticAssetsJob do
+      post create_static_assets_public_resources_path,
+        params: {
+          resource_ids: [@resource.uuid],
+          base_url: 'https://static.example/images',
+          destination: 'static-assets'
+        },
+        headers: { 'X-API-KEY' => @user.api_key },
+        as: :json
+    end
 
-    assert_response :ok
+    assert_response :unprocessable_entity
+  end
 
-    job = Job.find_by(uuid: JSON.parse(response.body)['job_uuid'])
-    assert_nil job.extra['r2_credentials']
+  test 'retrying the same batch under the same job_uuid does not inflate total_count' do
+    job_uuid = SecureRandom.uuid
+
+    2.times do
+      post create_static_assets_public_resources_path,
+        params: {
+          resource_ids: [@resource.uuid],
+          base_url: 'https://static.example/images',
+          destination: 'static-assets',
+          storage: valid_storage_params,
+          job_uuid: job_uuid
+        },
+        headers: { 'X-API-KEY' => @user.api_key },
+        as: :json
+
+      assert_response :ok
+    end
+
+    job = Job.find_by(uuid: job_uuid)
+    assert_equal 1, job.total_count
+    assert_equal 1, job.job_items.count
+  end
+
+  private
+
+  def valid_storage_params
+    { bucket: 'scoped-bucket', access_key_id: 'scoped-id', secret_access_key: 'scoped-secret' }
   end
 end

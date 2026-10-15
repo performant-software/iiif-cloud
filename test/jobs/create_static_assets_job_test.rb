@@ -252,17 +252,16 @@ class CreateStaticAssetsJobTest < ActiveJob::TestCase
     httparty_singleton.define_method(:get, original_get)
   end
 
-  test 'defaults to an R2Writer when local is not specified' do
-    original_r2_env = %w[R2_BUCKET R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_ENDPOINT].index_with { |key| ENV[key] }
-    ENV['R2_BUCKET'] = 'test-bucket'
-    ENV['R2_ACCESS_KEY_ID'] = 'id'
-    ENV['R2_SECRET_ACCESS_KEY'] = 'secret'
-    ENV['R2_ENDPOINT'] = 'https://example.r2.cloudflarestorage.com'
+  test 'uses StorageWriter.from_env when local is not specified and no job_uuid is given (e.g. the rake task path)' do
+    original_env = %w[STATIC_STORAGE_BUCKET STATIC_STORAGE_ACCESS_KEY_ID STATIC_STORAGE_SECRET_ACCESS_KEY].index_with { |key| ENV[key] }
+    ENV['STATIC_STORAGE_BUCKET'] = 'test-bucket'
+    ENV['STATIC_STORAGE_ACCESS_KEY_ID'] = 'id'
+    ENV['STATIC_STORAGE_SECRET_ACCESS_KEY'] = 'secret'
 
     writer = CreateStaticAssetsJob.new.send(:writer_for, 'static-assets', local: false)
-    assert_instance_of Iiif::StaticAssets::Writers::R2Writer, writer
+    assert_instance_of Iiif::StaticAssets::Writers::StorageWriter, writer
   ensure
-    original_r2_env.each { |key, value| ENV[key] = value }
+    original_env.each { |key, value| value.nil? ? ENV.delete(key) : ENV[key] = value }
   end
 
   test 'uses a DiskWriter when local: true is passed' do
@@ -270,13 +269,13 @@ class CreateStaticAssetsJobTest < ActiveJob::TestCase
     assert_instance_of Iiif::StaticAssets::Writers::DiskWriter, writer
   end
 
-  test 'passes through r2_credentials stored on the job extra for the given job_uuid' do
+  test 'passes through storage_credentials stored on the job extra for the given job_uuid' do
     job = Job.create!(uuid: SecureRandom.uuid, total_count: 1, extra: {
-      'r2_credentials' => {
+      'storage_credentials' => {
         'bucket' => 'scoped-bucket',
         'access_key_id' => 'scoped-id',
         'secret_access_key' => 'scoped-secret',
-        'endpoint' => 'https://scoped.r2.cloudflarestorage.com'
+        'session_token' => 'scoped-token'
       }
     })
 
@@ -285,41 +284,23 @@ class CreateStaticAssetsJobTest < ActiveJob::TestCase
 
       assert_equal 'scoped-id', constructor_kwargs.call[:access_key_id]
       assert_equal 'scoped-secret', constructor_kwargs.call[:secret_access_key]
-      assert_equal 'https://scoped.r2.cloudflarestorage.com', constructor_kwargs.call[:endpoint]
+      assert_equal 'scoped-token', constructor_kwargs.call[:session_token]
     end
   end
 
-  test 'falls back to ENV credentials when the job has no r2_credentials' do
+  test 'raises when the job has no stored storage_credentials (no ENV fallback)' do
     job = Job.create!(uuid: SecureRandom.uuid, total_count: 1)
-    original_r2_env = %w[R2_BUCKET R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_ENDPOINT].index_with { |key| ENV[key] }
-    ENV['R2_BUCKET'] = 'test-bucket'
-    ENV['R2_ACCESS_KEY_ID'] = 'env-id'
-    ENV['R2_SECRET_ACCESS_KEY'] = 'env-secret'
-    ENV['R2_ENDPOINT'] = 'https://example.r2.cloudflarestorage.com'
 
-    with_stubbed_s3_client do |constructor_kwargs|
+    error = assert_raises(ArgumentError) do
       CreateStaticAssetsJob.new.send(:writer_for, 'static-assets', local: false, job_uuid: job.uuid)
-
-      assert_equal 'env-id', constructor_kwargs.call[:access_key_id]
     end
-  ensure
-    original_r2_env.each { |key, value| ENV[key] = value }
+    assert_match(/No storage credentials stored for job #{job.uuid}/, error.message)
   end
 
-  test 'falls back to ENV credentials when job_uuid matches no job' do
-    original_r2_env = %w[R2_BUCKET R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_ENDPOINT].index_with { |key| ENV[key] }
-    ENV['R2_BUCKET'] = 'test-bucket'
-    ENV['R2_ACCESS_KEY_ID'] = 'env-id'
-    ENV['R2_SECRET_ACCESS_KEY'] = 'env-secret'
-    ENV['R2_ENDPOINT'] = 'https://example.r2.cloudflarestorage.com'
-
-    with_stubbed_s3_client do |constructor_kwargs|
+  test 'raises when job_uuid matches no job (no ENV fallback)' do
+    assert_raises(ArgumentError) do
       CreateStaticAssetsJob.new.send(:writer_for, 'static-assets', local: false, job_uuid: 'no-such-job')
-
-      assert_equal 'env-id', constructor_kwargs.call[:access_key_id]
     end
-  ensure
-    original_r2_env.each { |key, value| ENV[key] = value }
   end
 
   test 'records a completed JobItem and updates the parent Job when job_uuid is given' do
@@ -353,12 +334,35 @@ class CreateStaticAssetsJobTest < ActiveJob::TestCase
     httparty_singleton.define_method(:get, original_get)
   end
 
-  test 'records a failed JobItem and still re-raises when job_uuid is given' do
+  test 'does not record a failure when a failed attempt will still be retried' do
+    job = Job.create!(uuid: SecureRandom.uuid, status: Job::STATUS_PROCESSING, total_count: 1)
+    nonexistent_resource_id = Resource.maximum(:id).to_i + 1
+
+    # perform_now (unlike the block form of perform_enqueued_jobs) does not auto-execute the
+    # retry_on's own re-enqueue, so this runs only the first of 3 attempts - letting us directly
+    # observe the "retry is still pending" state the fix is meant to leave untouched.
+    assert_nothing_raised do
+      CreateStaticAssetsJob.perform_now(nonexistent_resource_id, 'https://static.example/images', 'static-assets', job_uuid: job.uuid)
+    end
+
+    job.reload
+    assert_equal Job::STATUS_PROCESSING, job.status
+    assert_nil job.job_items.find_by(resource_id: nonexistent_resource_id)
+    assert_enqueued_jobs 1, only: CreateStaticAssetsJob
+  end
+
+  test 'does not record a failure or raise while retries remain, then records it once exhausted' do
     job = Job.create!(uuid: SecureRandom.uuid, total_count: 1)
     nonexistent_resource_id = Resource.maximum(:id).to_i + 1
 
-    assert_raises(ActiveRecord::RecordNotFound) do
-      CreateStaticAssetsJob.perform_now(nonexistent_resource_id, 'https://static.example/images', 'static-assets', local: true, job_uuid: job.uuid)
+    # Within a block, perform_enqueued_jobs makes the test adapter execute each job the instant
+    # it's enqueued - so a retry_on's own re-enqueue (triggered while still inside this block)
+    # runs immediately too, cascading through all 3 attempts in this single call rather than
+    # leaving later attempts sitting unperformed in the queue.
+    assert_nothing_raised do
+      perform_enqueued_jobs do
+        CreateStaticAssetsJob.perform_later(nonexistent_resource_id, 'https://static.example/images', 'static-assets', job_uuid: job.uuid)
+      end
     end
 
     job.reload

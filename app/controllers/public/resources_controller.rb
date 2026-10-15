@@ -8,7 +8,6 @@ class Public::ResourcesController < Api::ResourcesController
   prepend_before_action :set_resource_id, only: [:show, :destroy, :update]
   prepend_before_action :set_resource_project_id, only: [:create, :update]
   skip_before_action :authenticate_request, only: [:content, :download, :hls, :iiif, :image_api, :info, :inline, :manifest, :preview, :thumbnail]
-  before_action :require_admin, only: :create_static_assets
 
   # Master playlist ("master.m3u8") or variant playlist ("stream_0/playlist.m3u8")
   HLS_PLAYLIST_PATH = %r{\A(stream_\d+/)?\w+\.m3u8\z}
@@ -118,11 +117,16 @@ class Public::ResourcesController < Api::ResourcesController
     render json: JSON.parse(resource.manifest)
   end
 
+  # No admin check here: storage credentials are always required below, and expected to be
+  # narrowly scoped to the caller's own destination prefix, so a caller can't write anywhere it
+  # doesn't already have a credential for. base_query (see Api::ResourcesController) further
+  # restricts non-admins to resources belonging to their own organization, same as every other
+  # action on this controller.
   def create_static_assets
     render json: { errors: [I18n.t('errors.resources_controller.create_static_assets_invalid')] }, status: :unprocessable_entity and return unless validate_static_assets?
-    render json: { errors: [I18n.t('errors.resources_controller.create_static_assets_r2_invalid')] }, status: :unprocessable_entity and return unless validate_r2_params?
+    render json: { errors: [I18n.t('errors.resources_controller.create_static_assets_storage_invalid')] }, status: :unprocessable_entity and return unless validate_storage_params?
 
-    resources = base_query.where(uuid: params[:resource_ids])
+    resources = base_query.where(uuid: params[:resource_ids]).to_a
 
     # An optional caller-supplied job_uuid lets multiple batches (e.g. core-data-cloud's chunked
     # calls for one logical export) accumulate under a single trackable Job; if omitted, a new one
@@ -130,8 +134,8 @@ class Public::ResourcesController < Api::ResourcesController
     job = Job.find_or_create_by!(uuid: params[:job_uuid].presence || SecureRandom.uuid) do |j|
       j.status = Job::STATUS_PROCESSING
     end
-    job.add_to_total!(resources.size)
-    store_r2_credentials(job)
+    JobItem.enqueue!(job: job, resource_ids: resources.map(&:id))
+    store_storage_credentials(job)
 
     resources.each do |resource|
       CreateStaticAssetsJob.perform_later(resource.id, params[:base_url], params[:destination], job_uuid: job.uuid)
@@ -184,24 +188,23 @@ class Public::ResourcesController < Api::ResourcesController
     %i(resource_ids base_url destination).all? { |key| params[key].present? }
   end
 
-  # The r2 param is entirely optional (omitting it falls back to this process's own ENV-configured
-  # R2 credentials), but if present, all four sub-keys must be given - a partial credential would
-  # otherwise silently fall back to ENV for whichever keys are missing, which is confusing and
-  # defeats the purpose of supplying scoped-down credentials at all.
-  def validate_r2_params?
-    return true unless params[:r2].present?
+  # storage credentials are always required (bucket/access_key_id/secret_access_key); there is no
+  # fallback to this process's own environment-configured credentials for this endpoint, since the
+  # whole point is for each caller to supply its own narrowly-scoped, often short-lived credential
+  # rather than share one long-lived, bucket-wide one. session_token is optional, since it's only
+  # meaningful for temporary/STS-issued credentials.
+  def validate_storage_params?
+    return false unless params[:storage].present?
 
-    %i(bucket access_key_id secret_access_key endpoint).all? { |key| params[:r2][key].present? }
+    %i(bucket access_key_id secret_access_key).all? { |key| params[:storage][key].present? }
   end
 
-  # Persists the caller-supplied R2 credentials (if any) on the Job row, keyed by job_uuid, so
-  # that every CreateStaticAssetsJob run under this job_uuid can look them up without the
-  # credentials being duplicated across each job's own Sidekiq arguments.
-  def store_r2_credentials(job)
-    return unless params[:r2].present?
-
-    credentials = params[:r2].slice(:bucket, :access_key_id, :secret_access_key, :endpoint).to_unsafe_h
-    job.update!(extra: job.extra.merge('r2_credentials' => credentials))
+  # Persists the caller-supplied storage credentials on the Job row, keyed by job_uuid, so that
+  # every CreateStaticAssetsJob run under this job_uuid can look them up without the credentials
+  # being duplicated across each job's own Sidekiq arguments.
+  def store_storage_credentials(job)
+    credentials = params[:storage].slice(:bucket, :access_key_id, :secret_access_key, :session_token).to_unsafe_h
+    job.update!(extra: job.extra.merge('storage_credentials' => credentials))
   end
 
   def set_page
