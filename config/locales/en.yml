@@ -38,6 +38,9 @@ en:
     dashboard_controller:
       unauthorized: "You do not have access to the system dashboard."
 
+    jobs_controller:
+      not_found: "No job found for that identifier."
+
     presentation_controller:
       collection_invalid: "Invalid parameters for creating a IIIF collection."
       manifest_invalid: "Invalid parameters for creating a IIIF manifest."
@@ -45,6 +48,8 @@ en:
     resources_controller:
       clear_cache: "You do not have permissions to clear resource cache."
       convert: "You do not have permissions to convert resources."
+      create_static_assets_invalid: "Invalid parameters for generating static assets."
+      create_static_assets_storage_invalid: "storage credentials are required: bucket, access_key_id, and secret_access_key must all be provided."
 
     unauthenticated: "You must be authenticate to access."
     unauthorized: "You do not have access to this record."
