@@ -1,4 +1,7 @@
 class CreateStaticAssetsJob < ApplicationJob
+  # Static asset generation can process a large batch of resources and shouldn't tie up the
+  # default queue (used for latency-sensitive work) while it runs.
+  queue_as :bulk
 
   # Retries a transient failure (e.g. a network blip hitting Cantaloupe) a few times with
   # increasing backoff before recording it as a final failure. This runs *after* retries are
@@ -21,8 +24,14 @@ class CreateStaticAssetsJob < ApplicationJob
   # A PDF resource whose pages haven't finished converting yet isn't ready for static asset
   # generation (see Iiif::StaticAssets::Generator#call) - retried on its own longer timeline
   # (rather than exhausting the generic StandardError retries above) since conversion may simply
-  # still be in progress.
-  retry_on Exceptions::PDFNotConvertedError, wait: 10.seconds
+  # still be in progress. Needs its own explicit failure block (like the StandardError handler
+  # above) - without one, exhausting these retries would leave the job stuck reporting
+  # "processing" forever instead of ever recording a final failure.
+  retry_on Exceptions::PDFNotConvertedError, wait: 10.seconds do |job, error|
+    options = job.arguments.last.is_a?(Hash) ? job.arguments.last : {}
+
+    job.send(:record_outcome, options[:job_uuid], job.arguments.first, JobItem::STATUS_FAILED, error: error.message)
+  end
 
   # job_uuid is optional so this job remains callable the way it always has been (e.g. from tests
   # or other callers that don't care about tracking); tracking is simply skipped when it's absent.

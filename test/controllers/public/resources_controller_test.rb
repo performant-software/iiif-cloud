@@ -60,6 +60,25 @@ class Public::ResourcesControllerTest < ActionDispatch::IntegrationTest
     assert_enqueued_with(job: CreateStaticAssetsJob, args: [@resource.id, 'https://static.example/images', 'static-assets', { job_uuid: job_uuid }])
   end
 
+  test 'rejects a request whose resource_ids match no accessible resource' do
+    assert_no_enqueued_jobs only: CreateStaticAssetsJob do
+      post create_static_assets_public_resources_path,
+        params: {
+          resource_ids: [SecureRandom.uuid],
+          base_url: 'https://static.example/images',
+          destination: 'static-assets',
+          storage: valid_storage_params
+        },
+        headers: { 'X-API-KEY' => @user.api_key },
+        as: :json
+    end
+
+    assert_response :unprocessable_entity
+    # No Job should be created (and no storage credentials stored) for a request that never
+    # ends up doing anything.
+    assert_equal 0, Job.count
+  end
+
   test 'admins are not restricted to their own organizations\' resources' do
     post create_static_assets_public_resources_path,
       params: {
@@ -116,7 +135,9 @@ class Public::ResourcesControllerTest < ActionDispatch::IntegrationTest
         as: :json
     end
 
-    assert_response :ok
+    # base_query excludes @other_resource (it belongs to a different organization), so no
+    # resources match at all - a 422, not a vacuous 200 with zero resources processed.
+    assert_response :unprocessable_entity
   end
 
   test 'stores fully-specified storage credentials on the job' do
@@ -215,6 +236,67 @@ class Public::ResourcesControllerTest < ActionDispatch::IntegrationTest
     job = Job.find_by(uuid: job_uuid)
     assert_equal 1, job.total_count
     assert_equal 1, job.job_items.count
+  end
+
+  test 'records the creating user on a newly-created job' do
+    post create_static_assets_public_resources_path,
+      params: {
+        resource_ids: [@resource.uuid],
+        base_url: 'https://static.example/images',
+        destination: 'static-assets',
+        storage: valid_storage_params
+      },
+      headers: { 'X-API-KEY' => @user.api_key },
+      as: :json
+
+    assert_response :ok
+
+    job_uuid = JSON.parse(response.body)['job_uuid']
+    assert_equal @user.id, Job.find_by(uuid: job_uuid).user_id
+  end
+
+  test 'rejects reuse of a job_uuid owned by a different user' do
+    other_user = User.create!(name: 'Other API User', email: 'other-api-user@example.com', api_key: 'other-valid-api-key', admin: true)
+    job_uuid = SecureRandom.uuid
+    Job.create!(uuid: job_uuid, status: Job::STATUS_PROCESSING, user: other_user)
+
+    assert_no_enqueued_jobs only: CreateStaticAssetsJob do
+      post create_static_assets_public_resources_path,
+        params: {
+          resource_ids: [@resource.uuid],
+          base_url: 'https://static.example/images',
+          destination: 'static-assets',
+          storage: valid_storage_params,
+          job_uuid: job_uuid
+        },
+        headers: { 'X-API-KEY' => @user.api_key },
+        as: :json
+    end
+
+    assert_response :forbidden
+    # Neither resources nor credentials should be touched on a job this caller doesn't own.
+    assert_equal 0, Job.find_by(uuid: job_uuid).job_items.count
+    assert_nil Job.find_by(uuid: job_uuid).extra['storage_credentials']
+  end
+
+  test 'rejects reuse of a job_uuid with no recorded owner (pre-existing job created before ownership was tracked)' do
+    job_uuid = SecureRandom.uuid
+    Job.create!(uuid: job_uuid, status: Job::STATUS_PROCESSING, user: nil)
+
+    assert_no_enqueued_jobs only: CreateStaticAssetsJob do
+      post create_static_assets_public_resources_path,
+        params: {
+          resource_ids: [@resource.uuid],
+          base_url: 'https://static.example/images',
+          destination: 'static-assets',
+          storage: valid_storage_params,
+          job_uuid: job_uuid
+        },
+        headers: { 'X-API-KEY' => @user.api_key },
+        as: :json
+    end
+
+    assert_response :forbidden
   end
 
   private

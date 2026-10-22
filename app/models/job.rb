@@ -8,6 +8,7 @@ class Job < ApplicationRecord
 
   # Relationships
   has_many :job_items, dependent: :destroy
+  belongs_to :user, optional: true
 
   # Validations
   validates :uuid, presence: true, uniqueness: true

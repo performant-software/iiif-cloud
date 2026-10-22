@@ -127,13 +127,11 @@ class Public::ResourcesController < Api::ResourcesController
     render json: { errors: [I18n.t('errors.resources_controller.create_static_assets_storage_invalid')] }, status: :unprocessable_entity and return unless validate_storage_params?
 
     resources = base_query.where(uuid: params[:resource_ids]).to_a
+    render json: { errors: [I18n.t('errors.resources_controller.create_static_assets_resources_not_found')] }, status: :unprocessable_entity and return if resources.empty?
 
-    # An optional caller-supplied job_uuid lets multiple batches (e.g. core-data-cloud's chunked
-    # calls for one logical export) accumulate under a single trackable Job; if omitted, a new one
-    # is generated so standalone callers still get a job_uuid back to poll.
-    job = Job.find_or_create_by!(uuid: params[:job_uuid].presence || SecureRandom.uuid) do |j|
-      j.status = Job::STATUS_PROCESSING
-    end
+    job = find_or_create_job
+    render json: { errors: [I18n.t('errors.resources_controller.create_static_assets_forbidden')] }, status: :forbidden and return if job.nil?
+
     JobItem.enqueue!(job: job, resource_ids: resources.map(&:id))
     store_storage_credentials(job)
 
@@ -186,6 +184,29 @@ class Public::ResourcesController < Api::ResourcesController
 
   def validate_static_assets?
     %i(resource_ids base_url destination).all? { |key| params[key].present? }
+  end
+
+  # An optional caller-supplied job_uuid lets multiple batches (e.g. core-data-cloud's chunked
+  # calls for one logical export) accumulate under a single trackable Job; if omitted, a new one
+  # is generated so standalone callers still get a job_uuid back to poll.
+  #
+  # job_uuid is caller-supplied and otherwise unconstrained - nothing stops two unrelated callers
+  # from coincidentally (or deliberately) reusing the same value. Without an ownership check, that
+  # could let one caller's request overwrite another's already-stored storage_credentials (see
+  # #store_storage_credentials) or mix unrelated resources into the same Job's counts. Scoping to
+  # user rather than organization because organization is shared across many users/API keys and
+  # so wouldn't actually prevent that collision.
+  #
+  # Returns nil (rather than raising) when an existing job belongs to someone else, so the caller
+  # can render a 403 without creating/touching anything. A job with no recorded owner (user_id
+  # nil - every job created before this check existed) is treated the same as a mismatched owner:
+  # it can never be "adopted" by whichever caller happens to reuse its uuid next, by anyone.
+  def find_or_create_job
+    existing = Job.find_by(uuid: params[:job_uuid]) if params[:job_uuid].present?
+    return existing if existing && existing.user_id == current_user.id
+    return nil if existing
+
+    Job.create!(uuid: params[:job_uuid].presence || SecureRandom.uuid, status: Job::STATUS_PROCESSING, user: current_user)
   end
 
   # storage credentials are always required (bucket/access_key_id/secret_access_key); there is no

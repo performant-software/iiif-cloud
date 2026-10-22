@@ -375,6 +375,32 @@ class CreateStaticAssetsJobTest < ActiveJob::TestCase
     assert_match(/Couldn't find Resource/, job_item.error)
   end
 
+  test 'records a failure once PDFNotConvertedError retries are exhausted, instead of leaving the job stuck processing' do
+    job = Job.create!(uuid: SecureRandom.uuid, total_count: 1)
+    # No converted pages attached, so Generator#call raises PDFNotConvertedError every attempt.
+    pdf_resource = Resource.create!(project: @project, name: 'Unconverted PDF', pages_count: 2)
+    pdf_resource.content.attach(
+      io: File.open(Rails.root.join('test/fixtures/files/sample_multi_page.pdf')),
+      filename: 'sample_multi_page.pdf',
+      content_type: 'application/pdf'
+    )
+
+    assert_nothing_raised do
+      perform_enqueued_jobs do
+        CreateStaticAssetsJob.perform_later(pdf_resource.id, 'https://static.example/images', 'static-assets', local: true, job_uuid: job.uuid)
+      end
+    end
+
+    job.reload
+    assert_equal 0, job.completed_count
+    assert_equal 1, job.failed_count
+    assert_equal Job::STATUS_FAILED, job.status
+
+    job_item = job.job_items.find_by(resource_id: pdf_resource.id)
+    assert_equal JobItem::STATUS_FAILED, job_item.status
+    assert_match(/has no converted pages yet/, job_item.error)
+  end
+
   test 'uses an explicit identifier instead of the resource uuid when provided' do
     source_info = { 'id' => 'https://cantaloupe.example/iiif/3/source', 'width' => 10, 'height' => 10 }
     response_class = Struct.new(:body, :code, :message) do
