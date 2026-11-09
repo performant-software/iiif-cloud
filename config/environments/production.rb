@@ -75,8 +75,17 @@ Rails.application.configure do
   # Don't log any deprecations.
   config.active_support.report_deprecations = false
 
-  # Use default logging formatter so that PID and timestamp are not suppressed.
-  config.log_formatter = ::Logger::Formatter.new
+  # Only prefix severity for warnings and errors
+  config.log_formatter = proc do |severity, _time, _progname, msg|
+    severity == 'INFO' ? "#{msg}\n" : "#{severity} #{msg}\n"
+  end
+
+  # Log each request as a single line
+  config.lograge.enabled = true
+  config.lograge.custom_options = ->(event) { { ip: event.payload[:request]&.remote_ip } }
+  config.lograge.before_format = lambda do |data, _payload|
+    data.slice(:method, :path, :status, :error, :duration, :location, :ip)
+  end
 
   # Use a different logger for distributed setups.
   # require "syslog/logger"
