@@ -5,4 +5,6 @@ module Exceptions
   class EmptyPDFError < StandardError; end
   class VideoProbeError < StandardError; end
   class VideoTranscodingError < StandardError; end
+  class PDFNotConvertedError < StandardError; end
+  class UnsupportedResourceTypeError < StandardError; end
 end
